@@ -8,7 +8,9 @@ interface SheetProps extends React.ComponentProps<typeof SheetPrimitive.Root> {
 interface SheetContentProps extends React.ComponentProps<typeof SheetPrimitive.Content> {
     children: React.ReactNode;
 }
-
+interface SheetTriggerProps extends React.ComponentProps<typeof SheetPrimitive.Trigger> {
+    children: React.ReactNode;
+}
 interface SheetHeaderProps {
     children: React.ReactNode;
 }
@@ -21,7 +23,7 @@ export function Sheet({ children, ...props }: SheetProps) {
     return <SheetPrimitive.Root {...props}>{children}</SheetPrimitive.Root>
 }
 
-export function SheetTrigger({ children, ...props }: any) {
+export function SheetTrigger({ children, ...props }: SheetTriggerProps) {
     return <SheetPrimitive.Trigger {...props}>{children}</SheetPrimitive.Trigger>
 }
 

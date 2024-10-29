@@ -14,7 +14,7 @@ const BattleTracker: React.FC = () => {
     const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [round, setRound] = useState<number>(1);
     const [attackDialogOpen, setAttackDialogOpen] = useState<boolean>(false);
-    const [targetId, setTargetId] = useState<number | null>(null);
+    const [targetId, setTargetId] = useState<number >(0);
     const [damageAmount, setDamageAmount] = useState<string>('');
     const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
 
@@ -28,7 +28,7 @@ const BattleTracker: React.FC = () => {
             text: entry
         }, ...prev]);
     };
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const addCreature = (e:any) => {
         e.preventDefault();
         if (newName && newInitiative && newHP) {
@@ -49,7 +49,7 @@ const BattleTracker: React.FC = () => {
         }
     };
 
-    const removeCreature = (id:any) => {
+    const removeCreature = (id:number) => {
         const creature = creatures.find(c => c.id === id);
         if (creature) {
             addLogEntry(`${creature.name} was removed from battle`);
@@ -61,8 +61,11 @@ const BattleTracker: React.FC = () => {
         setCreatures(creatures.filter(creature => creature.id !== id));
     };
 
-    const adjustHP = (id:any, amount:number, isAttack = false) => {
-        const creature = creatures.find(c => c.id === id)!!;
+    const adjustHP = (id:number, amount:number, isAttack = false) => {
+        const creature = creatures.find(c => c.id === id);
+        if (!creature) {
+            return;
+        }
         const newHP = Math.min(Math.max(0, creature.currentHP + amount), creature.maxHP);
         if (!isAttack && amount !== 0) {
             addLogEntry(`${creature.name}'s HP ${amount > 0 ? 'increased' : 'decreased'} by ${Math.abs(amount)} (${newHP}/${creature.maxHP} HP)`);
@@ -72,7 +75,7 @@ const BattleTracker: React.FC = () => {
         ));
     };
 
-    const moveCreature = (index:number, direction:any) => {
+    const moveCreature = (index:number, direction:number) => {
         const newCreatures = [...creatures];
         const temp = newCreatures[index];
         newCreatures[index] = newCreatures[index + direction];
@@ -114,7 +117,7 @@ const BattleTracker: React.FC = () => {
         addLogEntry('Combat paused');
     };
 
-    const initiateAttack = (targetId:any) => {
+    const initiateAttack = (targetId:number) => {
         setTargetId(targetId);
         setAttackDialogOpen(true);
         setDamageAmount('');
@@ -124,7 +127,10 @@ const BattleTracker: React.FC = () => {
         const damage = parseInt(damageAmount);
         if (!isNaN(damage) && damage >= 0) {
             const attacker = creatures[currentTurn];
-            const target = creatures.find(c => c.id === targetId)!!;
+            const target = creatures.find(c => c.id === targetId);
+            if (!target) {
+                return;
+            }
             const oldHP = target.currentHP;
             adjustHP(targetId, -damage, true);
             const newHP = Math.max(0, oldHP - damage);
@@ -135,7 +141,7 @@ const BattleTracker: React.FC = () => {
             }
 
             setAttackDialogOpen(false);
-            setTargetId(null);
+            setTargetId(0);
             setDamageAmount('');
         }
     };
