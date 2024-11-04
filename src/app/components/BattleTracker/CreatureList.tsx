@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, Sword, ArrowUpCircle, ArrowDownCircle, Trash2 } from 'lucide-react';
+import { Heart, Sword, ArrowUpCircle, ArrowDownCircle, Trash2, Shield } from 'lucide-react';
 import { CreatureListProps } from './types';
 
 const CreatureList: React.FC<CreatureListProps> = ({
@@ -26,7 +26,9 @@ const CreatureList: React.FC<CreatureListProps> = ({
                         <div className="font-bold">{creature.name}</div>
                         <div className="flex gap-4 text-sm text-gray-600">
                             <div>Initiative: {creature.initiative}</div>
-                            <div>AC: {creature.armorClass}</div>
+                            <div className="flex items-center gap-1">
+                                <Shield className="w-4 h-4" aria-label="Armor Class"/> {creature.armorClass}
+                            </div>
                         </div>
                     </div>
 

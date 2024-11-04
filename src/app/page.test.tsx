@@ -40,7 +40,7 @@ describe('Home', () => {
         const creatureName = screen.getByText('Goblin');
         const creatureInitiative = screen.getByText('Initiative: 15');
         const creatureHP = screen.getByText('30/30');
-        const creatureAC = screen.getByText('AC: 14');
+        const creatureAC = screen.getByText('14');
 
         expect(creatureName).toBeInTheDocument();
         expect(creatureInitiative).toBeInTheDocument();
