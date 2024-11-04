@@ -301,7 +301,7 @@ const BattleTracker: React.FC = () => {
                                         onClick={() => initiateAttack(creature.id)}
                                         className="p-1 hover:text-red-600"
                                     >
-                                        <Sword className="w-5 h-5"/>
+                                        <Sword className="w-5 h-5" data-testid="sword"/>
                                     </button>
                                 )
                             )}
@@ -322,6 +322,7 @@ const BattleTracker: React.FC = () => {
                                 </button>
                             )}
                             <button
+                                aria-label="removeCreatureButton"
                                 onClick={() => removeCreature(creature.id)}
                                 className="p-1 text-red-500 hover:text-red-600"
                             >
