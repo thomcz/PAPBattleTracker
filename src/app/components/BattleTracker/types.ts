@@ -7,6 +7,7 @@ export interface CombatControlsProps {
     startCombat: () => void;
     nextTurn: () => void;
     pauseCombat: () => void;
+    finishCombat: () => void;
 }
 
 export interface CreatureFormProps {

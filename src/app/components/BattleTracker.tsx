@@ -124,6 +124,14 @@ const BattleTracker: React.FC = () => {
         addLogEntry('Combat paused');
     };
 
+    const finishCombat = () => {
+        setIsCombatActive(false);
+        setCurrentTurn(0);
+        setRound(1);
+        addLogEntry('Combat finished - removing monsters');
+        setCreatures(prev => prev.filter(creature => creature.type === 'player'));
+    };
+
     const initiateAttack = (targetId: number) => {
         setTargetId(targetId);
         setAttackDialogOpen(true);
@@ -165,6 +173,7 @@ const BattleTracker: React.FC = () => {
                         startCombat={startCombat}
                         nextTurn={nextTurn}
                         pauseCombat={pauseCombat}
+                        finishCombat={finishCombat}
                     />
                     <CombatLog combatLog={combatLog} />
                 </div>

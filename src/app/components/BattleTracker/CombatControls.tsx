@@ -1,15 +1,16 @@
 import React from 'react';
-import { Play, RotateCw, Pause } from 'lucide-react';
-import { CombatControlsProps } from './types';
+import {Pause, Play, RotateCw} from 'lucide-react';
+import {CombatControlsProps} from './types';
 
 const CombatControls: React.FC<CombatControlsProps> = ({
-    creatures,
-    isCombatActive,
-    round,
-    startCombat,
-    nextTurn,
-    pauseCombat
-}) => {
+                                                           creatures,
+                                                           isCombatActive,
+                                                           round,
+                                                           startCombat,
+                                                           nextTurn,
+                                                           pauseCombat,
+                                                           finishCombat
+                                                       }) => {
     if (creatures.length === 0) return null;
 
     if (!isCombatActive) {
@@ -43,6 +44,14 @@ const CombatControls: React.FC<CombatControlsProps> = ({
             >
                 <Pause className="w-5 h-5"/>
                 Pause
+            </button>
+            <button
+                onClick={finishCombat}
+                className="bg-red-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-red-600"
+                aria-label="finishCombatButton"
+            >
+                <Play className="w-5 h-5"/>
+                Finish Combat
             </button>
         </div>
     );
