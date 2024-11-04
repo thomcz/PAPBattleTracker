@@ -13,6 +13,7 @@ const BattleTracker: React.FC = () => {
     const [newInitiative, setNewInitiative] = useState<string>('');
     const [newHP, setNewHP] = useState<string>('');
     const [newAC, setNewAC] = useState<string>('');
+    const [creatureType, setCreatureType] = useState<'monster' | 'player'>('monster');
     const [isCombatActive, setIsCombatActive] = useState<boolean>(false);
     const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [round, setRound] = useState<number>(1);
@@ -43,7 +44,8 @@ const BattleTracker: React.FC = () => {
                     initiative: parseInt(newInitiative),
                     currentHP: parseInt(newHP),
                     maxHP: parseInt(newHP),
-                    armorClass: parseInt(newAC)
+                    armorClass: parseInt(newAC),
+                    type: creatureType
                 }
             ].sort((a, b) => b.initiative - a.initiative));
             addLogEntry(`${newName} joined the battle with ${newHP} HP and initiative ${newInitiative}`);
@@ -178,6 +180,8 @@ const BattleTracker: React.FC = () => {
                 setNewHP={setNewHP}
                 newAC={newAC}
                 setNewAC={setNewAC}
+                creatureType={creatureType}
+                setCreatureType={setCreatureType}
             />
 
             <CreatureList

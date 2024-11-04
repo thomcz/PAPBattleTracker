@@ -11,7 +11,9 @@ const CreatureForm: React.FC<CreatureFormProps> = ({
     newHP,
     setNewHP,
     newAC,
-    setNewAC
+    setNewAC,
+    creatureType,
+    setCreatureType
 }) => {
     return (
         <form onSubmit={addCreature} className="mb-6 flex gap-2 flex-wrap">
@@ -45,6 +47,15 @@ const CreatureForm: React.FC<CreatureFormProps> = ({
                 className="border p-2 rounded w-24"
                 aria-label="armorClassInput"
             />
+            <select
+                value={creatureType}
+                onChange={(e) => setCreatureType(e.target.value as 'monster' | 'player')}
+                className="border p-2 rounded"
+                aria-label="creatureTypeSelect"
+            >
+                <option value="monster">Monster</option>
+                <option value="player">Player</option>
+            </select>
             <button
                 type="submit"
                 className="bg-green-500 text-white p-2 rounded flex items-center gap-2 hover:bg-green-600"

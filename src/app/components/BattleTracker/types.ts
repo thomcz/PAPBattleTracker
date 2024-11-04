@@ -19,6 +19,8 @@ export interface CreatureFormProps {
     setNewHP: (hp: string) => void;
     newAC: string;
     setNewAC: (ac: string) => void;
+    creatureType: 'monster' | 'player';
+    setCreatureType: (type: 'monster' | 'player') => void;
 }
 
 export interface CreatureListProps {

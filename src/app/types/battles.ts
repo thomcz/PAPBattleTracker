@@ -5,6 +5,7 @@ export interface Creature {
     initiative: number;
     currentHP: number;
     maxHP: number;
+    type: 'monster' | 'player';
 }
 
 export interface LogEntry {
