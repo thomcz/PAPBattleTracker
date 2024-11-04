@@ -1,8 +1,19 @@
 "use client";
-import React, { useState } from 'react';
-import { PlusCircle, Trash2, ArrowUpCircle, ArrowDownCircle, Heart, Play, RotateCw, Pause, Sword, ScrollText } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/app/components/ui/sheet";
+import React, {useState} from 'react';
+import {
+    ArrowDownCircle,
+    ArrowUpCircle,
+    Heart,
+    Pause,
+    Play,
+    PlusCircle,
+    RotateCw,
+    ScrollText,
+    Sword,
+    Trash2
+} from 'lucide-react';
+import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/app/components/ui/dialog";
+import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/app/components/ui/sheet";
 import {Creature, LogEntry} from "@/app/types/battles";
 
 const BattleTracker: React.FC = () => {
@@ -14,12 +25,12 @@ const BattleTracker: React.FC = () => {
     const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [round, setRound] = useState<number>(1);
     const [attackDialogOpen, setAttackDialogOpen] = useState<boolean>(false);
-    const [targetId, setTargetId] = useState<number >(0);
+    const [targetId, setTargetId] = useState<number>(0);
     const [damageAmount, setDamageAmount] = useState<string>('');
     const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
 
     // Rest of your component code remains the same, just add type annotations where needed
-    const addLogEntry = (entry:string) => {
+    const addLogEntry = (entry: string) => {
         const timestamp = new Date().toLocaleTimeString();
         setCombatLog(prev => [{
             id: Date.now(),
@@ -29,7 +40,7 @@ const BattleTracker: React.FC = () => {
         }, ...prev]);
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const addCreature = (e:any) => {
+    const addCreature = (e: any) => {
         e.preventDefault();
         if (newName && newInitiative && newHP) {
             setCreatures([
@@ -49,7 +60,7 @@ const BattleTracker: React.FC = () => {
         }
     };
 
-    const removeCreature = (id:number) => {
+    const removeCreature = (id: number) => {
         const creature = creatures.find(c => c.id === id);
         if (creature) {
             addLogEntry(`${creature.name} was removed from battle`);
@@ -61,7 +72,7 @@ const BattleTracker: React.FC = () => {
         setCreatures(creatures.filter(creature => creature.id !== id));
     };
 
-    const adjustHP = (id:number, amount:number, isAttack = false) => {
+    const adjustHP = (id: number, amount: number, isAttack = false) => {
         const creature = creatures.find(c => c.id === id);
         if (!creature) {
             return;
@@ -71,11 +82,11 @@ const BattleTracker: React.FC = () => {
             addLogEntry(`${creature.name}'s HP ${amount > 0 ? 'increased' : 'decreased'} by ${Math.abs(amount)} (${newHP}/${creature.maxHP} HP)`);
         }
         setCreatures(creatures.map(c =>
-            c.id === id ? { ...c, currentHP: newHP } : c
+            c.id === id ? {...c, currentHP: newHP} : c
         ));
     };
 
-    const moveCreature = (index:number, direction:number) => {
+    const moveCreature = (index: number, direction: number) => {
         const newCreatures = [...creatures];
         const temp = newCreatures[index];
         newCreatures[index] = newCreatures[index + direction];
@@ -117,7 +128,7 @@ const BattleTracker: React.FC = () => {
         addLogEntry('Combat paused');
     };
 
-    const initiateAttack = (targetId:number) => {
+    const initiateAttack = (targetId: number) => {
         setTargetId(targetId);
         setAttackDialogOpen(true);
         setDamageAmount('');
@@ -214,6 +225,7 @@ const BattleTracker: React.FC = () => {
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Creature name"
                     className="border p-2 rounded"
+                    aria-label="creatureNameInput"
                 />
                 <input
                     type="number"
