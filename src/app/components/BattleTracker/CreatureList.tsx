@@ -25,7 +25,7 @@ const CreatureList: React.FC<CreatureListProps> = ({
                     <div className="flex-1">
                         <div className="font-bold">{creature.name}</div>
                         <div className="text-sm text-gray-600">
-                            Initiative: {creature.initiative}
+                            Initiative: {creature.initiative} | AC: {creature.armorClass}
                         </div>
                     </div>
 

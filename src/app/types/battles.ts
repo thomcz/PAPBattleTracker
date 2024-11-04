@@ -1,4 +1,5 @@
 export interface Creature {
+    armorClass: number;
     id: number;
     name: string;
     initiative: number;

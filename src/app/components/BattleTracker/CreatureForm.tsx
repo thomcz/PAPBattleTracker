@@ -9,7 +9,9 @@ const CreatureForm: React.FC<CreatureFormProps> = ({
     newInitiative,
     setNewInitiative,
     newHP,
-    setNewHP
+    setNewHP,
+    newAC,
+    setNewAC
 }) => {
     return (
         <form onSubmit={addCreature} className="mb-6 flex gap-2 flex-wrap">
@@ -34,6 +36,14 @@ const CreatureForm: React.FC<CreatureFormProps> = ({
                 onChange={(e) => setNewHP(e.target.value)}
                 placeholder="HP"
                 className="border p-2 rounded w-24"
+            />
+            <input
+                type="number"
+                value={newAC}
+                onChange={(e) => setNewAC(e.target.value)}
+                placeholder="AC"
+                className="border p-2 rounded w-24"
+                aria-label="armorClassInput"
             />
             <button
                 type="submit"

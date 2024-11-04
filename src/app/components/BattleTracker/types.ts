@@ -17,6 +17,8 @@ export interface CreatureFormProps {
     setNewInitiative: (initiative: string) => void;
     newHP: string;
     setNewHP: (hp: string) => void;
+    newAC: string;
+    setNewAC: (ac: string) => void;
 }
 
 export interface CreatureListProps {
