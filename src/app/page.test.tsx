@@ -20,12 +20,14 @@ describe('Home', () => {
         const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
         const initiativeInput = screen.getByPlaceholderText('Initiative');
         const hpInput = screen.getByPlaceholderText('HP');
+        const acInput = screen.getByPlaceholderText('AC');
         const addButton = screen.getByRole('button', {name: /add/i});
 
         // Fill the form
         await user.type(nameInput, 'Goblin');
         await user.type(initiativeInput, '15');
         await user.type(hpInput, '30');
+        await user.type(acInput, '14');
 
         // Simulate form submission
         await user.click(addButton);
@@ -34,10 +36,12 @@ describe('Home', () => {
         const creatureName = screen.getByText('Goblin');
         const creatureInitiative = screen.getByText('Initiative: 15');
         const creatureHP = screen.getByText('30/30');
+        const creatureAC = screen.getByText('AC: 14');
 
         expect(creatureName).toBeInTheDocument();
         expect(creatureInitiative).toBeInTheDocument();
         expect(creatureHP).toBeInTheDocument();
+        expect(creatureAC).toBeInTheDocument();
     });
 
 
@@ -48,12 +52,14 @@ describe('Home', () => {
         const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
         const initiativeInput = screen.getByPlaceholderText('Initiative');
         const hpInput = screen.getByPlaceholderText('HP');
+        const acInput = screen.getByPlaceholderText('AC');
         const addButton = screen.getByRole('button', {name: /add/i});
 
         // Fill the form
         await user.type(nameInput, 'Orc');
         await user.type(initiativeInput, '10');
         await user.type(hpInput, '40');
+        await user.type(acInput, '16');
 
         // Simulate form submission
         await user.click(addButton);
@@ -78,16 +84,21 @@ describe('Home', () => {
         const initiativeInput = screen.getByPlaceholderText('Initiative');
         const hpInput = screen.getByPlaceholderText('HP');
         const addButton = screen.getByRole('button', {name: /add/i});
+        const acInput = screen.getByPlaceholderText('AC');
 
         await user.type(nameInput, 'Dragon');
         await user.type(initiativeInput, '20');
         await user.type(hpInput, '100');
+        await user.type(acInput, '19');
+        await user.type(acInput, '19');
         await user.click(addButton);
 
         // Add second creature
         await user.type(nameInput, 'Knight');
         await user.type(initiativeInput, '15');
         await user.type(hpInput, '50');
+        await user.type(acInput, '18');
+        await user.type(acInput, '18');
         await user.click(addButton);
 
         // Find the decrease HP button for Knight
@@ -112,16 +123,19 @@ describe('Home', () => {
         const initiativeInput = screen.getByPlaceholderText('Initiative');
         const hpInput = screen.getByPlaceholderText('HP');
         const addButton = screen.getByRole('button', {name: /add/i});
+        const acInput = screen.getByPlaceholderText('AC');
 
         await user.type(nameInput, 'Dragon');
         await user.type(initiativeInput, '20');
         await user.type(hpInput, '100');
+        await user.type(acInput, '20');
         await user.click(addButton);
 
         // Add second creature (lower initiative)
         await user.type(nameInput, 'Knight');
         await user.type(initiativeInput, '15');
         await user.type(hpInput, '50');
+        await user.type(acInput, '20');
         await user.click(addButton);
 
         // Start combat
