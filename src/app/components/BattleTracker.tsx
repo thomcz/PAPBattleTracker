@@ -1,20 +1,11 @@
 "use client";
-import React, {useState} from 'react';
-import {
-    ArrowDownCircle,
-    ArrowUpCircle,
-    Heart,
-    Pause,
-    Play,
-    PlusCircle,
-    RotateCw,
-    ScrollText,
-    Sword,
-    Trash2
-} from 'lucide-react';
-import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/app/components/ui/dialog";
-import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/app/components/ui/sheet";
-import {Creature, LogEntry} from "@/app/types/battles";
+import React, { useState } from 'react';
+import { Creature, LogEntry } from "@/app/types/battles";
+import CombatControls from './BattleTracker/CombatControls';
+import CreatureForm from './BattleTracker/CreatureForm';
+import CreatureList from './BattleTracker/CreatureList';
+import CombatLog from './BattleTracker/CombatLog';
+import AttackDialog from './BattleTracker/AttackDialog';
 
 const BattleTracker: React.FC = () => {
     const [creatures, setCreatures] = useState<Creature[]>([]);
@@ -162,216 +153,44 @@ const BattleTracker: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Battle Tracker</h1>
                 <div className="flex gap-2">
-                    {creatures.length > 0 && (
-                        <>
-                            {!isCombatActive ? (
-                                <button
-                                    onClick={startCombat}
-                                    className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600"
-                                    aria-label="startCombatButton"
-                                >
-                                    <Play className="w-5 h-5"/>
-                                    Start Combat
-                                </button>
-                            ) : (
-                                <div className="flex gap-2">
-                                    <span className="px-4 py-2 bg-gray-100 rounded">Round {round}</span>
-                                    <button
-                                        onClick={nextTurn}
-                                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-600"
-                                        aria-label="nextTurnButton"
-                                    >
-                                        <RotateCw className="w-5 h-5"/>
-                                        Next Turn
-                                    </button>
-                                    <button
-                                        onClick={pauseCombat}
-                                        className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-yellow-600"
-                                        aria-label="pauseCombatButton"
-                                    >
-                                        <Pause className="w-5 h-5"/>
-                                        Pause
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                    <Sheet>
-                        <SheetTrigger
-                            className="bg-gray-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-600">
-                            <ScrollText className="w-5 h-5"/>
-                            Combat Log
-                        </SheetTrigger>
-                        <SheetContent>
-                            <SheetHeader>
-                                <SheetTitle>Combat Log</SheetTitle>
-                            </SheetHeader>
-                            <div className="mt-4 space-y-2">
-                                {combatLog.map(entry => (
-                                    <div key={entry.id} className="text-sm border-b pb-2">
-                    <span className="text-gray-500 text-xs">
-                      [{entry.timestamp} - Round {entry.round}]
-                    </span>
-                                        <div>{entry.text}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </SheetContent>
-                    </Sheet>
+                    <CombatControls
+                        creatures={creatures}
+                        isCombatActive={isCombatActive}
+                        round={round}
+                        startCombat={startCombat}
+                        nextTurn={nextTurn}
+                        pauseCombat={pauseCombat}
+                    />
+                    <CombatLog combatLog={combatLog} />
                 </div>
             </div>
 
-            <form onSubmit={addCreature} className="mb-6 flex gap-2 flex-wrap">
-                <input
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Creature name"
-                    className="border p-2 rounded"
-                    aria-label="creatureNameInput"
-                />
-                <input
-                    type="number"
-                    value={newInitiative}
-                    onChange={(e) => setNewInitiative(e.target.value)}
-                    placeholder="Initiative"
-                    className="border p-2 rounded w-24"
-                />
-                <input
-                    type="number"
-                    value={newHP}
-                    onChange={(e) => setNewHP(e.target.value)}
-                    placeholder="HP"
-                    className="border p-2 rounded w-24"
-                />
-                <button
-                    type="submit"
-                    className="bg-green-500 text-white p-2 rounded flex items-center gap-2 hover:bg-green-600"
-                >
-                    <PlusCircle className="w-5 h-5"/>
-                    Add
-                </button>
-            </form>
+            <CreatureForm
+                addCreature={addCreature}
+                newName={newName}
+                setNewName={setNewName}
+                newInitiative={newInitiative}
+                setNewInitiative={setNewInitiative}
+                newHP={newHP}
+                setNewHP={setNewHP}
+            />
 
-            <div className="space-y-2">
-                {creatures.map((creature, index) => (
-                    <div
-                        key={creature.id}
-                        className={`border p-4 rounded flex items-center gap-4 transition-colors ${
-                            isCombatActive && index === currentTurn
-                                ? 'bg-yellow-100 border-yellow-400'
-                                : 'bg-white'
-                        }`}
-                    >
-                        <div className="flex-1">
-                            <div className="font-bold">{creature.name}</div>
-                            <div className="text-sm text-gray-600">
-                                Initiative: {creature.initiative}
-                            </div>
-                        </div>
+            <CreatureList
+                creatures={creatures}
+                currentTurn={currentTurn}
+                isCombatActive={isCombatActive}
+                adjustHP={adjustHP}
+                initiateAttack={initiateAttack}
+                moveCreature={moveCreature}
+                removeCreature={removeCreature}
+            />
 
-                        <div className="flex items-center gap-2">
-                            <Heart className="text-red-500 w-5 h-5"/>
-                            <button
-                                onClick={() => adjustHP(creature.id, -1)}
-                                className="px-2 py-1 bg-red-100 rounded hover:bg-red-200"
-                            >
-                                -
-                            </button>
-                            <span className="w-16 text-center">
-                {creature.currentHP}/{creature.maxHP}
-              </span>
-                            <button
-                                onClick={() => adjustHP(creature.id, 1)}
-                                className="px-2 py-1 bg-green-100 rounded hover:bg-green-200"
-                            >
-                                +
-                            </button>
-                        </div>
-
-                        <div className="flex gap-2">
-                            {isCombatActive && index === currentTurn ? (
-                                <button
-                                    onClick={() => initiateAttack(creature.id)}
-                                    className="p-1 text-red-500 hover:text-red-600 disabled:opacity-50"
-                                    disabled={index === currentTurn}
-                                >
-                                    <Sword className="w-5 h-5"/>
-                                </button>
-                            ) : (
-                                isCombatActive && (
-                                    <button
-                                        onClick={() => initiateAttack(creature.id)}
-                                        className="p-1 hover:text-red-600"
-                                    >
-                                        <Sword className="w-5 h-5" data-testid="sword"/>
-                                    </button>
-                                )
-                            )}
-                            {index > 0 && (
-                                <button
-                                    onClick={() => moveCreature(index, -1)}
-                                    className="p-1 hover:text-blue-600"
-                                >
-                                    <ArrowUpCircle className="w-5 h-5"/>
-                                </button>
-                            )}
-                            {index < creatures.length - 1 && (
-                                <button
-                                    onClick={() => moveCreature(index, 1)}
-                                    className="p-1 hover:text-blue-600"
-                                >
-                                    <ArrowDownCircle className="w-5 h-5"/>
-                                </button>
-                            )}
-                            <button
-                                aria-label="removeCreatureButton"
-                                onClick={() => removeCreature(creature.id)}
-                                className="p-1 text-red-500 hover:text-red-600"
-                            >
-                                <Trash2 className="w-5 h-5"/>
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <Dialog open={attackDialogOpen} onOpenChange={setAttackDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Attack {creatures.find(c => c.id === targetId)?.name}</DialogTitle>
-                    </DialogHeader>
-                    <div className="p-4">
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Enter damage amount:
-                            </label>
-                            <input
-                                type="number"
-                                value={damageAmount}
-                                onChange={(e) => setDamageAmount(e.target.value)}
-                                className="border p-2 rounded w-full"
-                                min="0"
-                                autoFocus
-                            />
-                        </div>
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => setAttackDialogOpen(false)}
-                                className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={executeAttack}
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                            >
-                                Attack
-                            </button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <AttackDialog
+                isOpen={attackDialogOpen}
+                setIsOpen={setAttackDialogOpen}
+                targetCreature={creatures.find(c => c.id === targetId)}
+                onAttack={executeAttack}
+            />
         </div>
     );
 };
