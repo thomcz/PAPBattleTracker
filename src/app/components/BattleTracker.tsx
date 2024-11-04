@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { Creature, LogEntry } from "@/app/types/battles";
+import { Download, Upload } from 'lucide-react';
 import CombatControls from './BattleTracker/CombatControls';
 import CreatureForm from './BattleTracker/CreatureForm';
 import CreatureList from './BattleTracker/CreatureList';
@@ -161,6 +162,50 @@ const BattleTracker: React.FC = () => {
         setDamageAmount('');
     };
 
+    const importState = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const state = JSON.parse(e.target?.result as string);
+                setCreatures(state.creatures);
+                setIsCombatActive(state.isCombatActive);
+                setCurrentTurn(state.currentTurn);
+                setRound(state.round);
+                setCombatLog(state.combatLog);
+                addLogEntry('Battle state imported successfully');
+            } catch (error) {
+                console.error('Error importing state:', error);
+                addLogEntry('Error importing battle state');
+            }
+        };
+        reader.readAsText(file);
+        // Reset the input
+        event.target.value = '';
+    };
+
+    const exportState = () => {
+        const state = {
+            creatures,
+            isCombatActive,
+            currentTurn,
+            round,
+            combatLog
+        };
+        
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `battle-state-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     const executeAttack = () => {
         const damage = parseInt(damageAmount);
         if (!isNaN(damage) && damage >= 0) {
@@ -189,6 +234,30 @@ const BattleTracker: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Battle Tracker</h1>
                 <div className="flex gap-2">
+                    <input
+                        type="file"
+                        accept=".json"
+                        onChange={importState}
+                        className="hidden"
+                        id="import-state"
+                        aria-label="importStateInput"
+                    />
+                    <label
+                        htmlFor="import-state"
+                        className="bg-purple-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-purple-600 cursor-pointer"
+                        aria-label="importStateButton"
+                    >
+                        <Upload className="w-5 h-5"/>
+                        Import State
+                    </label>
+                    <button
+                        onClick={exportState}
+                        className="bg-purple-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-purple-600"
+                        aria-label="exportStateButton"
+                    >
+                        <Download className="w-5 h-5"/>
+                        Export State
+                    </button>
                     <CombatControls
                         creatures={creatures}
                         isCombatActive={isCombatActive}
