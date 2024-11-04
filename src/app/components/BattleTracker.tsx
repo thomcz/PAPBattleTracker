@@ -168,6 +168,7 @@ const BattleTracker: React.FC = () => {
                                 <button
                                     onClick={startCombat}
                                     className="bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600"
+                                    aria-label="startCombatButton"
                                 >
                                     <Play className="w-5 h-5"/>
                                     Start Combat
@@ -178,6 +179,7 @@ const BattleTracker: React.FC = () => {
                                     <button
                                         onClick={nextTurn}
                                         className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-600"
+                                        aria-label="nextTurnButton"
                                     >
                                         <RotateCw className="w-5 h-5"/>
                                         Next Turn
@@ -185,6 +187,7 @@ const BattleTracker: React.FC = () => {
                                     <button
                                         onClick={pauseCombat}
                                         className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-yellow-600"
+                                        aria-label="pauseCombatButton"
                                     >
                                         <Pause className="w-5 h-5"/>
                                         Pause

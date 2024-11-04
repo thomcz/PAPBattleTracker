@@ -91,15 +91,67 @@ describe('Home', () => {
         await user.click(addButton);
 
         // Find the decrease HP button for Knight
-        const decreaseButtons = screen.getAllByRole('button', { name: '-' });
-        
+        const decreaseButtons = screen.getAllByRole('button', {name: '-'});
+
         // Click decrease button 5 times
-        for(let i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++) {
             await user.click(decreaseButtons[1]); // Second creature's decrease button
         }
 
         // Verify Knight's HP is reduced by 5
         const knightHP = screen.getByText('45/50');
         expect(knightHP).toBeInTheDocument();
+    });
+
+    it('verifies combat flow with two creatures', async () => {
+        render(<Home/>);
+        const user = userEvent.setup();
+
+        // Add first creature (higher initiative)
+        const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
+        const initiativeInput = screen.getByPlaceholderText('Initiative');
+        const hpInput = screen.getByPlaceholderText('HP');
+        const addButton = screen.getByRole('button', {name: /add/i});
+
+        await user.type(nameInput, 'Dragon');
+        await user.type(initiativeInput, '20');
+        await user.type(hpInput, '100');
+        await user.click(addButton);
+
+        // Add second creature (lower initiative)
+        await user.type(nameInput, 'Knight');
+        await user.type(initiativeInput, '15');
+        await user.type(hpInput, '50');
+        await user.click(addButton);
+
+        // Start combat
+        const startButton = screen.getByRole('button', {name: /startCombatButton/i});
+        await user.click(startButton);
+
+        // Verify Round 1 and first creature (Dragon) is highlighted
+        expect(screen.getByText('Round 1')).toBeInTheDocument();
+        const dragonDiv = screen.getByText('Dragon').closest('div');
+
+        expect(dragonDiv?.parentElement?.parentElement).toHaveClass('bg-yellow-100');
+
+        // Next turn - verify Knight is highlighted
+        const nextTurnButton = screen.getByRole('button', {name: /nextTurnButton/i});
+        await user.click(nextTurnButton);
+        const knightDiv = screen.getByText('Knight').closest('div');
+        expect(knightDiv?.parentElement?.parentElement).toHaveClass('bg-yellow-100');
+
+        // Next turn again - verify Round 2 started and Dragon is highlighted
+        await user.click(nextTurnButton);
+        expect(screen.getByText('Round 2')).toBeInTheDocument();
+        expect(dragonDiv?.parentElement?.parentElement).toHaveClass('bg-yellow-100');
+
+        // Pause combat
+        const pauseButton = screen.getByRole('button', {name: /pauseCombatButton/i});
+        await user.click(pauseButton);
+
+        // Verify combat controls are replaced with start button
+        expect(screen.queryByRole('button', {name: /pauseCombatButton/i})).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', {name: /nextTurnButton/i})).not.toBeInTheDocument();
+        expect(screen.getByRole('button', {name: /startCombatButton/i})).toBeInTheDocument();
     });
 });
