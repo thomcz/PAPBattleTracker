@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Creature, LogEntry } from "@/app/types/battles";
 import { Download, Upload } from 'lucide-react';
+import { importBattleState, exportBattleState } from '@/app/services/battleStateService';
 import CombatControls from './BattleTracker/CombatControls';
 import CreatureForm from './BattleTracker/CreatureForm';
 import CreatureList from './BattleTracker/CreatureList';
@@ -162,48 +163,35 @@ const BattleTracker: React.FC = () => {
         setDamageAmount('');
     };
 
-    const importState = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const importState = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const state = JSON.parse(e.target?.result as string);
-                setCreatures(state.creatures);
-                setIsCombatActive(state.isCombatActive);
-                setCurrentTurn(state.currentTurn);
-                setRound(state.round);
-                setCombatLog(state.combatLog);
-                addLogEntry('Battle state imported successfully');
-            } catch (error) {
-                console.error('Error importing state:', error);
-                addLogEntry('Error importing battle state');
-            }
-        };
-        reader.readAsText(file);
+        try {
+            const state = await importBattleState(file);
+            setCreatures(state.creatures);
+            setIsCombatActive(state.isCombatActive);
+            setCurrentTurn(state.currentTurn);
+            setRound(state.round);
+            setCombatLog(state.combatLog);
+            addLogEntry('Battle state imported successfully');
+        } catch (error) {
+            console.error('Error importing state:', error);
+            addLogEntry('Error importing battle state');
+        }
+        
         // Reset the input
         event.target.value = '';
     };
 
     const exportState = () => {
-        const state = {
+        exportBattleState({
             creatures,
             isCombatActive,
             currentTurn,
             round,
             combatLog
-        };
-        
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `battle-state-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        });
     };
 
     const executeAttack = () => {
