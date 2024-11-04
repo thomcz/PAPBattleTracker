@@ -132,6 +132,29 @@ const BattleTracker: React.FC = () => {
         setCreatures(prev => prev.filter(creature => creature.type === 'player'));
     };
 
+    const updateInitiative = (id: number, initiative: number) => {
+        const creature = creatures.find(c => c.id === id);
+        if (!creature) return;
+        
+        setCreatures(prev => {
+            const updated = prev.map(c => 
+                c.id === id ? {...c, initiative} : c
+            );
+            return updated.sort((a, b) => b.initiative - a.initiative);
+        });
+        addLogEntry(`${creature.name}'s initiative updated to ${initiative}`);
+    };
+
+    const updateArmorClass = (id: number, armorClass: number) => {
+        const creature = creatures.find(c => c.id === id);
+        if (!creature) return;
+        
+        setCreatures(prev => 
+            prev.map(c => c.id === id ? {...c, armorClass} : c)
+        );
+        addLogEntry(`${creature.name}'s armor class updated to ${armorClass}`);
+    };
+
     const initiateAttack = (targetId: number) => {
         setTargetId(targetId);
         setAttackDialogOpen(true);
@@ -201,6 +224,8 @@ const BattleTracker: React.FC = () => {
                 initiateAttack={initiateAttack}
                 moveCreature={moveCreature}
                 removeCreature={removeCreature}
+                updateInitiative={updateInitiative}
+                updateArmorClass={updateArmorClass}
             />
 
             <AttackDialog

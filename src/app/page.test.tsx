@@ -38,14 +38,14 @@ describe('Home', () => {
 
         // Check if the creature appears in the list
         const creatureName = screen.getByText('Goblin');
-        const creatureInitiative = screen.getByText('Initiative: 15');
+        const creatureInitiative = screen.getByRole('spinbutton', {name: 'editInitiative'});
         const creatureHP = screen.getByText('30/30');
-        const creatureAC = screen.getByText('14');
+        const creatureAC = screen.getByRole('spinbutton', {name: 'editArmorClass'});
 
         expect(creatureName).toBeInTheDocument();
-        expect(creatureInitiative).toBeInTheDocument();
+        expect(creatureInitiative).toHaveValue(15);
         expect(creatureHP).toBeInTheDocument();
-        expect(creatureAC).toBeInTheDocument();
+        expect(creatureAC).toHaveValue(14);
     });
 
 

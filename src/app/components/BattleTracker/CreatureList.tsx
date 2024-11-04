@@ -1,16 +1,18 @@
 import React from 'react';
-import { Heart, Sword, ArrowUpCircle, ArrowDownCircle, Trash2, Shield, User } from 'lucide-react';
-import { CreatureListProps } from './types';
+import {ArrowDownCircle, ArrowUpCircle, Heart, Shield, Sword, Trash2, User} from 'lucide-react';
+import {CreatureListProps} from './types';
 
 const CreatureList: React.FC<CreatureListProps> = ({
-    creatures,
-    currentTurn,
-    isCombatActive,
-    adjustHP,
-    initiateAttack,
-    moveCreature,
-    removeCreature
-}) => {
+                                                       creatures,
+                                                       currentTurn,
+                                                       isCombatActive,
+                                                       adjustHP,
+                                                       initiateAttack,
+                                                       moveCreature,
+                                                       removeCreature,
+                                                       updateInitiative,
+                                                       updateArmorClass
+                                                   }) => {
     return (
         <div className="space-y-2">
             {creatures.map((creature, index) => (
@@ -28,9 +30,35 @@ const CreatureList: React.FC<CreatureListProps> = ({
                             {creature.type === 'player' && <User className="w-4 h-4" aria-label="Player Character"/>}
                         </div>
                         <div className="flex gap-4 text-sm text-gray-600">
-                            <div>Initiative: {creature.initiative}</div>
                             <div className="flex items-center gap-1">
-                                <Shield className="w-4 h-4" aria-label="Armor Class"/> {creature.armorClass}
+                                Initiative:
+                                <input
+                                    type="number"
+                                    value={creature.initiative}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value);
+                                        if (!isNaN(value)) {
+                                            updateInitiative(creature.id, value);
+                                        }
+                                    }}
+                                    className="w-16 border rounded px-1"
+                                    aria-label="editInitiative"
+                                />
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Shield className="w-4 h-4" aria-label="Armor Class"/>
+                                <input
+                                    type="number"
+                                    value={creature.armorClass}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value);
+                                        if (!isNaN(value)) {
+                                            updateArmorClass(creature.id, value);
+                                        }
+                                    }}
+                                    className="w-16 border rounded px-1"
+                                    aria-label="editArmorClass"
+                                />
                             </div>
                         </div>
                     </div>

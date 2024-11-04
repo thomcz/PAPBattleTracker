@@ -32,6 +32,8 @@ export interface CreatureListProps {
     initiateAttack: (targetId: number) => void;
     moveCreature: (index: number, direction: number) => void;
     removeCreature: (id: number) => void;
+    updateInitiative: (id: number, initiative: number) => void;
+    updateArmorClass: (id: number, armorClass: number) => void;
 }
 
 export interface CombatLogProps {
