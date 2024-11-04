@@ -2,6 +2,7 @@ import '@testing-library/jest-dom'
 import {render, screen} from '@testing-library/react'
 import Home from "@/app/page";
 import userEvent from '@testing-library/user-event'
+import {createCreature, createDragon, createKnight} from '@/app/test/factories/creatureFactory'
 
 describe('Home', () => {
     const user = userEvent.setup()
@@ -16,21 +17,24 @@ describe('Home', () => {
     it('adds a creature and checks if it appears in the list', async () => {
         render(<Home/>);
 
-        // Simulate user input
-        const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
-        const initiativeInput = screen.getByPlaceholderText('Initiative');
-        const hpInput = screen.getByPlaceholderText('HP');
-        const acInput = screen.getByPlaceholderText('AC');
-        const addButton = screen.getByRole('button', {name: /add/i});
+        const elements = {
+            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
+            initiativeInput: screen.getByPlaceholderText('Initiative'),
+            hpInput: screen.getByPlaceholderText('HP'),
+            acInput: screen.getByPlaceholderText('AC'),
+            addButton: screen.getByRole('button', {name: /add/i})
+        };
 
-        // Fill the form
-        await user.type(nameInput, 'Goblin');
-        await user.type(initiativeInput, '15');
-        await user.type(hpInput, '30');
-        await user.type(acInput, '14');
-
-        // Simulate form submission
-        await user.click(addButton);
+        await createCreature(
+            user,
+            {
+                name: 'Goblin',
+                initiative: '15',
+                hp: '30',
+                ac: '14'
+            },
+            elements
+        );
 
         // Check if the creature appears in the list
         const creatureName = screen.getByText('Goblin');
@@ -48,21 +52,24 @@ describe('Home', () => {
     it('adds a creature and then removes it from the list', async () => {
         render(<Home/>);
 
-        // Simulate user input
-        const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
-        const initiativeInput = screen.getByPlaceholderText('Initiative');
-        const hpInput = screen.getByPlaceholderText('HP');
-        const acInput = screen.getByPlaceholderText('AC');
-        const addButton = screen.getByRole('button', {name: /add/i});
+        const elements = {
+            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
+            initiativeInput: screen.getByPlaceholderText('Initiative'),
+            hpInput: screen.getByPlaceholderText('HP'),
+            acInput: screen.getByPlaceholderText('AC'),
+            addButton: screen.getByRole('button', {name: /add/i})
+        };
 
-        // Fill the form
-        await user.type(nameInput, 'Orc');
-        await user.type(initiativeInput, '10');
-        await user.type(hpInput, '40');
-        await user.type(acInput, '16');
-
-        // Simulate form submission
-        await user.click(addButton);
+        await createCreature(
+            user,
+            {
+                name: 'Orc',
+                initiative: '10',
+                hp: '40',
+                ac: '16'
+            },
+            elements
+        );
 
         // Check if the creature appears in the list
         const creatureName = screen.getByText('Orc');
@@ -79,27 +86,16 @@ describe('Home', () => {
     it('adds two creatures and reduces health of one', async () => {
         render(<Home/>);
 
-        // Add first creature
-        const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
-        const initiativeInput = screen.getByPlaceholderText('Initiative');
-        const hpInput = screen.getByPlaceholderText('HP');
-        const addButton = screen.getByRole('button', {name: /add/i});
-        const acInput = screen.getByPlaceholderText('AC');
+        const elements = {
+            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
+            initiativeInput: screen.getByPlaceholderText('Initiative'),
+            hpInput: screen.getByPlaceholderText('HP'),
+            acInput: screen.getByPlaceholderText('AC'),
+            addButton: screen.getByRole('button', {name: /add/i})
+        };
 
-        await user.type(nameInput, 'Dragon');
-        await user.type(initiativeInput, '20');
-        await user.type(hpInput, '100');
-        await user.type(acInput, '19');
-        await user.type(acInput, '19');
-        await user.click(addButton);
-
-        // Add second creature
-        await user.type(nameInput, 'Knight');
-        await user.type(initiativeInput, '15');
-        await user.type(hpInput, '50');
-        await user.type(acInput, '18');
-        await user.type(acInput, '18');
-        await user.click(addButton);
+        await createDragon(user, elements);
+        await createKnight(user, elements);
 
         // Find the decrease HP button for Knight
         const decreaseButtons = screen.getAllByRole('button', {name: '-'});
@@ -118,25 +114,16 @@ describe('Home', () => {
         render(<Home/>);
         const user = userEvent.setup();
 
-        // Add first creature (higher initiative)
-        const nameInput = screen.getByRole('textbox', {name: /creatureNameInput/i});
-        const initiativeInput = screen.getByPlaceholderText('Initiative');
-        const hpInput = screen.getByPlaceholderText('HP');
-        const addButton = screen.getByRole('button', {name: /add/i});
-        const acInput = screen.getByPlaceholderText('AC');
+        const elements = {
+            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
+            initiativeInput: screen.getByPlaceholderText('Initiative'),
+            hpInput: screen.getByPlaceholderText('HP'),
+            acInput: screen.getByPlaceholderText('AC'),
+            addButton: screen.getByRole('button', {name: /add/i})
+        };
 
-        await user.type(nameInput, 'Dragon');
-        await user.type(initiativeInput, '20');
-        await user.type(hpInput, '100');
-        await user.type(acInput, '20');
-        await user.click(addButton);
-
-        // Add second creature (lower initiative)
-        await user.type(nameInput, 'Knight');
-        await user.type(initiativeInput, '15');
-        await user.type(hpInput, '50');
-        await user.type(acInput, '20');
-        await user.click(addButton);
+        await createDragon(user, elements);
+        await createKnight(user, elements);
 
         // Start combat
         const startButton = screen.getByRole('button', {name: /startCombatButton/i});
