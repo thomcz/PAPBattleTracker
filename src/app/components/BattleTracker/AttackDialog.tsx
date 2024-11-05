@@ -15,7 +15,6 @@ const AttackDialog: React.FC<AttackDialogProps> = ({
         if (!isNaN(damage) && damage >= 0) {
             onAttack(damage);
             setDamageAmount('');
-            setIsOpen(false);
         }
     };
 

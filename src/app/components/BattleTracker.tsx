@@ -160,7 +160,6 @@ const BattleTracker: React.FC = () => {
     const initiateAttack = (targetId: number) => {
         setTargetId(targetId);
         setAttackDialogOpen(true);
-        setDamageAmount('');
     };
 
     const importState = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,27 +193,23 @@ const BattleTracker: React.FC = () => {
         });
     };
 
-    const executeAttack = () => {
-        const damage = parseInt(damageAmount);
-        if (!isNaN(damage) && damage >= 0) {
-            const attacker = creatures[currentTurn];
-            const target = creatures.find(c => c.id === targetId);
-            if (!target) {
-                return;
-            }
-            const oldHP = target.currentHP;
-            adjustHP(targetId, -damage, true);
-            const newHP = Math.max(0, oldHP - damage);
-
-            addLogEntry(`${attacker.name} attacked ${target.name} for ${damage} damage (${newHP}/${target.maxHP} HP)`);
-            if (newHP === 0) {
-                addLogEntry(`${target.name} was defeated!`);
-            }
-
-            setAttackDialogOpen(false);
-            setTargetId(0);
-            setDamageAmount('');
+    const executeAttack = (damage: number) => {
+        const attacker = creatures[currentTurn];
+        const target = creatures.find(c => c.id === targetId);
+        if (!target) {
+            return;
         }
+        const oldHP = target.currentHP;
+        adjustHP(targetId, -damage, true);
+        const newHP = Math.max(0, oldHP - damage);
+
+        addLogEntry(`${attacker.name} attacked ${target.name} for ${damage} damage (${newHP}/${target.maxHP} HP)`);
+        if (newHP === 0) {
+            addLogEntry(`${target.name} was defeated!`);
+        }
+
+        setAttackDialogOpen(false);
+        setTargetId(0);
     };
 
     return (
