@@ -97,7 +97,11 @@ describe('CreatureList Component', () => {
     });
 
     it('calls removeCreature when remove button is clicked', async () => {
-        render(<CreatureList {...singleCreatureProps} />);
+        const combatNotActiveProps = {
+            ...singleCreatureProps,
+            isCombatActive: false,
+        };
+        render(<CreatureList {...combatNotActiveProps} />);
         const removeButton = screen.getByLabelText('removeCreatureButton');
         await user.click(removeButton);
         expect(mockRemoveCreature).toHaveBeenCalledWith(1);

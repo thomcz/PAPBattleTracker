@@ -1,20 +1,20 @@
 import React from 'react';
-import {Heart, Shield, Sword, Trash2, User, Skull} from 'lucide-react';
+import {Dices, Heart, Shield, Skull, Sword, Trash2, User} from 'lucide-react';
 import {CreatureListProps} from './types';
 
 const CreatureList: React.FC<CreatureListProps & {
     updateEffects: (id: number, effectToRemove: string) => void;
 }> = ({
-    creatures,
-    currentTurn,
-    isCombatActive,
-    adjustHP,
-    initiateAttack,
-    removeCreature,
-    updateInitiative,
-    updateArmorClass,
-    updateEffects
-}) => {
+          creatures,
+          currentTurn,
+          isCombatActive,
+          adjustHP,
+          initiateAttack,
+          removeCreature,
+          updateInitiative,
+          updateArmorClass,
+          updateEffects
+      }) => {
     return (
         <div className="space-y-2">
             {creatures.map((creature, index) => (
@@ -43,7 +43,7 @@ const CreatureList: React.FC<CreatureListProps & {
                         </div>
                         <div className="flex gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
-                                Initiative:
+                                <Dices className="w-4 h-4" aria-label="Initiative"/>
                                 <input
                                     type="number"
                                     value={creature.initiative}
@@ -57,6 +57,8 @@ const CreatureList: React.FC<CreatureListProps & {
                                     aria-label="editInitiative"
                                 />
                             </div>
+                        </div>
+                        <div className="flex gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                                 <Shield className="w-4 h-4" aria-label="Armor Class"/>
                                 <input
@@ -77,9 +79,9 @@ const CreatureList: React.FC<CreatureListProps & {
 
                     <div className="flex items-center gap-2">
                         {creature.currentHP > 0 ? (
-                            <Heart className="text-red-500 w-5 h-5" />
+                            <Heart className="text-red-500 w-5 h-5"/>
                         ) : (
-                            <Skull className="text-gray-500 w-5 h-5" />
+                            <Skull className="text-gray-500 w-5 h-5"/>
                         )}
                         <button
                             onClick={() => adjustHP(creature.id, -1)}
@@ -113,13 +115,16 @@ const CreatureList: React.FC<CreatureListProps & {
                                 <Sword className="w-5 h-5" data-testid="sword"/>
                             </button>
                         )}
-                        <button
-                            aria-label="removeCreatureButton"
-                            onClick={() => removeCreature(creature.id)}
-                            className="p-1 text-red-500 hover:text-red-600"
-                        >
-                            <Trash2 className="w-5 h-5"/>
-                        </button>
+                        {!isCombatActive && (
+                            <button
+                                aria-label="removeCreatureButton"
+                                onClick={() => removeCreature(creature.id)}
+                                className="p-1 text-red-500 hover:text-red-600"
+                            >
+                                <Trash2 className="w-5 h-5"/>
+                            </button>
+                        )}
+
                     </div>
                 </div>
             ))}
