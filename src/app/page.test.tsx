@@ -80,8 +80,6 @@ describe('Home', () => {
     });
 
     it('verifies combat flow with two creatures', async () => {
-
-
         await createDragon(user);
         await createKnight(user);
 
@@ -95,14 +93,16 @@ describe('Home', () => {
 
         expect(dragonDiv?.parentElement?.parentElement).toHaveClass('bg-yellow-100');
 
-        // Next turn - verify Knight is highlighted
-        const nextTurnButton = screen.getByRole('button', {name: /nextTurnButton/i});
-        await user.click(nextTurnButton);
+        // Initiate attack on Knight
+        await attackCreature(1, '42');
+
+        // After Attack Next turn start - verify Knight is highlighted
         const knightDiv = screen.getByText('Knight').closest('div');
         expect(knightDiv?.parentElement?.parentElement).toHaveClass('bg-yellow-100');
 
+        // Initiate attack on Dragon
+        await attackCreature(0, '42');
         // Next turn again - verify Round 2 started and Dragon is highlighted
-        await user.click(nextTurnButton);
         expect(screen.getByText('Round 2')).toBeInTheDocument();
         expect(dragonDiv?.parentElement?.parentElement).toHaveClass('bg-yellow-100');
 
@@ -116,6 +116,25 @@ describe('Home', () => {
         expect(screen.getByRole('button', {name: /startCombatButton/i})).toBeInTheDocument();
     });
 
+    async function attackCreature(creatureIndex: number, damage: string, effect?: string) {
+        const attackButtons = screen.getAllByRole('button', {name: /attackButton/i});
+        await user.click(attackButtons[creatureIndex]);
+
+        // Enter damage in attack dialog
+        const damageInput = screen.getByLabelText('damageInput');
+        await user.type(damageInput, damage);
+
+        if (effect) {
+            // Enter effect in dialog
+            const effectInput = screen.getByLabelText('effectInput');
+            await user.type(effectInput, effect);
+        }
+
+        // Confirm attack
+        const confirmAttackButton = screen.getByLabelText('confirmAttackButton');
+        await user.click(confirmAttackButton);
+    }
+
     it('deals damage when knight attack dragon during combat', async () => {
 
         // Add Dragon and Knight to the battle
@@ -126,25 +145,12 @@ describe('Home', () => {
         const startButton = screen.getByRole('button', {name: /startCombatButton/i});
         await user.click(startButton);
 
-        // Move to Knight's turn
-        const nextTurnButton = screen.getByRole('button', {name: /nextTurnButton/i});
-        await user.click(nextTurnButton);
+        // Initiate attack on Knight
+        await attackCreature(1, '42');
 
-        // Initiate attack on Dragon
-        const attackButtons = screen.getAllByRole('button', {name: /attackButton/i});
-        await user.click(attackButtons[0]); // Attack the Dragon (first creature)
-
-        // Enter damage in attack dialog
-        const damageInput = screen.getByLabelText('damageInput');
-        await user.type(damageInput, '42');
-
-        // Confirm attack
-        const confirmAttackButton = screen.getByLabelText('confirmAttackButton');
-        await user.click(confirmAttackButton);
-
-        // Verify Dragon's HP is reduced by 42 (from 100 to 58)
-        const dragonHP = screen.getByText('58/100');
-        expect(dragonHP).toBeInTheDocument();
+        // Verify Knight's HP is reduced by 42 (from 8 to 50)
+        const knightHP = screen.getByText('8/50');
+        expect(knightHP).toBeInTheDocument();
     });
 
     it('applies and removes an effect from a creature during combat', async () => {
@@ -156,24 +162,8 @@ describe('Home', () => {
         const startButton = screen.getByRole('button', {name: /startCombatButton/i});
         await user.click(startButton);
 
-        // Move to Knight's turn
-        const nextTurnButton = screen.getByRole('button', {name: /nextTurnButton/i});
-        await user.click(nextTurnButton);
-        // Initiate attack on Dragon
-        const attackButtons = screen.getAllByRole('button', {name: /attackButton/i});
-        await user.click(attackButtons[0]); // Attack the Dragon (first creature)
-
-        // Enter damage in attack dialog
-        const damageInput = screen.getByLabelText('damageInput');
-        await user.type(damageInput, '0');
-
-        // Enter effect in dialog
-        const effectInput = screen.getByLabelText('effectInput');
-        await user.type(effectInput, 'Stunned');
-
-        // Confirm attack
-        const confirmAttackButton = screen.getByLabelText('confirmAttackButton');
-        await user.click(confirmAttackButton);
+        // Initiate attack on Knight
+        await attackCreature(1, '42', 'Stunned');
 
         // Verify effect is added
         const effectBadge = screen.getByText('Stunned');

@@ -37,16 +37,8 @@ describe('CombatControls Component', () => {
 
     it('renders combat controls when combat is active', () => {
         render(<CombatControls {...defaultProps} isCombatActive={true}/>);
-        expect(screen.getByLabelText('nextTurnButton')).toBeInTheDocument();
         expect(screen.getByLabelText('pauseCombatButton')).toBeInTheDocument();
         expect(screen.getByLabelText('finishCombatButton')).toBeInTheDocument();
-    });
-
-    it('calls nextTurn when next turn button is clicked', async () => {
-        render(<CombatControls {...defaultProps} isCombatActive={true}/>);
-        const nextTurnButton = screen.getByLabelText('nextTurnButton');
-        await user.click(nextTurnButton);
-        expect(mockNextTurn).toHaveBeenCalled();
     });
 
     it('calls pauseCombat when pause button is clicked', async () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pause, Play, RotateCw} from 'lucide-react';
+import {Pause, Play, StopCircle} from 'lucide-react';
 import {CombatControlsProps} from './types';
 
 const CombatControls: React.FC<CombatControlsProps> = ({
@@ -7,7 +7,6 @@ const CombatControls: React.FC<CombatControlsProps> = ({
                                                            isCombatActive,
                                                            round,
                                                            startCombat,
-                                                           nextTurn,
                                                            pauseCombat,
                                                            finishCombat
                                                        }) => {
@@ -27,32 +26,26 @@ const CombatControls: React.FC<CombatControlsProps> = ({
     }
 
     return (
-        <div className="flex gap-2">
-            <span className="px-4 py-2 bg-gray-100 rounded">Round {round}</span>
-            <button
-                onClick={nextTurn}
-                className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-600"
-                aria-label="nextTurnButton"
-            >
-                <RotateCw className="w-5 h-5"/>
-                Next Turn
-            </button>
-            <button
-                onClick={pauseCombat}
-                className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-yellow-600"
-                aria-label="pauseCombatButton"
-            >
-                <Pause className="w-5 h-5"/>
-                Pause
-            </button>
-            <button
-                onClick={finishCombat}
-                className="bg-red-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-red-600"
-                aria-label="finishCombatButton"
-            >
-                <Play className="w-5 h-5"/>
-                Finish Combat
-            </button>
+        <div className="flex justify-between w-full">
+            <div className="flex gap-2">
+                <span className="px-4 py-2 bg-gray-100 rounded">Round {round}</span>
+            </div>
+            <div className="flex gap-2">
+                <button
+                    onClick={pauseCombat}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-yellow-600"
+                    aria-label="pauseCombatButton"
+                >
+                    <Pause className="w-5 h-5"/>
+                </button>
+                <button
+                    onClick={finishCombat}
+                    className="bg-red-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-red-600"
+                    aria-label="finishCombatButton"
+                >
+                    <StopCircle className="w-5 h-5"/>
+                </button>
+            </div>
         </div>
     );
 };

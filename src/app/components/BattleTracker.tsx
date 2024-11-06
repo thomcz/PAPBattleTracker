@@ -161,7 +161,8 @@ const BattleTracker: React.FC = () => {
         addLogEntry(logMessage);
         setTargetId(null);
         setAttackDialogOpen(false);
-    }, [targetId, creatures, currentTurn, adjustHP, addLogEntry]);
+        nextTurn();
+    }, [targetId, creatures, currentTurn, adjustHP, addLogEntry, nextTurn]);
 
     const importState = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -232,7 +233,6 @@ const BattleTracker: React.FC = () => {
                         isCombatActive={isCombatActive}
                         round={round}
                         startCombat={startCombat}
-                        nextTurn={nextTurn}
                         pauseCombat={pauseCombat}
                         finishCombat={finishCombat}
                     />

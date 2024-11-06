@@ -5,7 +5,6 @@ export interface CombatControlsProps {
     isCombatActive: boolean;
     round: number;
     startCombat: () => void;
-    nextTurn: () => void;
     pauseCombat: () => void;
     finishCombat: () => void;
 }
