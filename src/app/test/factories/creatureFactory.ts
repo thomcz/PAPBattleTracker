@@ -1,3 +1,5 @@
+import {screen} from "@testing-library/react";
+
 interface CreatureInput {
     name: string;
     initiative: string;
@@ -7,44 +9,38 @@ interface CreatureInput {
 
 export const createCreature = async (
     user: any,
-    {name, initiative, hp, ac}: CreatureInput,
-    {
-        nameInput,
-        initiativeInput,
-        hpInput,
-        acInput,
-        addButton
-    }: any
+    {name, initiative, hp, ac}: CreatureInput
 ) => {
-    await user.type(nameInput, name);
-    await user.type(initiativeInput, initiative);
-    await user.type(hpInput, hp);
-    await user.type(acInput, ac);
-    await user.click(addButton);
+    const openDialogButton = screen.getByRole('button', {name: /openCreatureDialogButton/i});
+    await user.click(openDialogButton);
+
+    await user.type(screen.getByRole('textbox', {name: /creatureNameInput/i}), name);
+    await user.type(screen.getByRole('spinbutton', {name: /initiativeInput/i}), initiative);
+    await user.type(screen.getByRole('spinbutton', {name: /hpInput/i}), hp);
+    await user.type(screen.getByRole('spinbutton', {name: /armorClassInput/i}), ac);
+
+    await user.click(screen.getByRole('button', {name: /addCreatureButton/i}));
 };
 
-export const createKnight = async (user: any, elements: any) => {
-    return createCreature(
-        user,
-        {
-            name: 'Knight',
-            initiative: '15',
-            hp: '50',
-            ac: '18'
-        },
-        elements
-    );
+const PREDEFINED_CREATURES = {
+    knight: {
+        name: 'Knight',
+        initiative: '15',
+        hp: '50',
+        ac: '18'
+    },
+    dragon: {
+        name: 'Dragon',
+        initiative: '20',
+        hp: '100',
+        ac: '19'
+    }
+} as const;
+
+export const createKnight = async (user: any) => {
+    return createCreature(user, PREDEFINED_CREATURES.knight);
 };
 
-export const createDragon = async (user: any, elements: any) => {
-    return createCreature(
-        user,
-        {
-            name: 'Dragon',
-            initiative: '20',
-            hp: '100',
-            ac: '19'
-        },
-        elements
-    );
+export const createDragon = async (user: any) => {
+    return createCreature(user, PREDEFINED_CREATURES.dragon);
 };

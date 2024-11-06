@@ -6,35 +6,25 @@ import {createCreature, createDragon, createKnight} from '@/app/test/factories/c
 
 describe('Home', () => {
     const user = userEvent.setup()
+    
+    beforeEach(() => {
+        render(<Home/>)
+    })
 
     it('renders a heading', () => {
-        render(<Home/>)
 
         const heading = screen.getByRole('heading', {name: 'Battle Tracker'})
 
         expect(heading).toBeInTheDocument()
     })
     it('adds a creature and checks if it appears in the list', async () => {
-        render(<Home/>);
 
-        const elements = {
-            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
-            initiativeInput: screen.getByPlaceholderText('Initiative'),
-            hpInput: screen.getByPlaceholderText('HP'),
-            acInput: screen.getByPlaceholderText('AC'),
-            addButton: screen.getByRole('button', {name: /add/i})
-        };
-
-        await createCreature(
-            user,
-            {
-                name: 'Goblin',
-                initiative: '15',
-                hp: '30',
-                ac: '14'
-            },
-            elements
-        );
+        await createCreature(user, {
+            name: 'Goblin',
+            initiative: '15',
+            hp: '30',
+            ac: '14'
+        });
 
         // Check if the creature appears in the list
         const creatureName = screen.getByText('Goblin');
@@ -50,26 +40,13 @@ describe('Home', () => {
 
 
     it('adds a creature and then removes it from the list', async () => {
-        render(<Home/>);
 
-        const elements = {
-            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
-            initiativeInput: screen.getByPlaceholderText('Initiative'),
-            hpInput: screen.getByPlaceholderText('HP'),
-            acInput: screen.getByPlaceholderText('AC'),
-            addButton: screen.getByRole('button', {name: /add/i})
-        };
-
-        await createCreature(
-            user,
-            {
-                name: 'Orc',
-                initiative: '10',
-                hp: '40',
-                ac: '16'
-            },
-            elements
-        );
+        await createCreature(user, {
+            name: 'Orc',
+            initiative: '10',
+            hp: '40',
+            ac: '16'
+        });
 
         // Check if the creature appears in the list
         const creatureName = screen.getByText('Orc');
@@ -84,18 +61,10 @@ describe('Home', () => {
     });
 
     it('adds two creatures and reduces health of one', async () => {
-        render(<Home/>);
 
-        const elements = {
-            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
-            initiativeInput: screen.getByPlaceholderText('Initiative'),
-            hpInput: screen.getByPlaceholderText('HP'),
-            acInput: screen.getByPlaceholderText('AC'),
-            addButton: screen.getByRole('button', {name: /add/i})
-        };
+        await createDragon(user);
 
-        await createDragon(user, elements);
-        await createKnight(user, elements);
+        await createKnight(user);
 
         // Find the decrease HP button for Knight
         const decreaseButtons = screen.getAllByRole('button', {name: '-'});
@@ -111,19 +80,10 @@ describe('Home', () => {
     });
 
     it('verifies combat flow with two creatures', async () => {
-        render(<Home/>);
-        const user = userEvent.setup();
 
-        const elements = {
-            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
-            initiativeInput: screen.getByPlaceholderText('Initiative'),
-            hpInput: screen.getByPlaceholderText('HP'),
-            acInput: screen.getByPlaceholderText('AC'),
-            addButton: screen.getByRole('button', {name: /add/i})
-        };
 
-        await createDragon(user, elements);
-        await createKnight(user, elements);
+        await createDragon(user);
+        await createKnight(user);
 
         // Start combat
         const startButton = screen.getByRole('button', {name: /startCombatButton/i});
@@ -157,20 +117,10 @@ describe('Home', () => {
     });
 
     it('deals damage when knight attack dragon during combat', async () => {
-        render(<Home/>);
-        const user = userEvent.setup();
-
-        const elements = {
-            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
-            initiativeInput: screen.getByPlaceholderText('Initiative'),
-            hpInput: screen.getByPlaceholderText('HP'),
-            acInput: screen.getByPlaceholderText('AC'),
-            addButton: screen.getByRole('button', {name: /add/i})
-        };
 
         // Add Dragon and Knight to the battle
-        await createDragon(user, elements);
-        await createKnight(user, elements);
+        await createDragon(user);
+        await createKnight(user);
 
         // Start combat
         const startButton = screen.getByRole('button', {name: /startCombatButton/i});

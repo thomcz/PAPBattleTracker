@@ -1,20 +1,16 @@
 "use client";
-import React, {useState, useCallback} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Creature, LogEntry} from "@/app/types/battles";
-import {Download, Upload} from 'lucide-react';
+import {Download, PlusCircle, Upload} from 'lucide-react';
 import {exportBattleState, importBattleState} from '@/app/services/battleStateService';
 import CombatControls from './BattleTracker/CombatControls';
-import CreatureForm from './BattleTracker/CreatureForm';
 import CreatureList from './BattleTracker/CreatureList';
 import AttackDialog from './BattleTracker/AttackDialog';
+import CreatureDialog from './BattleTracker/CreatureDialog';
 
 const BattleTracker: React.FC = () => {
     const [creatures, setCreatures] = useState<Creature[]>([]);
-    const [newName, setNewName] = useState<string>('');
-    const [newInitiative, setNewInitiative] = useState<string>('');
-    const [newHP, setNewHP] = useState<string>('');
-    const [newAC, setNewAC] = useState<string>('');
-    const [creatureType, setCreatureType] = useState<'monster' | 'player'>('monster');
+    const [creatureDialogOpen, setCreatureDialogOpen] = useState(false);
     const [isCombatActive, setIsCombatActive] = useState<boolean>(false);
     const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [round, setRound] = useState<number>(1);
@@ -32,28 +28,26 @@ const BattleTracker: React.FC = () => {
             text: entry
         }, ...prev]);
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const addCreature = (e: any) => {
-        e.preventDefault();
-        if (newName && newInitiative && newHP && newAC) {
-            setCreatures([
-                ...creatures,
-                {
-                    id: Date.now(),
-                    name: newName,
-                    initiative: parseInt(newInitiative),
-                    currentHP: parseInt(newHP),
-                    maxHP: parseInt(newHP),
-                    armorClass: parseInt(newAC),
-                    type: creatureType
-                }
-            ].sort((a, b) => b.initiative - a.initiative));
-            addLogEntry(`${newName} joined the battle with ${newHP} HP and initiative ${newInitiative}`);
-            setNewName('');
-            setNewInitiative('');
-            setNewHP('');
-            setNewAC('');
-        }
+    const addCreature = ({name, initiative, hp, ac, type}: {
+        name: string;
+        initiative: string;
+        hp: string;
+        ac: string;
+        type: 'monster' | 'player';
+    }) => {
+        setCreatures([
+            ...creatures,
+            {
+                id: Date.now(),
+                name,
+                initiative: parseInt(initiative),
+                currentHP: parseInt(hp),
+                maxHP: parseInt(hp),
+                armorClass: parseInt(ac),
+                type
+            }
+        ].sort((a, b) => b.initiative - a.initiative));
+        addLogEntry(`${name} joined the battle with ${hp} HP and initiative ${initiative}`);
     };
 
     const removeCreature = (id: number) => {
@@ -162,10 +156,10 @@ const BattleTracker: React.FC = () => {
 
     const handleAttack = useCallback((damage: number) => {
         if (targetId === null) return;
-        
+
         const target = creatures.find(c => c.id === targetId);
         const attacker = creatures[currentTurn];
-        
+
         if (!target || !attacker) return;
 
         adjustHP(targetId, -damage, true);
@@ -247,18 +241,19 @@ const BattleTracker: React.FC = () => {
                 </div>
             </div>
 
-            <CreatureForm
-                addCreature={addCreature}
-                newName={newName}
-                setNewName={setNewName}
-                newInitiative={newInitiative}
-                setNewInitiative={setNewInitiative}
-                newHP={newHP}
-                setNewHP={setNewHP}
-                newAC={newAC}
-                setNewAC={setNewAC}
-                creatureType={creatureType}
-                setCreatureType={setCreatureType}
+            <button
+                onClick={() => setCreatureDialogOpen(true)}
+                className="mb-6 bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600"
+                aria-label="openCreatureDialogButton"
+            >
+                <PlusCircle className="w-5 h-5"/>
+                Add Creature
+            </button>
+
+            <CreatureDialog
+                isOpen={creatureDialogOpen}
+                onClose={() => setCreatureDialogOpen(false)}
+                onAdd={addCreature}
             />
 
             <CreatureList
