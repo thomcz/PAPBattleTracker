@@ -1,7 +1,8 @@
 "use client";
 import React, {useCallback, useState} from 'react';
 import {Creature, LogEntry} from "@/app/types/battles";
-import {Download, PlusCircle, Upload} from 'lucide-react';
+import {PlusCircle} from 'lucide-react';
+import NavigationBar from './NavigationBar';
 import {exportBattleState, importBattleState} from '@/app/services/battleStateService';
 import CombatControls from './BattleTracker/CombatControls';
 import CreatureList from './BattleTracker/CreatureList';
@@ -154,7 +155,7 @@ const BattleTracker: React.FC = () => {
             }
             return c;
         }));
-        const logMessage = effect 
+        const logMessage = effect
             ? `${attacker.name} attacked ${target.name} for ${damage} damage and applied "${effect}"`
             : `${attacker.name} attacked ${target.name} for ${damage} damage`;
         addLogEntry(logMessage);
@@ -211,34 +212,21 @@ const BattleTracker: React.FC = () => {
 
 
     return (
-        <div className="p-4 max-w-2xl mx-auto">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">Battle Tracker</h1>
-                <div className="flex gap-2">
-                    <input
-                        type="file"
-                        accept=".json"
-                        onChange={importState}
-                        className="hidden"
-                        id="import-state"
-                        aria-label="importStateInput"
-                    />
-                    <label
-                        htmlFor="import-state"
-                        className="bg-purple-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-purple-600 cursor-pointer"
-                        aria-label="importStateButton"
-                    >
-                        <Upload className="w-5 h-5"/>
-                        Import State
-                    </label>
-                    <button
-                        onClick={exportState}
-                        className="bg-purple-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-purple-600"
-                        aria-label="exportStateButton"
-                    >
-                        <Download className="w-5 h-5"/>
-                        Export State
-                    </button>
+        <div>
+            <input
+                type="file"
+                accept=".json"
+                onChange={importState}
+                className="hidden"
+                id="import-state"
+                aria-label="importStateInput"
+            />
+            <NavigationBar
+                onImport={() => document.getElementById('import-state')?.click()}
+                onExport={exportState}
+            />
+            <div className="p-4 max-w-2xl mx-auto">
+                <div className="flex justify-end mb-4">
                     <CombatControls
                         creatures={creatures}
                         isCombatActive={isCombatActive}
@@ -249,44 +237,44 @@ const BattleTracker: React.FC = () => {
                         finishCombat={finishCombat}
                     />
                 </div>
+
+                <button
+                    onClick={() => setCreatureDialogOpen(true)}
+                    className="mb-6 bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600"
+                    aria-label="openCreatureDialogButton"
+                >
+                    <PlusCircle className="w-5 h-5"/>
+                    Add Creature
+                </button>
+
+                <CreatureDialog
+                    isOpen={creatureDialogOpen}
+                    onClose={() => setCreatureDialogOpen(false)}
+                    onAdd={addCreature}
+                />
+
+                <CreatureList
+                    creatures={creatures}
+                    currentTurn={currentTurn}
+                    isCombatActive={isCombatActive}
+                    adjustHP={adjustHP}
+                    initiateAttack={initiateAttack}
+                    removeCreature={removeCreature}
+                    updateInitiative={updateInitiative}
+                    updateArmorClass={updateArmorClass}
+                    updateEffects={updateEffects}
+                />
+
+                <AttackDialog
+                    isOpen={attackDialogOpen}
+                    onClose={() => {
+                        setAttackDialogOpen(false);
+                        setTargetId(null);
+                    }}
+                    onAttack={handleAttack}
+                    targetName={creatures.find(c => c.id === targetId)?.name || ''}
+                />
             </div>
-
-            <button
-                onClick={() => setCreatureDialogOpen(true)}
-                className="mb-6 bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-600"
-                aria-label="openCreatureDialogButton"
-            >
-                <PlusCircle className="w-5 h-5"/>
-                Add Creature
-            </button>
-
-            <CreatureDialog
-                isOpen={creatureDialogOpen}
-                onClose={() => setCreatureDialogOpen(false)}
-                onAdd={addCreature}
-            />
-
-            <CreatureList
-                creatures={creatures}
-                currentTurn={currentTurn}
-                isCombatActive={isCombatActive}
-                adjustHP={adjustHP}
-                initiateAttack={initiateAttack}
-                removeCreature={removeCreature}
-                updateInitiative={updateInitiative}
-                updateArmorClass={updateArmorClass}
-                updateEffects={updateEffects}
-            />
-
-            <AttackDialog
-                isOpen={attackDialogOpen}
-                onClose={() => {
-                    setAttackDialogOpen(false);
-                    setTargetId(null);
-                }}
-                onAttack={handleAttack}
-                targetName={creatures.find(c => c.id === targetId)?.name || ''}
-            />
         </div>
     );
 };
