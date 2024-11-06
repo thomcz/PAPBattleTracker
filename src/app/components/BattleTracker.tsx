@@ -76,24 +76,6 @@ const BattleTracker: React.FC = () => {
         ));
     };
 
-    const moveCreature = (index: number, direction: number) => {
-        const newCreatures = [...creatures];
-        const temp = newCreatures[index];
-        newCreatures[index] = newCreatures[index + direction];
-        newCreatures[index + direction] = temp;
-
-        addLogEntry(`${temp.name} moved ${direction > 0 ? 'down' : 'up'} in initiative order`);
-
-        setCreatures(newCreatures);
-
-        if (isCombatActive) {
-            if (index === currentTurn) {
-                setCurrentTurn(currentTurn + direction);
-            } else if (index + direction === currentTurn) {
-                setCurrentTurn(currentTurn - direction);
-            }
-        }
-    };
 
     const startCombat = () => {
         setIsCombatActive(true);
@@ -262,7 +244,6 @@ const BattleTracker: React.FC = () => {
                 isCombatActive={isCombatActive}
                 adjustHP={adjustHP}
                 initiateAttack={initiateAttack}
-                moveCreature={moveCreature}
                 removeCreature={removeCreature}
                 updateInitiative={updateInitiative}
                 updateArmorClass={updateArmorClass}

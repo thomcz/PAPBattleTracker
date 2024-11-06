@@ -1,5 +1,5 @@
 import React from 'react';
-import {ArrowDownCircle, ArrowUpCircle, Heart, Shield, Sword, Trash2, User} from 'lucide-react';
+import {Heart, Shield, Sword, Trash2, User} from 'lucide-react';
 import {CreatureListProps} from './types';
 
 const CreatureList: React.FC<CreatureListProps> = ({
@@ -8,7 +8,6 @@ const CreatureList: React.FC<CreatureListProps> = ({
                                                        isCombatActive,
                                                        adjustHP,
                                                        initiateAttack,
-                                                       moveCreature,
                                                        removeCreature,
                                                        updateInitiative,
                                                        updateArmorClass
@@ -95,22 +94,6 @@ const CreatureList: React.FC<CreatureListProps> = ({
                                 disabled={index === currentTurn}
                             >
                                 <Sword className="w-5 h-5" data-testid="sword"/>
-                            </button>
-                        )}
-                        {index > 0 && (
-                            <button
-                                onClick={() => moveCreature(index, -1)}
-                                className="p-1 hover:text-blue-600"
-                            >
-                                <ArrowUpCircle className="w-5 h-5"/>
-                            </button>
-                        )}
-                        {index < creatures.length - 1 && (
-                            <button
-                                onClick={() => moveCreature(index, 1)}
-                                className="p-1 hover:text-blue-600"
-                            >
-                                <ArrowDownCircle className="w-5 h-5"/>
                             </button>
                         )}
                         <button
