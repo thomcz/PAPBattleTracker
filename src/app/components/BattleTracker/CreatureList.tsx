@@ -1,5 +1,5 @@
 import React from 'react';
-import {Heart, Shield, Sword, Trash2, User} from 'lucide-react';
+import {Heart, Shield, Sword, Trash2, User, Skull} from 'lucide-react';
 import {CreatureListProps} from './types';
 
 const CreatureList: React.FC<CreatureListProps & {
@@ -76,7 +76,11 @@ const CreatureList: React.FC<CreatureListProps & {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Heart className="text-red-500 w-5 h-5"/>
+                        {creature.currentHP > 0 ? (
+                            <Heart className="text-red-500 w-5 h-5" />
+                        ) : (
+                            <Skull className="text-gray-500 w-5 h-5" />
+                        )}
                         <button
                             onClick={() => adjustHP(creature.id, -1)}
                             className="px-2 py-1 bg-red-100 rounded hover:bg-red-200"
