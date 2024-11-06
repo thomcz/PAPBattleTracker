@@ -1,13 +1,11 @@
 "use client";
-import React, { useState } from 'react';
-import { Creature, LogEntry } from "@/app/types/battles";
-import { Download, Upload } from 'lucide-react';
-import { importBattleState, exportBattleState } from '@/app/services/battleStateService';
+import React, {useState} from 'react';
+import {Creature, LogEntry} from "@/app/types/battles";
+import {Download, Upload} from 'lucide-react';
+import {exportBattleState, importBattleState} from '@/app/services/battleStateService';
 import CombatControls from './BattleTracker/CombatControls';
 import CreatureForm from './BattleTracker/CreatureForm';
 import CreatureList from './BattleTracker/CreatureList';
-import CombatLog from './BattleTracker/CombatLog';
-import AttackDialog from './BattleTracker/AttackDialog';
 
 const BattleTracker: React.FC = () => {
     const [creatures, setCreatures] = useState<Creature[]>([]);
@@ -19,9 +17,7 @@ const BattleTracker: React.FC = () => {
     const [isCombatActive, setIsCombatActive] = useState<boolean>(false);
     const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [round, setRound] = useState<number>(1);
-    const [attackDialogOpen, setAttackDialogOpen] = useState<boolean>(false);
     const [targetId, setTargetId] = useState<number>(0);
-    const [damageAmount, setDamageAmount] = useState<string>('');
     const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
 
     // Rest of your component code remains the same, just add type annotations where needed
@@ -137,9 +133,9 @@ const BattleTracker: React.FC = () => {
     const updateInitiative = (id: number, initiative: number) => {
         const creature = creatures.find(c => c.id === id);
         if (!creature) return;
-        
+
         setCreatures(prev => {
-            const updated = prev.map(c => 
+            const updated = prev.map(c =>
                 c.id === id ? {...c, initiative} : c
             );
             return updated.sort((a, b) => b.initiative - a.initiative);
@@ -150,8 +146,8 @@ const BattleTracker: React.FC = () => {
     const updateArmorClass = (id: number, armorClass: number) => {
         const creature = creatures.find(c => c.id === id);
         if (!creature) return;
-        
-        setCreatures(prev => 
+
+        setCreatures(prev =>
             prev.map(c => c.id === id ? {...c, armorClass} : c)
         );
         addLogEntry(`${creature.name}'s armor class updated to ${armorClass}`);
@@ -159,7 +155,6 @@ const BattleTracker: React.FC = () => {
 
     const initiateAttack = (targetId: number) => {
         setTargetId(targetId);
-        setAttackDialogOpen(true);
     };
 
     const importState = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,7 +173,7 @@ const BattleTracker: React.FC = () => {
             console.error('Error importing state:', error);
             addLogEntry('Error importing battle state');
         }
-        
+
         // Reset the input
         event.target.value = '';
     };
@@ -193,24 +188,6 @@ const BattleTracker: React.FC = () => {
         });
     };
 
-    const executeAttack = (damage: number) => {
-        const attacker = creatures[currentTurn];
-        const target = creatures.find(c => c.id === targetId);
-        if (!target) {
-            return;
-        }
-        const oldHP = target.currentHP;
-        adjustHP(targetId, -damage, true);
-        const newHP = Math.max(0, oldHP - damage);
-
-        addLogEntry(`${attacker.name} attacked ${target.name} for ${damage} damage (${newHP}/${target.maxHP} HP)`);
-        if (newHP === 0) {
-            addLogEntry(`${target.name} was defeated!`);
-        }
-
-        setAttackDialogOpen(false);
-        setTargetId(0);
-    };
 
     return (
         <div className="p-4 max-w-2xl mx-auto">
@@ -250,7 +227,6 @@ const BattleTracker: React.FC = () => {
                         pauseCombat={pauseCombat}
                         finishCombat={finishCombat}
                     />
-                    <CombatLog combatLog={combatLog} />
                 </div>
             </div>
 
@@ -280,12 +256,6 @@ const BattleTracker: React.FC = () => {
                 updateArmorClass={updateArmorClass}
             />
 
-            <AttackDialog
-                isOpen={attackDialogOpen}
-                setIsOpen={setAttackDialogOpen}
-                targetCreature={creatures.find(c => c.id === targetId)}
-                onAttack={executeAttack}
-            />
         </div>
     );
 };

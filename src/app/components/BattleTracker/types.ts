@@ -1,4 +1,4 @@
-import { Creature, LogEntry } from "@/app/types/battles";
+import {Creature, LogEntry} from "@/app/types/battles";
 
 export interface CombatControlsProps {
     creatures: Creature[];
@@ -36,13 +36,3 @@ export interface CreatureListProps {
     updateArmorClass: (id: number, armorClass: number) => void;
 }
 
-export interface CombatLogProps {
-    combatLog: LogEntry[];
-}
-
-export interface AttackDialogProps {
-    isOpen: boolean;
-    setIsOpen: (open: boolean) => void;
-    targetCreature?: Creature;
-    onAttack: (damage: number) => void;
-}
