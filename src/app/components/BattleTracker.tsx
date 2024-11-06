@@ -136,7 +136,7 @@ const BattleTracker: React.FC = () => {
         setAttackDialogOpen(true);
     }, []);
 
-    const handleAttack = useCallback((damage: number) => {
+    const handleAttack = useCallback((damage: number, effect?: string) => {
         if (targetId === null) return;
 
         const target = creatures.find(c => c.id === targetId);
@@ -145,7 +145,19 @@ const BattleTracker: React.FC = () => {
         if (!target || !attacker) return;
 
         adjustHP(targetId, -damage, true);
-        addLogEntry(`${attacker.name} attacked ${target.name} for ${damage} damage`);
+        setCreatures(prev => prev.map(c => {
+            if (c.id === targetId && effect) {
+                return {
+                    ...c,
+                    effects: [...(c.effects || []), effect]
+                };
+            }
+            return c;
+        }));
+        const logMessage = effect 
+            ? `${attacker.name} attacked ${target.name} for ${damage} damage and applied "${effect}"`
+            : `${attacker.name} attacked ${target.name} for ${damage} damage`;
+        addLogEntry(logMessage);
         setTargetId(null);
         setAttackDialogOpen(false);
     }, [targetId, creatures, currentTurn, adjustHP, addLogEntry]);
@@ -170,6 +182,22 @@ const BattleTracker: React.FC = () => {
         // Reset the input
         event.target.value = '';
     };
+
+    const updateEffects = useCallback((id: number, effectToRemove: string) => {
+        setCreatures(prev => prev.map(c => {
+            if (c.id === id) {
+                return {
+                    ...c,
+                    effects: (c.effects || []).filter(e => e !== effectToRemove)
+                };
+            }
+            return c;
+        }));
+        const creature = creatures.find(c => c.id === id);
+        if (creature) {
+            addLogEntry(`Removed effect "${effectToRemove}" from ${creature.name}`);
+        }
+    }, [creatures, addLogEntry]);
 
     const exportState = () => {
         exportBattleState({
@@ -247,6 +275,7 @@ const BattleTracker: React.FC = () => {
                 removeCreature={removeCreature}
                 updateInitiative={updateInitiative}
                 updateArmorClass={updateArmorClass}
+                updateEffects={updateEffects}
             />
 
             <AttackDialog

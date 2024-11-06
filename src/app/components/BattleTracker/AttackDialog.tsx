@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 interface AttackDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onAttack: (damage: number) => void;
+    onAttack: (damage: number, effect?: string) => void;
     targetName: string;
 }
 
@@ -15,6 +15,7 @@ const AttackDialog: React.FC<AttackDialogProps> = ({
     targetName,
 }) => {
     const [damage, setDamage] = useState<string>('');
+    const [effect, setEffect] = useState<string>('');
 
     if (!isOpen) return null;
 
@@ -22,8 +23,9 @@ const AttackDialog: React.FC<AttackDialogProps> = ({
         e.preventDefault();
         const damageValue = parseInt(damage);
         if (!isNaN(damageValue)) {
-            onAttack(damageValue);
+            onAttack(damageValue, effect || undefined);
             setDamage('');
+            setEffect('');
             onClose();
         }
     };
@@ -53,6 +55,19 @@ const AttackDialog: React.FC<AttackDialogProps> = ({
                             className="mt-1 block w-full border rounded-md shadow-sm p-2"
                             placeholder="Enter damage"
                             aria-label="damageInput"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Effect (Optional)
+                        </label>
+                        <input
+                            type="text"
+                            value={effect}
+                            onChange={(e) => setEffect(e.target.value)}
+                            className="mt-1 block w-full border rounded-md shadow-sm p-2"
+                            placeholder="Enter effect"
+                            aria-label="effectInput"
                         />
                     </div>
                     <button

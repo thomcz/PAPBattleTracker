@@ -2,16 +2,19 @@ import React from 'react';
 import {Heart, Shield, Sword, Trash2, User} from 'lucide-react';
 import {CreatureListProps} from './types';
 
-const CreatureList: React.FC<CreatureListProps> = ({
-                                                       creatures,
-                                                       currentTurn,
-                                                       isCombatActive,
-                                                       adjustHP,
-                                                       initiateAttack,
-                                                       removeCreature,
-                                                       updateInitiative,
-                                                       updateArmorClass
-                                                   }) => {
+const CreatureList: React.FC<CreatureListProps & {
+    updateEffects: (id: number, effectToRemove: string) => void;
+}> = ({
+    creatures,
+    currentTurn,
+    isCombatActive,
+    adjustHP,
+    initiateAttack,
+    removeCreature,
+    updateInitiative,
+    updateArmorClass,
+    updateEffects
+}) => {
     return (
         <div className="space-y-2">
             {creatures.map((creature, index) => (
@@ -27,6 +30,16 @@ const CreatureList: React.FC<CreatureListProps> = ({
                         <div className="font-bold flex items-center gap-2">
                             {creature.name}
                             {creature.type === 'player' && <User className="w-4 h-4" aria-label="Player Character"/>}
+                            {creature.effects?.map((effect, index) => (
+                                <span
+                                    key={index}
+                                    className="text-sm bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full cursor-pointer"
+                                    onClick={() => updateEffects(creature.id, effect)}
+                                    aria-label={`effect-${effect}`}
+                                >
+                                    {effect}
+                                </span>
+                            ))}
                         </div>
                         <div className="flex gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">

@@ -33,5 +33,6 @@ export interface CreatureListProps {
     removeCreature: (id: number) => void;
     updateInitiative: (id: number, initiative: number) => void;
     updateArmorClass: (id: number, armorClass: number) => void;
+    updateEffects: (id: number, effectToRemove: string) => void;
 }
 

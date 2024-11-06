@@ -6,7 +6,7 @@ import {createCreature, createDragon, createKnight} from '@/app/test/factories/c
 
 describe('Home', () => {
     const user = userEvent.setup()
-    
+
     beforeEach(() => {
         render(<Home/>)
     })
@@ -145,5 +145,44 @@ describe('Home', () => {
         // Verify Dragon's HP is reduced by 42 (from 100 to 58)
         const dragonHP = screen.getByText('58/100');
         expect(dragonHP).toBeInTheDocument();
+    });
+
+    it('applies and removes an effect from a creature during combat', async () => {
+        // Add Dragon and Knight to the battle
+        await createDragon(user);
+        await createKnight(user);
+
+        // Start combat
+        const startButton = screen.getByRole('button', {name: /startCombatButton/i});
+        await user.click(startButton);
+
+        // Move to Knight's turn
+        const nextTurnButton = screen.getByRole('button', {name: /nextTurnButton/i});
+        await user.click(nextTurnButton);
+        // Initiate attack on Dragon
+        const attackButtons = screen.getAllByRole('button', {name: /attackButton/i});
+        await user.click(attackButtons[0]); // Attack the Dragon (first creature)
+
+        // Enter damage in attack dialog
+        const damageInput = screen.getByLabelText('damageInput');
+        await user.type(damageInput, '0');
+
+        // Enter effect in dialog
+        const effectInput = screen.getByLabelText('effectInput');
+        await user.type(effectInput, 'Stunned');
+
+        // Confirm attack
+        const confirmAttackButton = screen.getByLabelText('confirmAttackButton');
+        await user.click(confirmAttackButton);
+
+        // Verify effect is added
+        const effectBadge = screen.getByText('Stunned');
+        expect(effectBadge).toBeInTheDocument();
+
+        // Remove effect by clicking on it
+        await user.click(effectBadge);
+
+        // Verify effect is removed
+        expect(screen.queryByText('Stunned')).not.toBeInTheDocument();
     });
 });

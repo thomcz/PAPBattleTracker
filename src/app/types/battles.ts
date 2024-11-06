@@ -1,4 +1,5 @@
 export interface Creature {
+    effects?: string[];
     armorClass: number;
     id: number;
     name: string;
