@@ -85,6 +85,7 @@ const CreatureList: React.FC<CreatureListProps> = ({
                     <div className="flex gap-2">
                         {isCombatActive && (
                             <button
+                                aria-label="attackButton"
                                 onClick={() => initiateAttack(creature.id)}
                                 className={`p-1 ${
                                     index === currentTurn

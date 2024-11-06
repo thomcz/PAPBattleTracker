@@ -1,11 +1,12 @@
 "use client";
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {Creature, LogEntry} from "@/app/types/battles";
 import {Download, Upload} from 'lucide-react';
 import {exportBattleState, importBattleState} from '@/app/services/battleStateService';
 import CombatControls from './BattleTracker/CombatControls';
 import CreatureForm from './BattleTracker/CreatureForm';
 import CreatureList from './BattleTracker/CreatureList';
+import AttackDialog from './BattleTracker/AttackDialog';
 
 const BattleTracker: React.FC = () => {
     const [creatures, setCreatures] = useState<Creature[]>([]);
@@ -17,7 +18,8 @@ const BattleTracker: React.FC = () => {
     const [isCombatActive, setIsCombatActive] = useState<boolean>(false);
     const [currentTurn, setCurrentTurn] = useState<number>(0);
     const [round, setRound] = useState<number>(1);
-    const [targetId, setTargetId] = useState<number>(0);
+    const [attackDialogOpen, setAttackDialogOpen] = useState(false);
+    const [targetId, setTargetId] = useState<number | null>(null);
     const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
 
     // Rest of your component code remains the same, just add type annotations where needed
@@ -153,9 +155,24 @@ const BattleTracker: React.FC = () => {
         addLogEntry(`${creature.name}'s armor class updated to ${armorClass}`);
     };
 
-    const initiateAttack = (targetId: number) => {
-        setTargetId(targetId);
-    };
+    const initiateAttack = useCallback((id: number) => {
+        setTargetId(id);
+        setAttackDialogOpen(true);
+    }, []);
+
+    const handleAttack = useCallback((damage: number) => {
+        if (targetId === null) return;
+        
+        const target = creatures.find(c => c.id === targetId);
+        const attacker = creatures[currentTurn];
+        
+        if (!target || !attacker) return;
+
+        adjustHP(targetId, -damage, true);
+        addLogEntry(`${attacker.name} attacked ${target.name} for ${damage} damage`);
+        setTargetId(null);
+        setAttackDialogOpen(false);
+    }, [targetId, creatures, currentTurn, adjustHP, addLogEntry]);
 
     const importState = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -256,6 +273,15 @@ const BattleTracker: React.FC = () => {
                 updateArmorClass={updateArmorClass}
             />
 
+            <AttackDialog
+                isOpen={attackDialogOpen}
+                onClose={() => {
+                    setAttackDialogOpen(false);
+                    setTargetId(null);
+                }}
+                onAttack={handleAttack}
+                targetName={creatures.find(c => c.id === targetId)?.name || ''}
+            />
         </div>
     );
 };

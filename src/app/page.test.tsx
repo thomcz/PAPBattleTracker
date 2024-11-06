@@ -155,4 +155,45 @@ describe('Home', () => {
         expect(screen.queryByRole('button', {name: /nextTurnButton/i})).not.toBeInTheDocument();
         expect(screen.getByRole('button', {name: /startCombatButton/i})).toBeInTheDocument();
     });
+
+    it('deals damage when knight attack dragon during combat', async () => {
+        render(<Home/>);
+        const user = userEvent.setup();
+
+        const elements = {
+            nameInput: screen.getByRole('textbox', {name: /creatureNameInput/i}),
+            initiativeInput: screen.getByPlaceholderText('Initiative'),
+            hpInput: screen.getByPlaceholderText('HP'),
+            acInput: screen.getByPlaceholderText('AC'),
+            addButton: screen.getByRole('button', {name: /add/i})
+        };
+
+        // Add Dragon and Knight to the battle
+        await createDragon(user, elements);
+        await createKnight(user, elements);
+
+        // Start combat
+        const startButton = screen.getByRole('button', {name: /startCombatButton/i});
+        await user.click(startButton);
+
+        // Move to Knight's turn
+        const nextTurnButton = screen.getByRole('button', {name: /nextTurnButton/i});
+        await user.click(nextTurnButton);
+
+        // Initiate attack on Dragon
+        const attackButtons = screen.getAllByRole('button', {name: /attackButton/i});
+        await user.click(attackButtons[0]); // Attack the Dragon (first creature)
+
+        // Enter damage in attack dialog
+        const damageInput = screen.getByLabelText('damageInput');
+        await user.type(damageInput, '42');
+
+        // Confirm attack
+        const confirmAttackButton = screen.getByLabelText('confirmAttackButton');
+        await user.click(confirmAttackButton);
+
+        // Verify Dragon's HP is reduced by 42 (from 100 to 58)
+        const dragonHP = screen.getByText('58/100');
+        expect(dragonHP).toBeInTheDocument();
+    });
 });
