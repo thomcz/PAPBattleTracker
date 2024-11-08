@@ -4,10 +4,29 @@ import Home from "@/app/page";
 import userEvent from '@testing-library/user-event'
 import {createCreature, createDragon, createKnight} from '@/app/test/factories/creatureFactory'
 
+// Mock localStorage
+const localStorageMock = (() => {
+    let store: { [key: string]: string } = {};
+    return {
+        getItem: (key: string) => store[key] || null,
+        setItem: (key: string, value: string) => {
+            store[key] = value.toString();
+        },
+        clear: () => {
+            store = {};
+        }
+    };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock
+});
+
 describe('Home', () => {
     const user = userEvent.setup()
 
     beforeEach(() => {
+        localStorage.clear();
         render(<Home/>)
     })
 
@@ -174,5 +193,56 @@ describe('Home', () => {
 
         // Verify effect is removed
         expect(screen.queryByText('Stunned')).not.toBeInTheDocument();
+    });
+
+    it('loads state from localStorage', async () => {
+
+        // Set up a new state in localStorage
+        const newState = {
+            creatures: [{
+                id: 1,
+                name: 'TestCreature',
+                initiative: 15,
+                currentHP: 20,
+                maxHP: 20,
+                armorClass: 16,
+                type: 'monster'
+            }],
+            isCombatActive: false,
+            currentTurn: 0,
+            round: 1,
+            combatLog: []
+        };
+        localStorage.setItem('battleTrackerState', JSON.stringify(newState));
+
+        // Re-render the component
+        render(<Home/>);
+
+        // Verify the state was loaded
+        expect(screen.getByText('TestCreature')).toBeInTheDocument();
+        const armorClassInput = screen.getAllByRole('spinbutton', {name: 'editArmorClass'})[0];
+
+        expect(armorClassInput).toHaveValue(16);
+    });
+
+    it('writes state to localStorage when adding a creature', async () => {
+        // Add a creature
+        await createCreature(user, {
+            name: 'StorageTest',
+            initiative: '12',
+            hp: '25',
+            ac: '15'
+        });
+
+        // Get the stored state from localStorage
+        const storedState = JSON.parse(localStorage.getItem('battleTrackerState') || '{}');
+
+        // Verify the creature was stored
+        expect(storedState.creatures).toHaveLength(1);
+        expect(storedState.creatures[0].name).toBe('StorageTest');
+        expect(storedState.creatures[0].initiative).toBe(12);
+        expect(storedState.creatures[0].currentHP).toBe(25);
+        expect(storedState.creatures[0].maxHP).toBe(25);
+        expect(storedState.creatures[0].armorClass).toBe(15);
     });
 });

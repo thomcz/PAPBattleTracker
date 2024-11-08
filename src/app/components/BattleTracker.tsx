@@ -1,5 +1,5 @@
 "use client";
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState, useEffect} from 'react';
 import {Creature, LogEntry} from "@/app/types/battles";
 import {PlusCircle} from 'lucide-react';
 import NavigationBar from './NavigationBar';
@@ -8,6 +8,8 @@ import CombatControls from './BattleTracker/CombatControls';
 import CreatureList from './BattleTracker/CreatureList';
 import AttackDialog from './BattleTracker/AttackDialog';
 import CreatureDialog from './BattleTracker/CreatureDialog';
+
+const STORAGE_KEY = 'battleTrackerState';
 
 const BattleTracker: React.FC = () => {
     const [creatures, setCreatures] = useState<Creature[]>([]);
@@ -18,6 +20,31 @@ const BattleTracker: React.FC = () => {
     const [attackDialogOpen, setAttackDialogOpen] = useState(false);
     const [targetId, setTargetId] = useState<number | null>(null);
     const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
+
+    // Load state from localStorage on mount
+    useEffect(() => {
+        const savedState = localStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            setCreatures(state.creatures);
+            setIsCombatActive(state.isCombatActive);
+            setCurrentTurn(state.currentTurn);
+            setRound(state.round);
+            setCombatLog(state.combatLog);
+        }
+    }, []);
+
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
+        const state = {
+            creatures,
+            isCombatActive,
+            currentTurn,
+            round,
+            combatLog
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }, [creatures, isCombatActive, currentTurn, round, combatLog]);
 
     // Rest of your component code remains the same, just add type annotations where needed
     const addLogEntry = (entry: string) => {
