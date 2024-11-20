@@ -48,6 +48,13 @@ describe('CombatControls Component', () => {
         expect(mockPauseCombat).toHaveBeenCalled();
     });
 
+    it('calls nextTurn when skip turn button is clicked', async () => {
+        render(<CombatControls {...defaultProps} isCombatActive={true}/>);
+        const skipButton = screen.getByLabelText('skipTurnButton');
+        await user.click(skipButton);
+        expect(mockNextTurn).toHaveBeenCalled();
+    });
+
     it('calls finishCombat when finish button is clicked', async () => {
         render(<CombatControls {...defaultProps} isCombatActive={true}/>);
         const finishButton = screen.getByLabelText('finishCombatButton');

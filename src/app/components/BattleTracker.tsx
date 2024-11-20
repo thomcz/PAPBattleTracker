@@ -262,6 +262,7 @@ const BattleTracker: React.FC = () => {
                         startCombat={startCombat}
                         pauseCombat={pauseCombat}
                         finishCombat={finishCombat}
+                        nextTurn={nextTurn}
                     />
                 </div>
 

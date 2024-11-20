@@ -8,7 +8,8 @@ const CombatControls: React.FC<CombatControlsProps> = ({
                                                            round,
                                                            startCombat,
                                                            pauseCombat,
-                                                           finishCombat
+                                                           finishCombat,
+                                                           nextTurn
                                                        }) => {
     if (creatures.length === 0) return null;
 
@@ -31,6 +32,13 @@ const CombatControls: React.FC<CombatControlsProps> = ({
                 <span className="px-4 py-2 bg-gray-100 rounded">Round {round}</span>
             </div>
             <div className="flex gap-2">
+                <button
+                    onClick={nextTurn}
+                    className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-600"
+                    aria-label="skipTurnButton"
+                >
+                    <Play className="w-5 h-5"/>
+                </button>
                 <button
                     onClick={pauseCombat}
                     className="bg-yellow-500 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-yellow-600"
