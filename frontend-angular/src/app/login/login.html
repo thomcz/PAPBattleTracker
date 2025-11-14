@@ -1,0 +1,68 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Login to PAP Battle Tracker</h2>
+
+    <!-- Error message display -->
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
+      <!-- Username field -->
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          [class.error]="hasError('username', 'required')"
+          formControlName="username"
+          id="username"
+          placeholder="Enter your username"
+          type="text"
+        />
+        @if (hasError('username', 'required')) {
+          <span class="error-message">Username is required</span>
+        }
+        @if (hasError('username', 'minlength')) {
+          <span class="error-message">Username must be at least 3 characters</span>
+        }
+      </div>
+
+      <!-- Password field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          [class.error]="hasError('password', 'required')"
+          formControlName="password"
+          id="password"
+          placeholder="Enter your password"
+          type="password"
+        />
+        @if (hasError('password', 'required')) {
+          <span class="error-message">Password is required</span>
+        }
+        @if (hasError('password', 'minlength')) {
+          <span class="error-message">Password must be at least 6 characters</span>
+        }
+      </div>
+
+      <!-- Submit button -->
+      <button
+        [disabled]="isLoading()"
+        class="btn-primary"
+        type="submit">
+        @if (isLoading()) {
+          <span>Logging in...</span>
+        } @else {
+          <span>Login</span>
+        }
+      </button>
+    </form>
+
+    <!-- Register link -->
+    <div class="footer-link">
+      Don't have an account?
+      <a routerLink="/register">Register here</a>
+    </div>
+  </div>
+</div>

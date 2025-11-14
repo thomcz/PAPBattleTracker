@@ -1,0 +1,98 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2>Create Account</h2>
+
+    @if (errorMessage()) {
+      <div class="alert alert-error">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" [formGroup]="registerForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          [class.error]="hasError('username', 'required') || hasError('username', 'minlength')"
+          formControlName="username"
+          id="username"
+          placeholder="Choose a username"
+          type="text"
+        />
+        @if (hasError('username', 'required')) {
+          <span class="error-message">Username is required</span>
+        }
+        @if (hasError('username', 'minlength')) {
+          <span class="error-message">Username must be at least 3 characters</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          [class.error]="hasError('email', 'required') || hasError('email', 'email')"
+          formControlName="email"
+          id="email"
+          placeholder="your@email.com"
+          type="email"
+        />
+        @if (hasError('email', 'required')) {
+          <span class="error-message">Email is required</span>
+        }
+        @if (hasError('email', 'email')) {
+          <span class="error-message">Please enter a valid email</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          [class.error]="hasError('password', 'required') || hasError('password', 'minlength')"
+          formControlName="password"
+          id="password"
+          placeholder="Choose a password"
+          type="password"
+        />
+        @if (hasError('password', 'required')) {
+          <span class="error-message">Password is required</span>
+        }
+        @if (hasError('password', 'minlength')) {
+          <span class="error-message">Password must be at least 6 characters</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          [class.error]="hasError('confirmPassword', 'required') || hasFormError('passwordMismatch')"
+          formControlName="confirmPassword"
+          id="confirmPassword"
+          placeholder="Confirm your password"
+          type="password"
+        />
+        @if (hasError('confirmPassword', 'required')) {
+          <span class="error-message">Please confirm your password</span>
+        }
+        @if (hasFormError('passwordMismatch')) {
+          <span class="error-message">Passwords do not match</span>
+        }
+      </div>
+
+      <button
+        [disabled]="isLoading()"
+        class="btn-primary"
+        type="submit"
+      >
+        @if (isLoading()) {
+          <span>Creating account...</span>
+        } @else {
+          <span>Register</span>
+        }
+      </button>
+    </form>
+
+    <div class="footer-link">
+      Already have an account?
+      <a routerLink="/login">Login here</a>
+    </div>
+  </div>
+</div>
