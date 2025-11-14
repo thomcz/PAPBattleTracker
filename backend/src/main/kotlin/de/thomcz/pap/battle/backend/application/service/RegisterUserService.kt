@@ -23,7 +23,7 @@ class RegisterUserService(
 
         // 2. Create domain entity
         val hashedPassword = passwordEncoder.encode(command.password)
-        val user = User(0, command.userName, command.email, hashedPassword)
+        val user = User.register(command.userName, command.email, hashedPassword)
 
         // 3. Save via port
         val savedUser = userRepository.save(user)

@@ -16,7 +16,8 @@ class AuthenticationUserService(
 ) : AuthenticationUseCase {
     override fun execute(command: AuthenticateUserCommand): AuthenticationResult {
         val user = userRepository.findByUserName(command.userName) ?: throw IllegalArgumentException("User not found")
-        require(passwordEncoder.matches(command.password, user.passwordHash)) { "Invalid password" }
+
+        user.authenticate(command.password, passwordEncoder)
 
         val token = tokenGenerator.generateToken(user.userName)
 
