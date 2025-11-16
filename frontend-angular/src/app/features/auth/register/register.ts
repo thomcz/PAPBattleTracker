@@ -1,9 +1,9 @@
 import {Component, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
-import {Authentication} from '../service/authentication';
-import {RegisterRequest} from '../models/auth-request.model';
+import {RegisterRequest} from '../../../core/domain/models/auth-request.model';
+import {RegisterUseCase} from '../../../core/domain/use-cases/register.use-case';
+import {NavigationPort} from '../../../core/ports/navigation.port';
 
 @Component({
   selector: 'app-register',
@@ -19,8 +19,8 @@ export class Register {
 
   constructor(
     private fb: FormBuilder,
-    private authService: Authentication,
-    private router: Router
+    private authService: RegisterUseCase,
+    private router: NavigationPort
   ) {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -64,7 +64,7 @@ export class Register {
       password: this.registerForm.value.password
     };
 
-    this.authService.register(registerRequest).subscribe({
+    this.authService.execute(registerRequest).subscribe({
       next: (response) => {
         console.log('Registration successful', response);
         this.router.navigate(['/']);  // Redirect to home

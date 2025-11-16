@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {Router} from '@angular/router';
-import {Authentication} from '../service/authentication';
+import {LogoutUseCase} from '../core/domain/use-cases/logout.use-case';
+import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
 
 @Component({
   selector: 'app-home',
@@ -12,7 +12,7 @@ import {Authentication} from '../service/authentication';
       <nav class="navbar">
         <h1>PAP Battle Tracker</h1>
         <div class="user-info">
-          @if (authService.currentUser(); as user) {
+          @if (loginUserCase.currentUser(); as user) {
             <span>Welcome, {{ user.userName }}!</span>
             <button (click)="logout()" class="btn-logout">Logout</button>
           }
@@ -21,9 +21,9 @@ import {Authentication} from '../service/authentication';
 
       <main class="content">
         <h2>Dashboard</h2>
-        <p>This is a protected page. Only authenticated users can see this.</p>
+        <p>This is a protected page. RegisterRequestOnly authenticated users can see this.</p>
 
-        @if (authService.currentUser(); as user) {
+        @if (loginUserCase.currentUser(); as user) {
           <div class="user-card">
             <h3>Your Profile</h3>
             <p><strong>Username:</strong> {{ user.userName }}</p>
@@ -90,13 +90,12 @@ import {Authentication} from '../service/authentication';
 })
 export class HomeComponent {
   constructor(
-    public authService: Authentication,
-    private router: Router
+    public logoutUseCase: LogoutUseCase,
+    public loginUserCase: LoginUseCase,
   ) {
   }
 
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.logoutUseCase.execute();
   }
 }

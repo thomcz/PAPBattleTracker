@@ -1,12 +1,13 @@
 import {CanActivateFn, Router} from '@angular/router';
 import {inject} from '@angular/core';
-import {Authentication} from '../service/authentication';
+import {LoginUseCase} from '../domain/use-cases/login.use-case';
+import {NavigationPort} from '../ports/navigation.port';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  const authService = inject(Authentication);
-  const router = inject(Router);
+  const authService = inject(LoginUseCase);
+  const router = inject(NavigationPort);
 
-  if (authService.isLoggedIn()) {
+  if (authService.isAuthenticated()) {
     return true;  // Allow navigation
   }
 
@@ -21,10 +22,10 @@ export const authGuard: CanActivateFn = (route, state) => {
  * Guest guard that prevents authenticated users from accessing login/register pages
  */
 export const guestGuard: CanActivateFn = (route, state) => {
-  const authService = inject(Authentication);
+  const authService = inject(LoginUseCase);
   const router = inject(Router);
 
-  if (!authService.isLoggedIn()) {
+  if (!authService.isAuthenticated()) {
     return true;  // Allow navigation
   }
 

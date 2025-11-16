@@ -1,7 +1,7 @@
 import {Routes} from '@angular/router';
-import {Login} from './login/login';
-import {Register} from './register/register';
-import {authGuard, guestGuard} from './guard/authentication-guard';
+import {Login} from './features/auth/login/login';
+import {Register} from './features/auth/register/register';
+import {authGuard, guestGuard} from './core/guards/authentication-guard';
 
 export const routes: Routes = [
   {

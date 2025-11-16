@@ -1,14 +1,15 @@
 import {Component, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {Router} from '@angular/router';
-import {Authentication} from '../service/authentication';
-import {LoginRequest} from '../models/auth-request.model';
+import {LoginRequest} from '../../../core/domain/models/auth-request.model';
+import {NavigationPort} from '../../../core/ports/navigation.port';
+import {LoginUseCase} from '../../../core/domain/use-cases/login.use-case';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -19,8 +20,8 @@ export class Login {
 
   constructor(
     private fb: FormBuilder,
-    private authService: Authentication,
-    private router: Router
+    private authService: LoginUseCase,
+    private router: NavigationPort
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
@@ -45,7 +46,7 @@ export class Login {
       password: this.loginForm.value.password
     };
 
-    this.authService.login(loginRequest).subscribe({
+    this.authService.execute(loginRequest).subscribe({
       next: (response) => {
         console.log('Login successful', response);
         this.router.navigate(['/']);  // Redirect to home

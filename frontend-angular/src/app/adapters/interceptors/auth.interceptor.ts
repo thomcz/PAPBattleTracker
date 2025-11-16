@@ -1,13 +1,15 @@
 import {HttpInterceptorFn} from '@angular/common/http';
 import {inject} from '@angular/core';
-import {Router} from '@angular/router';
-import {Authentication} from '../service/authentication';
 import {catchError, throwError} from 'rxjs';
+import {LogoutUseCase} from '../../core/domain/use-cases/logout.use-case';
+import {LoginUseCase} from '../../core/domain/use-cases/login.use-case';
+import {NavigationPort} from '../../core/ports/navigation.port';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(Authentication);
-  const router = inject(Router);
-  const token = authService.getToken();
+  const logoutUseCase = inject(LogoutUseCase);
+  const loginUseCase = inject(LoginUseCase);
+  const router = inject(NavigationPort);
+  const token = loginUseCase.getToken();
 
   // Clone request and add Authorization header if token exists
   if (token) {
@@ -23,7 +25,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error) => {
       if (error.status === 401) {
         // Token expired or invalid - logout and redirect to login
-        authService.logout();
+        logoutUseCase.execute();
         router.navigate(['/login']);
       }
       return throwError(() => error);
