@@ -1,5 +1,5 @@
 import {Component, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {LoginRequest} from '../../../core/domain/models/auth-request.model';
 import {NavigationPort} from '../../../core/ports/navigation.port';
@@ -9,7 +9,7 @@ import {RouterLink} from '@angular/router';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

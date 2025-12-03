@@ -1,12 +1,12 @@
 import {Component} from '@angular/core';
-import {CommonModule} from '@angular/common';
+
 import {LogoutUseCase} from '../core/domain/use-cases/logout.use-case';
 import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="home-container">
       <nav class="navbar">

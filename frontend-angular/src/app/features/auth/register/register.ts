@@ -1,5 +1,5 @@
 import {Component, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+
 import {AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RegisterRequest} from '../../../core/domain/models/auth-request.model';
 import {RegisterUseCase} from '../../../core/domain/use-cases/register.use-case';
@@ -8,7 +8,7 @@ import {NavigationPort} from '../../../core/ports/navigation.port';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })
