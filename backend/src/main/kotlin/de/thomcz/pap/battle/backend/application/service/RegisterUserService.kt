@@ -16,19 +16,13 @@ class RegisterUserService(
     private val tokenGenerator: TokenGenerator
 ) : RegisterUseCase {
     override fun execute(command: RegisterUserCommand): AuthenticationResult {
-        // 1. Validate uniqueness
-        if (userRepository.existsByUserName(command.userName)) {
-            throw IllegalArgumentException("Username taken")
-        }
+        require(!userRepository.existsByUserName(command.userName)) { "Username taken" }
 
-        // 2. Create domain entity
         val hashedPassword = passwordEncoder.encode(command.password)
         val user = User.register(command.userName, command.email, hashedPassword)
 
-        // 3. Save via port
         val savedUser = userRepository.save(user)
 
-        // 4. Generate token
         val token = tokenGenerator.generateToken(savedUser.userName)
 
         return AuthenticationResult(token, savedUser)
