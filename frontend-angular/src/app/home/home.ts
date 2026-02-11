@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {Router} from '@angular/router';
 
 import {LogoutUseCase} from '../core/domain/use-cases/logout.use-case';
 import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
@@ -21,15 +22,25 @@ import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
 
       <main class="content">
         <h2>Dashboard</h2>
-        <p>This is a protected page. RegisterRequestOnly authenticated users can see this.</p>
+        <p>Welcome to PAP Battle Tracker! Manage your tabletop RPG combat sessions.</p>
 
-        @if (loginUserCase.currentUser(); as user) {
-          <div class="user-card">
-            <h3>Your Profile</h3>
-            <p><strong>Username:</strong> {{ user.userName }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
+        <div class="quick-actions">
+          <div class="action-card" (click)="goToBattles()">
+            <div class="action-icon">⚔️</div>
+            <h3>Battle Sessions</h3>
+            <p>Create and manage your combat encounters</p>
+            <button class="btn-action">Go to Battles</button>
           </div>
-        }
+
+          @if (loginUserCase.currentUser(); as user) {
+            <div class="action-card">
+              <div class="action-icon">👤</div>
+              <h3>Your Profile</h3>
+              <p><strong>Username:</strong> {{ user.userName }}</p>
+              <p><strong>Email:</strong> {{ user.email }}</p>
+            </div>
+          }
+        </div>
       </main>
     </div>
   `,
@@ -79,12 +90,56 @@ import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
       margin: 0 auto;
     }
 
-    .user-card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
       margin-top: 2rem;
+    }
+
+    .action-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .action-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .action-card h3 {
+      margin: 0 0 0.5rem 0;
+      color: #333;
+    }
+
+    .action-card p {
+      color: #6c757d;
+      margin: 0.5rem 0;
+    }
+
+    .btn-action {
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    .btn-action:hover {
+      background: #5568d3;
     }
   `]
 })
@@ -92,10 +147,15 @@ export class HomeComponent {
   constructor(
     public logoutUseCase: LogoutUseCase,
     public loginUserCase: LoginUseCase,
+    private router: Router
   ) {
   }
 
   logout(): void {
     this.logoutUseCase.execute();
+  }
+
+  goToBattles(): void {
+    this.router.navigate(['/battles']);
   }
 }

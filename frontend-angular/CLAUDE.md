@@ -12,7 +12,7 @@ Angular 18 frontend with hexagonal architecture and signal-based state managemen
 # Development
 npm start                            # Start dev server at http://localhost:4200
 npm run build                        # Build production bundle
-npm test                             # Run tests with Karma
+npm test                             # Run tests with Vitest
 npm run lint                         # Run ESLint
 ```
 
@@ -59,7 +59,7 @@ src/app/
 - **State Management**: RxJS + Angular Signals
 - **HTTP**: HttpClient with interceptors
 - **Routing**: Angular Router with guards
-- **Testing**: Jasmine + Karma
+- **Testing**: Vitest + jsdom
 
 ### State Management Pattern
 
@@ -112,7 +112,7 @@ export class LoginUseCase {
 
 - Test files co-located with source files (e.g., `login.spec.ts` next to `login.ts`)
 - Use TestBed for dependency injection in tests
-- Use jasmine spies for mocking ports
+- Use Vitest's `vi` for mocking and spies (compatible with Jasmine syntax)
 
 ### Example Test Pattern
 
@@ -160,8 +160,9 @@ describe('LoginUseCase', () => {
 ### Running Tests
 
 ```bash
-npm test                             # Run all tests in watch mode
-npm run test:ci                      # Run tests once (CI mode)
+npm test                             # Run all tests with Vitest
+ng test                              # Alternative command
+ng test --coverage                   # Run tests with coverage report
 ```
 
 ## Adding a New Feature

@@ -1,0 +1,79 @@
+<div class="battle-list-container">
+  <div class="header">
+    <h1>Battle Sessions</h1>
+    <button class="btn-primary" (click)="openCreateDialog()">
+      <span class="icon">+</span> Create New Battle
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading battles...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-message">
+      <p>{{ error() }}</p>
+      <button class="btn-secondary" (click)="loadBattles()">Retry</button>
+    </div>
+  }
+
+  @if (!loading() && !error()) {
+    @if (battles().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">⚔️</div>
+        <h2>Ready to begin your adventure?</h2>
+        <p>Create your first battle session and start tracking epic combat encounters!</p>
+        <button class="btn-primary" (click)="openCreateDialog()">
+          <span class="icon">+</span> Create Your First Battle
+        </button>
+      </div>
+    } @else {
+      <div class="battles-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Battle Name</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Last Modified</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (battle of battles(); track battle.id) {
+              <tr (click)="viewBattle(battle.id)" class="battle-row">
+                <td class="battle-name">{{ battle.name }}</td>
+                <td>
+                  <span class="status-badge" [class]="getStatusClass(battle.status)">
+                    {{ getStatusLabel(battle.status) }}
+                  </span>
+                </td>
+                <td>{{ battle.createdAt | date: 'short' }}</td>
+                <td>{{ battle.lastModified | date: 'short' }}</td>
+                <td>
+                  <button
+                    class="btn-view"
+                    (click)="viewBattle(battle.id); $event.stopPropagation()"
+                    aria-label="View battle details">
+                    View
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- Create Battle Dialog -->
+  @if (showCreateDialog()) {
+    <app-create-battle-dialog
+      (battleCreated)="onBattleCreated($event)"
+      (dialogClosed)="closeCreateDialog()">
+    </app-create-battle-dialog>
+  }
+</div>

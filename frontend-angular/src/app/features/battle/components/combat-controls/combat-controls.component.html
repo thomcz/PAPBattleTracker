@@ -1,0 +1,143 @@
+<div class="combat-controls">
+  <h2>Combat Controls</h2>
+
+  @if (error()) {
+    <div class="error-message">
+      {{ error() }}
+    </div>
+  }
+
+  <div class="controls-grid">
+    <!-- Start Combat Button -->
+    <button
+      class="btn-control btn-start"
+      (click)="startCombat()"
+      [disabled]="!canStartCombat() || loading()"
+      [title]="getStartTooltip()">
+      @if (loading() && battle.status === CombatStatus.NOT_STARTED) {
+        <span class="spinner-small"></span>
+        Starting...
+      } @else {
+        <span class="icon">▶</span>
+        Start Combat
+      }
+    </button>
+
+    <!-- Pause Combat Button -->
+    <button
+      class="btn-control btn-pause"
+      (click)="pauseCombat()"
+      [disabled]="!canPauseCombat() || loading()"
+      title="Pause the current combat">
+      @if (loading() && battle.status === CombatStatus.ACTIVE) {
+        <span class="spinner-small"></span>
+        Pausing...
+      } @else {
+        <span class="icon">⏸</span>
+        Pause Combat
+      }
+    </button>
+
+    <!-- Resume Combat Button -->
+    <button
+      class="btn-control btn-resume"
+      (click)="resumeCombat()"
+      [disabled]="!canResumeCombat() || loading()"
+      title="Resume paused combat">
+      @if (loading() && battle.status === CombatStatus.PAUSED) {
+        <span class="spinner-small"></span>
+        Resuming...
+      } @else {
+        <span class="icon">▶</span>
+        Resume Combat
+      }
+    </button>
+
+    <!-- End Combat Button -->
+    <button
+      class="btn-control btn-end"
+      (click)="openEndDialog()"
+      [disabled]="!canEndCombat() || loading()"
+      title="End the combat session">
+      <span class="icon">⏹</span>
+      End Combat
+    </button>
+  </div>
+
+  <!-- Current Status Info -->
+  <div class="status-info">
+    <div class="info-item">
+      <span class="label">Status:</span>
+      <span class="value">{{ battle.status }}</span>
+    </div>
+    @if (battle.status === CombatStatus.ACTIVE || battle.status === CombatStatus.PAUSED) {
+      <div class="info-item">
+        <span class="label">Round:</span>
+        <span class="value">{{ battle.round }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Current Turn:</span>
+        <span class="value">
+          @if (battle.creatures.length > 0 && battle.currentTurn < battle.creatures.length) {
+            {{ battle.creatures[battle.currentTurn].name }}
+          } @else {
+            N/A
+          }
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- End Combat Dialog -->
+  @if (showEndDialog()) {
+    <div class="dialog-overlay" (click)="closeEndDialog()">
+      <div class="dialog-content" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3>End Combat</h3>
+          <button class="close-btn" (click)="closeEndDialog()" aria-label="Close dialog">
+            ×
+          </button>
+        </div>
+
+        <div class="dialog-body">
+          <p>How did the combat end?</p>
+          <div class="outcome-buttons">
+            <button
+              class="btn-outcome victory"
+              (click)="endCombat(CombatOutcome.PLAYERS_VICTORIOUS)"
+              [disabled]="loading()">
+              🎉 Players Victory
+            </button>
+            <button
+              class="btn-outcome defeat"
+              (click)="endCombat(CombatOutcome.PLAYERS_DEFEATED)"
+              [disabled]="loading()">
+              ☠️ Players Defeated
+            </button>
+            <button
+              class="btn-outcome draw"
+              (click)="endCombat(CombatOutcome.DRAW)"
+              [disabled]="loading()">
+              🤝 Draw
+            </button>
+            <button
+              class="btn-outcome aborted"
+              (click)="endCombat(CombatOutcome.ABORTED)"
+              [disabled]="loading()">
+              ⚠️ Aborted
+            </button>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button
+            class="btn-cancel"
+            (click)="closeEndDialog()"
+            [disabled]="loading()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -24,6 +24,16 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home').then(m => m.HomeComponent),
     canActivate: [authGuard]  // Requires authentication
   },
+  {
+    path: 'battles',
+    loadComponent: () => import('./features/battle/pages/battle-list/battle-list.component').then(m => m.BattleListComponent),
+    canActivate: [authGuard]  // Requires authentication
+  },
+  {
+    path: 'battles/:id',
+    loadComponent: () => import('./features/battle/pages/battle-detail/battle-detail.component').then(m => m.BattleDetailComponent),
+    canActivate: [authGuard]  // Requires authentication
+  },
   // Add more protected routes here
   {
     path: '**',

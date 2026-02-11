@@ -1,0 +1,360 @@
+openapi: 3.0.3
+info:
+  title: Battle Tracker API - Creatures
+  description: REST API for managing creatures within battles
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+
+tags:
+  - name: Creatures
+    description: Creature management operations
+
+paths:
+  /battles/{battleId}/creatures:
+    post:
+      tags:
+        - Creatures
+      summary: Add creature to battle
+      operationId: addCreature
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCreatureRequest'
+      responses:
+        '201':
+          description: Creature added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /battles/{battleId}/creatures/{creatureId}:
+    put:
+      tags:
+        - Creatures
+      summary: Update creature attributes
+      operationId: updateCreature
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+        - $ref: '#/components/parameters/CreatureIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreatureRequest'
+      responses:
+        '200':
+          description: Creature updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Creatures
+      summary: Remove creature from battle
+      operationId: removeCreature
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+        - $ref: '#/components/parameters/CreatureIdParam'
+      responses:
+        '204':
+          description: Creature removed successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /battles/{battleId}/creatures/{creatureId}/damage:
+    post:
+      tags:
+        - Creatures
+      summary: Apply damage to creature
+      operationId: applyDamage
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+        - $ref: '#/components/parameters/CreatureIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyDamageRequest'
+      responses:
+        '200':
+          description: Damage applied successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+
+  /battles/{battleId}/creatures/{creatureId}/heal:
+    post:
+      tags:
+        - Creatures
+      summary: Apply healing to creature
+      operationId: applyHealing
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+        - $ref: '#/components/parameters/CreatureIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyHealingRequest'
+      responses:
+        '200':
+          description: Healing applied successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+
+  /battles/{battleId}/creatures/{creatureId}/effects:
+    post:
+      tags:
+        - Creatures
+      summary: Add status effect to creature
+      operationId: addStatusEffect
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+        - $ref: '#/components/parameters/CreatureIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [effect]
+              properties:
+                effect:
+                  type: string
+                  example: "Poisoned"
+      responses:
+        '200':
+          description: Effect added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+
+    delete:
+      tags:
+        - Creatures
+      summary: Remove status effect from creature
+      operationId: removeStatusEffect
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+        - $ref: '#/components/parameters/CreatureIdParam'
+        - name: effect
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Effect removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    BattleIdParam:
+      name: battleId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    CreatureIdParam:
+      name: creatureId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    AddCreatureRequest:
+      type: object
+      required: [name, type, maxHP, currentHP, initiative, armorClass]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          enum: [PLAYER, MONSTER]
+        maxHP:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        currentHP:
+          type: integer
+          minimum: 0
+          maximum: 9999
+        initiative:
+          type: integer
+          minimum: -20
+          maximum: 100
+        armorClass:
+          type: integer
+          minimum: 0
+          maximum: 50
+
+    UpdateCreatureRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        maxHP:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        currentHP:
+          type: integer
+          minimum: 0
+          maximum: 9999
+        initiative:
+          type: integer
+          minimum: -20
+          maximum: 100
+        armorClass:
+          type: integer
+          minimum: 0
+          maximum: 50
+
+    ApplyDamageRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        sourceCreatureId:
+          type: string
+          format: uuid
+        damageType:
+          type: string
+
+    ApplyHealingRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+          maximum: 9999
+        sourceCreatureId:
+          type: string
+          format: uuid
+
+    CreatureResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [PLAYER, MONSTER]
+        currentHP:
+          type: integer
+        maxHP:
+          type: integer
+        initiative:
+          type: integer
+        armorClass:
+          type: integer
+        isDefeated:
+          type: boolean
+        effects:
+          type: array
+          items:
+            type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+
+  responses:
+    BadRequestError:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
