@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
+    kotlin("jvm") version "2.3.10"
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.5.7"
     id("io.spring.dependency-management") version "1.1.7"
@@ -41,7 +41,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:6.2.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
