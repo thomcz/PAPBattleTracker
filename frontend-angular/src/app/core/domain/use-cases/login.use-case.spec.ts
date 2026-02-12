@@ -1,12 +1,36 @@
 import { TestBed } from '@angular/core/testing';
-
+import { vi } from 'vitest';
 import { LoginUseCase } from './login.use-case';
+import { AuthPort } from '../../ports/auth.port';
+import { StoragePort } from '../../ports/storage.port';
 
 describe('LoginUseCase', () => {
   let service: LoginUseCase;
+  let authPortMock: AuthPort;
+  let storagePortMock: StoragePort;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    authPortMock = {
+      register: vi.fn(),
+      login: vi.fn(),
+      getCurrentUser: vi.fn().mockReturnValue(null),
+      isAuthenticated: vi.fn()
+    } as AuthPort;
+
+    storagePortMock = {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn()
+    } as StoragePort;
+
+    TestBed.configureTestingModule({
+      providers: [
+        LoginUseCase,
+        { provide: AuthPort, useValue: authPortMock },
+        { provide: StoragePort, useValue: storagePortMock }
+      ]
+    });
     service = TestBed.inject(LoginUseCase);
   });
 
