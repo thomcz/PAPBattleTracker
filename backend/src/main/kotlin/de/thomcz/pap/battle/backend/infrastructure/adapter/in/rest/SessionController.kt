@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/dummy")
-class DummyController {
-    @PostMapping("/ping")
-    fun ping(): String {
+@RequestMapping("/api/session")
+class SessionController {
+    @PostMapping("/session")
+    fun createSession(): String {
         return "pong"
     }
 }

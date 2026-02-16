@@ -1,0 +1,104 @@
+<div class="battle-detail-container">
+  <div class="header">
+    <button class="btn-back" (click)="goBackToList()">
+      ← Back to Battles
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading battle details...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-message">
+      <p>{{ error() }}</p>
+      <div class="error-actions">
+        <button class="btn-secondary" (click)="goBackToList()">
+          Back to List
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && !error() && battle()) {
+    <div class="battle-info">
+      <div class="battle-header">
+        <h1>{{ battle()!.name }}</h1>
+        <span class="status-badge" [class]="getStatusClass(battle()!.status)">
+          {{ getStatusLabel(battle()!.status) }}
+        </span>
+      </div>
+
+      <div class="battle-metadata">
+        <div class="metadata-item">
+          <span class="label">Created:</span>
+          <span class="value">{{ battle()!.createdAt | date: 'medium' }}</span>
+        </div>
+        <div class="metadata-item">
+          <span class="label">Last Modified:</span>
+          <span class="value">{{ battle()!.lastModified | date: 'medium' }}</span>
+        </div>
+        @if (battle()!.status === CombatStatus.ACTIVE || battle()!.status === CombatStatus.PAUSED) {
+          <div class="metadata-item">
+            <span class="label">Round:</span>
+            <span class="value">{{ battle()!.round }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Combat Controls -->
+    <app-combat-controls
+      [battle]="battle()!"
+      (battleUpdated)="onBattleUpdated($event)">
+    </app-combat-controls>
+
+    <!-- Creatures Section (Story 2 - Not Yet Implemented) -->
+    <div class="creatures-section">
+      <h2>Creatures</h2>
+      @if (battle()!.creatures.length === 0) {
+        <div class="empty-state">
+          <p>No creatures added yet.</p>
+          @if (battle()!.status === CombatStatus.NOT_STARTED) {
+            <p class="hint">Add creatures to start combat (Story 2 feature - coming soon)</p>
+          }
+        </div>
+      } @else {
+        <div class="creatures-list">
+          @for (creature of battle()!.creatures; track creature.id) {
+            <div class="creature-card">
+              <div class="creature-name">{{ creature.name }}</div>
+              <div class="creature-stats">
+                <span>HP: {{ creature.currentHP }}/{{ creature.maxHP }}</span>
+                <span>Initiative: {{ creature.initiative }}</span>
+                <span>AC: {{ creature.armorClass }}</span>
+              </div>
+              @if (creature.isDefeated) {
+                <span class="defeated-badge">Defeated</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Combat Log Section (Story 5 - Not Yet Implemented) -->
+    @if (battle()!.combatLog.length > 0) {
+      <div class="combat-log-section">
+        <h2>Combat Log</h2>
+        <div class="combat-log">
+          @for (entry of battle()!.combatLog; track entry.id) {
+            <div class="log-entry">
+              <span class="log-round">Round {{ entry.round }}</span>
+              <span class="log-text">{{ entry.text }}</span>
+              <span class="log-time">{{ entry.timestamp | date: 'short' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

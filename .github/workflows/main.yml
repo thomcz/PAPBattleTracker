@@ -1,4 +1,4 @@
-name: Build Backend and Frontend
+name: Build and Test Backend and Frontend
 
 on:
   push:
@@ -9,8 +9,12 @@ on:
       - '**'
 
 jobs:
-  build-backend:
+  backend-kotlin:
+    name: Backend (Kotlin) - Test & Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,15 +27,46 @@ jobs:
           cache: 'gradle'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x ./backend/gradlew
+        run: chmod +x ./gradlew
 
-      - name: Build backend with Gradle
-        run: |
-          cd backend
-          ./gradlew build -x test
+      - name: Run tests
+        run: ./gradlew test
 
-  build-frontend:
+      - name: Build
+        run: ./gradlew build
+
+  frontend-angular:
+    name: Frontend (Angular) - Test & Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend-angular
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: 'frontend-angular/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  frontend-nextjs:
+    name: Frontend (Next.js Reference) - Test & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend-next-js
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -43,12 +78,11 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'frontend-next-js/package-lock.json'
 
-      - name: Install frontend dependencies
-        run: |
-          cd frontend-next-js
-          npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build frontend
-        run: |
-          cd frontend-next-js
-          npm run build
+      - name: Run tests
+        run: npm test -- --passWithNoTests
+
+      - name: Build
+        run: npm run build

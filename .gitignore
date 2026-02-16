@@ -40,3 +40,7 @@ yarn-error.log*
 next-env.d.ts
 .aider*
 .env
+/pap/bruno.json
+/pap/login.bru
+/pap/ping.bru
+/pap/register.bru

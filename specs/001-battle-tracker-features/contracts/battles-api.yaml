@@ -1,0 +1,581 @@
+openapi: 3.0.3
+info:
+  title: Battle Tracker API - Battles
+  description: REST API for managing battle sessions in tabletop RPG combat tracker
+  version: 1.0.0
+  contact:
+    name: PAPBattleTracker Team
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+  - url: https://api.papbattletracker.com/api
+    description: Production server
+
+tags:
+  - name: Battles
+    description: Battle session management operations
+
+paths:
+  /battles:
+    get:
+      tags:
+        - Battles
+      summary: List all battles for authenticated user
+      description: Retrieves all battle sessions owned by the authenticated user
+      operationId: listBattles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by combat status
+          required: false
+          schema:
+            type: string
+            enum: [NOT_STARTED, ACTIVE, PAUSED, ENDED]
+        - name: page
+          in: query
+          description: Page number (0-indexed)
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          description: Page size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Battles retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - Battles
+      summary: Create a new battle
+      description: Creates a new battle session for the authenticated user
+      operationId: createBattle
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBattleRequest'
+      responses:
+        '201':
+          description: Battle created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}:
+    get:
+      tags:
+        - Battles
+      summary: Get battle by ID
+      description: Retrieves a specific battle by its ID
+      operationId: getBattle
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '200':
+          description: Battle retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Battles
+      summary: Delete battle
+      description: Permanently deletes a battle and all associated data
+      operationId: deleteBattle
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '204':
+          description: Battle deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}/start:
+    post:
+      tags:
+        - Battles
+      summary: Start combat
+      description: Begins combat for the battle, sorting creatures by initiative
+      operationId: startCombat
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '200':
+          description: Combat started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict - Battle already started or has no creatures
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}/pause:
+    post:
+      tags:
+        - Battles
+      summary: Pause combat
+      description: Pauses active combat, preserving all state
+      operationId: pauseCombat
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '200':
+          description: Combat paused successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict - Combat not active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}/resume:
+    post:
+      tags:
+        - Battles
+      summary: Resume combat
+      description: Resumes paused combat
+      operationId: resumeCombat
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '200':
+          description: Combat resumed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict - Combat not paused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}/end:
+    post:
+      tags:
+        - Battles
+      summary: End combat
+      description: Ends combat, removing monster creatures and clearing effects
+      operationId: endCombat
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EndCombatRequest'
+      responses:
+        '200':
+          description: Combat ended successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}/next-turn:
+    post:
+      tags:
+        - Battles
+      summary: Advance to next turn
+      description: Advances to the next creature's turn in initiative order
+      operationId: advanceTurn
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '200':
+          description: Turn advanced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflict - Combat not active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/{battleId}/export:
+    get:
+      tags:
+        - Battles
+      summary: Export battle state
+      description: Exports complete battle state as JSON for backup or sharing
+      operationId: exportBattle
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BattleIdParam'
+      responses:
+        '200':
+          description: Battle exported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleExport'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /battles/import:
+    post:
+      tags:
+        - Battles
+      summary: Import battle state
+      description: Imports a previously exported battle state
+      operationId: importBattle
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BattleImport'
+      responses:
+        '201':
+          description: Battle imported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    BattleIdParam:
+      name: battleId
+      in: path
+      description: Battle unique identifier
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CreateBattleRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Dragon's Lair Encounter"
+
+    EndCombatRequest:
+      type: object
+      required:
+        - outcome
+      properties:
+        outcome:
+          type: string
+          enum: [PLAYERS_VICTORIOUS, PLAYERS_DEFEATED, DRAW, ABORTED]
+          example: PLAYERS_VICTORIOUS
+
+    BattleResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [NOT_STARTED, ACTIVE, PAUSED, ENDED]
+        createdAt:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          format: date-time
+
+    BattleDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BattleResponse'
+        - type: object
+          properties:
+            creatures:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreatureSummary'
+            currentTurn:
+              type: integer
+              minimum: 0
+              description: Current turn index (0-based)
+            round:
+              type: integer
+              minimum: 1
+              description: Current combat round
+            combatLog:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+
+    CreatureSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [PLAYER, MONSTER]
+        currentHP:
+          type: integer
+        maxHP:
+          type: integer
+        initiative:
+          type: integer
+        armorClass:
+          type: integer
+        isDefeated:
+          type: boolean
+        effects:
+          type: array
+          items:
+            type: string
+
+    LogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        round:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        text:
+          type: string
+
+    BattleListResponse:
+      type: object
+      properties:
+        battles:
+          type: array
+          items:
+            $ref: '#/components/schemas/BattleResponse'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        currentPage:
+          type: integer
+        pageSize:
+          type: integer
+
+    BattleExport:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "1.0"
+        exportedAt:
+          type: string
+          format: date-time
+        battle:
+          $ref: '#/components/schemas/BattleDetailResponse'
+
+    BattleImport:
+      type: object
+      required:
+        - version
+        - battle
+      properties:
+        version:
+          type: string
+        battle:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    BadRequestError:
+      description: Bad Request - Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnauthorizedError:
+      description: Unauthorized - Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ForbiddenError:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
