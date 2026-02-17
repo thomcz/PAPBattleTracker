@@ -1,7 +1,10 @@
 package de.thomcz.pap.battle.backend.application.service
 
 import de.thomcz.pap.battle.backend.application.dto.CreateBattleCommand
+import de.thomcz.pap.battle.backend.application.dto.CreateCreatureRequest
+import de.thomcz.pap.battle.backend.application.dto.CreatureResponse
 import de.thomcz.pap.battle.backend.application.dto.EndCombatCommand
+import de.thomcz.pap.battle.backend.application.dto.UpdateCreatureRequest
 import de.thomcz.pap.battle.backend.domain.model.Battle
 import de.thomcz.pap.battle.backend.domain.model.CombatStatus
 import de.thomcz.pap.battle.backend.domain.port.`in`.*
@@ -164,6 +167,135 @@ class BattleService(
         battleRepository.save(battle)
 
         return battle
+    }
+
+    /**
+     * Add a creature to a battle.
+     *
+     * User Story 1: Add Creatures to Battle
+     *
+     * @param battleId The battle to add the creature to
+     * @param userId The username of the user performing the action (from JWT)
+     * @param request The creature details
+     * @return CreatureResponse containing the newly added creature
+     * @throws EntityNotFoundException if battle not found
+     * @throws AccessDeniedException if user does not own the battle
+     * @throws IllegalArgumentException if creature attributes are invalid
+     */
+    fun addCreature(battleId: UUID, userId: String, request: CreateCreatureRequest): CreatureResponse {
+        // Load battle from repository
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        // Verify ownership
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        // Add creature to battle (emits CreatureAdded event)
+        // Domain layer validates creature attributes
+        battle.addCreature(
+            userId = userUUID,
+            name = request.name,
+            type = request.type,
+            currentHp = request.currentHp,
+            maxHp = request.maxHp,
+            initiative = request.initiative,
+            armorClass = request.armorClass
+        )
+
+        // Save battle (persists new event)
+        battleRepository.save(battle)
+
+        // Get the newly added creature (last one in the list)
+        val addedCreature = battle.getCreatures().last()
+
+        // Map to response DTO
+        return CreatureResponse.fromCreature(addedCreature)
+    }
+
+    /**
+     * Update a creature in a battle.
+     *
+     * User Story 2: Edit Creature Attributes
+     *
+     * @param battleId The battle containing the creature
+     * @param creatureId The creature to update
+     * @param userId The username of the user performing the action (from JWT)
+     * @param request The updated creature details
+     * @return CreatureResponse containing the updated creature
+     * @throws EntityNotFoundException if battle not found
+     * @throws AccessDeniedException if user does not own the battle
+     * @throws IllegalArgumentException if creature not found or attributes are invalid
+     */
+    fun updateCreature(
+        battleId: UUID,
+        creatureId: UUID,
+        userId: String,
+        request: UpdateCreatureRequest
+    ): CreatureResponse {
+        // Load battle from repository
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        // Verify ownership
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        // Update creature (emits CreatureUpdated event)
+        // Domain layer validates creature attributes
+        battle.updateCreature(
+            userId = userUUID,
+            creatureId = creatureId,
+            name = request.name,
+            currentHp = request.currentHp,
+            maxHp = request.maxHp,
+            initiative = request.initiative,
+            armorClass = request.armorClass
+        )
+
+        // Save battle (persists new event)
+        battleRepository.save(battle)
+
+        // Get the updated creature
+        val updatedCreature = battle.getCreature(creatureId)
+            ?: throw IllegalArgumentException("Creature not found after update: $creatureId")
+
+        // Map to response DTO
+        return CreatureResponse.fromCreature(updatedCreature)
+    }
+
+    /**
+     * Remove a creature from a battle.
+     *
+     * User Story 3: Remove Creatures
+     *
+     * @param battleId The battle containing the creature
+     * @param creatureId The creature to remove
+     * @param userId The username of the user performing the action (from JWT)
+     * @throws EntityNotFoundException if battle not found
+     * @throws AccessDeniedException if user does not own the battle
+     * @throws IllegalArgumentException if creature not found
+     */
+    fun removeCreature(battleId: UUID, creatureId: UUID, userId: String) {
+        // Load battle from repository
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        // Verify ownership
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        // Remove creature (emits CreatureRemoved event)
+        battle.removeCreature(userUUID, creatureId)
+
+        // Save battle (persists new event)
+        battleRepository.save(battle)
     }
 
     /**

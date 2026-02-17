@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BattlePort, CombatOutcome } from '../../core/ports/battle.port';
-import { Battle, BattleSummary, CombatStatus } from '../../core/domain/models/battle.model';
+import { Battle, BattleSummary, CombatStatus, Creature, CreatureType } from '../../core/domain/models/battle.model';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -66,5 +66,46 @@ export class BattleApiAdapter implements BattlePort {
 
   deleteBattle(battleId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${battleId}`);
+  }
+
+  addCreature(
+    battleId: string,
+    name: string,
+    type: CreatureType,
+    currentHp: number,
+    maxHp: number,
+    initiative: number,
+    armorClass: number
+  ): Observable<Creature> {
+    return this.http.post<Creature>(`${this.apiUrl}/${battleId}/creatures`, {
+      name,
+      type,
+      currentHp,
+      maxHp,
+      initiative,
+      armorClass
+    });
+  }
+
+  updateCreature(
+    battleId: string,
+    creatureId: string,
+    name: string,
+    currentHp: number,
+    maxHp: number,
+    initiative: number,
+    armorClass: number
+  ): Observable<Creature> {
+    return this.http.put<Creature>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`, {
+      name,
+      currentHp,
+      maxHp,
+      initiative,
+      armorClass
+    });
+  }
+
+  removeCreature(battleId: string, creatureId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`);
   }
 }

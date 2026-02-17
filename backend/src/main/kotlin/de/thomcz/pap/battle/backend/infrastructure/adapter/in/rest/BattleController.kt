@@ -1,7 +1,9 @@
 package de.thomcz.pap.battle.backend.infrastructure.adapter.`in`.rest
 
 import de.thomcz.pap.battle.backend.application.dto.*
+import de.thomcz.pap.battle.backend.application.dto.UpdateCreatureRequest
 import de.thomcz.pap.battle.backend.application.service.AccessDeniedException
+import de.thomcz.pap.battle.backend.application.service.BattleService
 import de.thomcz.pap.battle.backend.application.service.EntityNotFoundException
 import de.thomcz.pap.battle.backend.application.service.StateConflictException
 import de.thomcz.pap.battle.backend.domain.model.CombatStatus
@@ -37,7 +39,8 @@ class BattleController(
     private val startCombat: StartCombatUseCase,
     private val pauseCombat: PauseCombatUseCase,
     private val resumeCombat: ResumeCombatUseCase,
-    private val endCombat: EndCombatUseCase
+    private val endCombat: EndCombatUseCase,
+    private val battleService: BattleService
 ) {
 
     /**
@@ -144,6 +147,57 @@ class BattleController(
         val battle = endCombat.execute(id, command, userId)
 
         return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * POST /api/battles/{id}/creatures - Add a creature to a battle
+     * User Story 1: Add Creatures to Battle
+     */
+    @PostMapping("/{id}/creatures")
+    fun addCreature(
+        @PathVariable id: UUID,
+        @Valid @RequestBody request: CreateCreatureRequest,
+        authentication: Authentication
+    ): ResponseEntity<CreatureResponse> {
+        val userId = getUserId(authentication)
+        val creature = battleService.addCreature(id, userId, request)
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(creature)
+    }
+
+    /**
+     * PUT /api/battles/{id}/creatures/{creatureId} - Update a creature's attributes
+     * User Story 2: Edit Creature Attributes
+     */
+    @PutMapping("/{id}/creatures/{creatureId}")
+    fun updateCreature(
+        @PathVariable id: UUID,
+        @PathVariable creatureId: UUID,
+        @Valid @RequestBody request: UpdateCreatureRequest,
+        authentication: Authentication
+    ): ResponseEntity<CreatureResponse> {
+        val userId = getUserId(authentication)
+        val creature = battleService.updateCreature(id, creatureId, userId, request)
+
+        return ResponseEntity.ok(creature)
+    }
+
+    /**
+     * DELETE /api/battles/{id}/creatures/{creatureId} - Remove a creature from battle
+     * User Story 3: Remove Creatures
+     */
+    @DeleteMapping("/{id}/creatures/{creatureId}")
+    fun removeCreature(
+        @PathVariable id: UUID,
+        @PathVariable creatureId: UUID,
+        authentication: Authentication
+    ): ResponseEntity<Void> {
+        val userId = getUserId(authentication)
+        battleService.removeCreature(id, creatureId, userId)
+
+        return ResponseEntity.noContent().build()
     }
 
     /**

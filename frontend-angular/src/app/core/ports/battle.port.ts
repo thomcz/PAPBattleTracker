@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Battle, BattleSummary, CombatStatus } from '../domain/models/battle.model';
+import { Battle, BattleSummary, CombatStatus, Creature, CreatureType } from '../domain/models/battle.model';
 
 /**
  * Port interface for battle operations.
@@ -10,55 +10,89 @@ import { Battle, BattleSummary, CombatStatus } from '../domain/models/battle.mod
  * Per research.md: Returns Observables for async operations, which can be converted
  * to signals in components using toSignal().
  */
-export interface BattlePort {
+export abstract class BattlePort {
   /**
    * Create a new battle session.
    */
-  createBattle(name: string): Observable<Battle>;
+  abstract createBattle(name: string): Observable<Battle>;
 
   /**
    * List all battles for the authenticated user.
    */
-  listBattles(status?: CombatStatus): Observable<BattleSummary[]>;
+  abstract listBattles(status?: CombatStatus): Observable<BattleSummary[]>;
 
   /**
    * Get detailed battle information by ID.
    */
-  getBattle(battleId: string): Observable<Battle>;
+  abstract getBattle(battleId: string): Observable<Battle>;
 
   /**
    * Start combat in a battle.
    * Sorts creatures by initiative and sets status to ACTIVE.
    */
-  startCombat(battleId: string): Observable<Battle>;
+  abstract startCombat(battleId: string): Observable<Battle>;
 
   /**
    * Pause active combat.
    * Preserves all state for later resumption.
    */
-  pauseCombat(battleId: string): Observable<Battle>;
+  abstract pauseCombat(battleId: string): Observable<Battle>;
 
   /**
    * Resume paused combat.
    */
-  resumeCombat(battleId: string): Observable<Battle>;
+  abstract resumeCombat(battleId: string): Observable<Battle>;
 
   /**
    * End combat.
    * Removes monster creatures, retains player creatures.
    */
-  endCombat(battleId: string, outcome: CombatOutcome): Observable<Battle>;
+  abstract endCombat(battleId: string, outcome: CombatOutcome): Observable<Battle>;
 
   /**
    * Advance to next turn in initiative order.
    * Increments round when last creature finishes turn.
    */
-  advanceTurn(battleId: string): Observable<Battle>;
+  abstract advanceTurn(battleId: string): Observable<Battle>;
 
   /**
    * Delete a battle and all associated data.
    */
-  deleteBattle(battleId: string): Observable<void>;
+  abstract deleteBattle(battleId: string): Observable<void>;
+
+  /**
+   * Add a creature to a battle.
+   * User Story 1: Add Creatures to Battle
+   */
+  abstract addCreature(
+    battleId: string,
+    name: string,
+    type: CreatureType,
+    currentHp: number,
+    maxHp: number,
+    initiative: number,
+    armorClass: number
+  ): Observable<Creature>;
+
+  /**
+   * Update a creature's attributes.
+   * User Story 2: Edit Creature Attributes
+   */
+  abstract updateCreature(
+    battleId: string,
+    creatureId: string,
+    name: string,
+    currentHp: number,
+    maxHp: number,
+    initiative: number,
+    armorClass: number
+  ): Observable<Creature>;
+
+  /**
+   * Remove a creature from a battle.
+   * User Story 3: Remove Creatures
+   */
+  abstract removeCreature(battleId: string, creatureId: string): Observable<void>;
 }
 
 /**

@@ -16,6 +16,34 @@ npm test                             # Run tests with Vitest
 npm run lint                         # Run ESLint
 ```
 
+## Definition of Done: Tests Are Required
+
+**CRITICAL**: A feature is NOT considered complete without comprehensive tests.
+
+### Test Requirements for Feature Completion
+- ✅ **Unit tests** for all use cases (e.g., `AddCreatureUseCase`)
+- ✅ **Component tests** for all UI components (using `@testing-library/angular`)
+- ✅ **Integration tests** for adapters and API communication
+- ✅ **Minimum 80% code coverage** for new features
+- ✅ All tests must pass: `npm test`
+
+### Test File Naming Convention
+- Co-locate tests with source files
+- Use `.spec.ts` extension
+- Example: `add-creature.use-case.ts` → `add-creature.use-case.spec.ts`
+
+### Example Test Patterns
+See existing tests for patterns:
+- Use case tests: `core/domain/use-cases/login.use-case.spec.ts`
+- Component tests: `features/battle/components/combat-controls/combat-controls.component.spec.ts`
+- Adapter tests: `adapters/api/battle-api.adapter.spec.ts`
+
+**When implementing a new feature:**
+1. Write tests alongside implementation (TDD approach recommended)
+2. Follow existing test patterns (Vitest + TestBed + @testing-library)
+3. Verify all tests pass with `npm test`
+4. Only mark feature as complete when all tests are green ✅
+
 ## Architecture
 
 ### Hexagonal (Ports and Adapters) Structure

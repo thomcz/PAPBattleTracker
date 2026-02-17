@@ -24,6 +24,42 @@ Spring Boot + Kotlin backend with hexagonal architecture and JWT authentication.
 ./gradlew check                      # Run all verification tasks
 ```
 
+## Definition of Done: Tests Are Required
+
+**CRITICAL**: A feature is NOT considered complete without comprehensive tests.
+
+### Test Requirements for Feature Completion
+- ✅ **Unit tests** for all domain logic (use cases, aggregates, domain services)
+- ✅ **Integration tests** for all REST endpoints (`@WebMvcTest` or `@SpringBootTest`)
+- ✅ **Repository tests** for all database operations
+- ✅ **Service layer tests** with mocked dependencies
+- ✅ **Minimum 80% code coverage** for new features
+- ✅ All tests must pass: `./gradlew test`
+
+### Test File Organization
+- Test files mirror source structure in `src/test/kotlin/`
+- Use descriptive test names: `shouldAddCreatureWhenValidRequest()`
+- Group related tests in nested describe blocks
+
+### Test Categories
+1. **Unit Tests**: Test single classes in isolation (use MockK)
+2. **Integration Tests**: Test API endpoints with Spring context
+3. **Repository Tests**: Test JPA repositories with `@DataJpaTest`
+
+### Example Test Patterns
+See existing tests for patterns:
+- Domain tests: `domain/BattleTest.kt`
+- Service tests: `application/services/BattleServiceTest.kt`
+- Controller tests: `infrastructure/rest/BattleControllerTest.kt`
+- Repository tests: `infrastructure/persistence/JpaBattleRepositoryTest.kt`
+
+**When implementing a new feature:**
+1. Write tests alongside implementation (TDD approach recommended)
+2. Follow existing test patterns (JUnit 5 + MockK + Spring Test)
+3. Verify all tests pass with `./gradlew test`
+4. Check coverage with `./gradlew jacocoTestReport`
+5. Only mark feature as complete when all tests are green ✅
+
 ## Architecture
 
 ### Hexagonal (Ports and Adapters) Structure

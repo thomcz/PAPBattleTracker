@@ -1,0 +1,431 @@
+openapi: 3.0.3
+info:
+  title: PAPBattleTracker Creature Management API
+  description: REST API endpoints for managing creatures within battles
+  version: 1.0.0
+  contact:
+    name: PAPBattleTracker Team
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/battles/{battleId}/creatures:
+    post:
+      summary: Add creature to battle
+      description: Creates a new creature (player or monster) and adds it to the specified battle
+      operationId: addCreature
+      tags:
+        - Creatures
+      parameters:
+        - $ref: '#/components/parameters/BattleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreatureRequest'
+            examples:
+              player:
+                summary: Add player character
+                value:
+                  name: "Fighter"
+                  type: "PLAYER"
+                  currentHp: 30
+                  maxHp: 30
+                  initiative: 18
+                  armorClass: 18
+              monster:
+                summary: Add monster
+                value:
+                  name: "Goblin"
+                  type: "MONSTER"
+                  currentHp: 7
+                  maxHp: 7
+                  initiative: 14
+                  armorClass: 15
+      responses:
+        '201':
+          description: Creature created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                name: "Goblin"
+                type: "MONSTER"
+                currentHp: 7
+                maxHp: 7
+                initiative: 14
+                armorClass: 15
+                statusEffects: []
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/BattleNotFound'
+        '409':
+          $ref: '#/components/responses/InvalidBattleState'
+
+  /api/battles/{battleId}/creatures/{creatureId}:
+    put:
+      summary: Update creature attributes
+      description: Modifies an existing creature's attributes (name, HP, initiative, AC, type)
+      operationId: updateCreature
+      tags:
+        - Creatures
+      parameters:
+        - $ref: '#/components/parameters/BattleId'
+        - $ref: '#/components/parameters/CreatureId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreatureRequest'
+            examples:
+              updateHp:
+                summary: Update HP after damage
+                value:
+                  currentHp: 3
+              updateInitiative:
+                summary: Update initiative mid-combat
+                value:
+                  initiative: 20
+              fullUpdate:
+                summary: Update all attributes
+                value:
+                  name: "Goblin Chief"
+                  type: "MONSTER"
+                  currentHp: 15
+                  maxHp: 20
+                  initiative: 16
+                  armorClass: 17
+      responses:
+        '200':
+          description: Creature updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CreatureNotFound'
+        '409':
+          $ref: '#/components/responses/InvalidBattleState'
+
+    delete:
+      summary: Remove creature from battle
+      description: Removes a creature from the battle roster
+      operationId: removeCreature
+      tags:
+        - Creatures
+      parameters:
+        - $ref: '#/components/parameters/BattleId'
+        - $ref: '#/components/parameters/CreatureId'
+      responses:
+        '204':
+          description: Creature removed successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/CreatureNotFound'
+        '409':
+          $ref: '#/components/responses/InvalidBattleState'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/login
+
+  parameters:
+    BattleId:
+      name: battleId
+      in: path
+      required: true
+      description: UUID of the battle
+      schema:
+        type: string
+        format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+    CreatureId:
+      name: creatureId
+      in: path
+      required: true
+      description: UUID of the creature
+      schema:
+        type: string
+        format: uuid
+      example: "123e4567-e89b-12d3-a456-426614174000"
+
+  schemas:
+    CreateCreatureRequest:
+      type: object
+      required:
+        - name
+        - type
+        - currentHp
+        - maxHp
+        - initiative
+        - armorClass
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Display name of the creature
+          example: "Goblin Chief"
+        type:
+          $ref: '#/components/schemas/CreatureType'
+        currentHp:
+          type: integer
+          minimum: 0
+          description: Current hit points
+          example: 15
+        maxHp:
+          type: integer
+          minimum: 1
+          description: Maximum hit points
+          example: 20
+        initiative:
+          type: integer
+          description: Initiative score for turn order (can be negative)
+          example: 14
+        armorClass:
+          type: integer
+          minimum: 0
+          description: Armor class for defense
+          example: 15
+
+    UpdateCreatureRequest:
+      type: object
+      description: Partial update - only provided fields will be updated
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Display name of the creature
+          example: "Goblin Chief"
+        type:
+          $ref: '#/components/schemas/CreatureType'
+        currentHp:
+          type: integer
+          minimum: 0
+          description: Current hit points
+          example: 10
+        maxHp:
+          type: integer
+          minimum: 1
+          description: Maximum hit points
+          example: 20
+        initiative:
+          type: integer
+          description: Initiative score for turn order
+          example: 16
+        armorClass:
+          type: integer
+          minimum: 0
+          description: Armor class for defense
+          example: 17
+
+    CreatureResponse:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - currentHp
+        - maxHp
+        - initiative
+        - armorClass
+        - statusEffects
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this creature
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Display name of the creature
+          example: "Goblin Chief"
+        type:
+          $ref: '#/components/schemas/CreatureType'
+        currentHp:
+          type: integer
+          minimum: 0
+          description: Current hit points
+          example: 15
+        maxHp:
+          type: integer
+          minimum: 1
+          description: Maximum hit points
+          example: 20
+        initiative:
+          type: integer
+          description: Initiative score for turn order
+          example: 14
+        armorClass:
+          type: integer
+          minimum: 0
+          description: Armor class for defense
+          example: 15
+        statusEffects:
+          type: array
+          items:
+            type: string
+          description: Active status effects (e.g., poisoned, blessed)
+          example: ["poisoned", "prone"]
+
+    CreatureType:
+      type: string
+      enum:
+        - PLAYER
+        - MONSTER
+      description: |
+        Type of creature in battle:
+        - PLAYER: Player character, persists through combat end
+        - MONSTER: Enemy creature, removed automatically when combat ends
+      example: "MONSTER"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+      properties:
+        error:
+          type: string
+          description: HTTP error name
+          example: "Bad Request"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Creature name cannot be blank"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+          example: "2026-02-16T10:30:00Z"
+        path:
+          type: string
+          description: Request path that caused the error
+          example: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"
+        details:
+          type: array
+          items:
+            type: string
+          description: Additional validation error details
+          example:
+            - "currentHp: must be greater than or equal to 0"
+            - "maxHp: must be greater than 0"
+
+  responses:
+    BadRequest:
+      description: Invalid request (validation errors)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            validation:
+              summary: Validation failure
+              value:
+                error: "Bad Request"
+                message: "Validation failed"
+                timestamp: "2026-02-16T10:30:00Z"
+                path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"
+                details:
+                  - "name: must not be blank"
+                  - "maxHp: must be greater than 0"
+            invalidHp:
+              summary: Current HP exceeds max HP
+              value:
+                error: "Bad Request"
+                message: "Current HP (50) cannot exceed max HP (30)"
+                timestamp: "2026-02-16T10:30:00Z"
+                path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Unauthorized"
+            message: "JWT token is missing or invalid"
+            timestamp: "2026-02-16T10:30:00Z"
+            path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"
+
+    Forbidden:
+      description: User does not own this battle
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Forbidden"
+            message: "You do not have permission to modify this battle"
+            timestamp: "2026-02-16T10:30:00Z"
+            path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"
+
+    BattleNotFound:
+      description: Battle with specified ID not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Not Found"
+            message: "Battle not found: 550e8400-e29b-41d4-a716-446655440000"
+            timestamp: "2026-02-16T10:30:00Z"
+            path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"
+
+    CreatureNotFound:
+      description: Creature with specified ID not found in this battle
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Not Found"
+            message: "Creature not found: 123e4567-e89b-12d3-a456-426614174000"
+            timestamp: "2026-02-16T10:30:00Z"
+            path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures/123e4567-e89b-12d3-a456-426614174000"
+
+    InvalidBattleState:
+      description: Operation not allowed in current battle state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            combatEnded:
+              summary: Cannot modify creatures after combat ends
+              value:
+                error: "Conflict"
+                message: "Cannot add creatures to ended battle"
+                timestamp: "2026-02-16T10:30:00Z"
+                path: "/api/battles/550e8400-e29b-41d4-a716-446655440000/creatures"

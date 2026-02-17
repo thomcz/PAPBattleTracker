@@ -1,0 +1,130 @@
+.creature-list-container {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.creatures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.creature-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.creature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.creature-type {
+  display: inline-block;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background-color: #f44336;
+  color: white;
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+.creature-type.type-player {
+  background-color: #4caf50;
+}
+
+.hp-bar-container {
+  margin-bottom: 16px;
+}
+
+.hp-bar {
+  height: 24px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.hp-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.hp-healthy {
+  background-color: #4caf50;
+}
+
+.hp-wounded {
+  background-color: #ff9800;
+}
+
+.hp-critical {
+  background-color: #f44336;
+}
+
+.hp-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.effects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.effect-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #2196f3;
+  color: white;
+}

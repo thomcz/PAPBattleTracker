@@ -1,9 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
 import { Battle, CombatStatus } from '../../../../core/domain/models/battle.model';
 import { CombatControlsComponent } from '../../components/combat-controls/combat-controls.component';
+import { CreatureListComponent } from '../../components/creature-list/creature-list.component';
+import { AddCreatureUseCase } from '../../../../core/domain/use-cases/add-creature.use-case';
 
 /**
  * Battle Detail Component
@@ -16,7 +19,7 @@ import { CombatControlsComponent } from '../../components/combat-controls/combat
 @Component({
   selector: 'app-battle-detail',
   standalone: true,
-  imports: [CommonModule, CombatControlsComponent],
+  imports: [CommonModule, CombatControlsComponent, CreatureListComponent, MatSnackBarModule],
   templateUrl: './battle-detail.component.html',
   styleUrls: ['./battle-detail.component.css']
 })
@@ -32,7 +35,9 @@ export class BattleDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private battleApi: BattleApiAdapter
+    private battleApi: BattleApiAdapter,
+    private addCreatureUseCase: AddCreatureUseCase,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -97,5 +102,76 @@ export class BattleDetailComponent implements OnInit {
       default:
         return status;
     }
+  }
+
+  // Creature management methods (User Stories 1-3)
+  onAddCreature(data: any): void {
+    const currentBattle = this.battle();
+    if (!currentBattle) return;
+
+    this.addCreatureUseCase.execute(currentBattle.id, data).subscribe({
+      next: (newCreature) => {
+        // Update battle signal with new creature added to array
+        const updatedBattle = {
+          ...currentBattle,
+          creatures: [...currentBattle.creatures, newCreature]
+        };
+        this.battle.set(updatedBattle);
+        this.snackBar.open('Creature added successfully', 'Close', { duration: 3000 });
+      },
+      error: () => {
+        this.snackBar.open('Failed to add creature', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  onUpdateCreature(event: { creatureId: string; data: any }): void {
+    const currentBattle = this.battle();
+    if (!currentBattle) return;
+
+    this.battleApi.updateCreature(
+      currentBattle.id,
+      event.creatureId,
+      event.data.name,
+      event.data.currentHp,
+      event.data.maxHp,
+      event.data.initiative,
+      event.data.armorClass
+    ).subscribe({
+      next: (updatedCreature) => {
+        // Update battle signal with modified creature
+        const updatedBattle = {
+          ...currentBattle,
+          creatures: currentBattle.creatures.map(c =>
+            c.id === event.creatureId ? updatedCreature : c
+          )
+        };
+        this.battle.set(updatedBattle);
+        this.snackBar.open('Creature updated successfully', 'Close', { duration: 3000 });
+      },
+      error: () => {
+        this.snackBar.open('Failed to update creature', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  onRemoveCreature(creatureId: string): void {
+    const currentBattle = this.battle();
+    if (!currentBattle) return;
+
+    this.battleApi.removeCreature(currentBattle.id, creatureId).subscribe({
+      next: () => {
+        // Update battle signal with creature removed from array
+        const updatedBattle = {
+          ...currentBattle,
+          creatures: currentBattle.creatures.filter(c => c.id !== creatureId)
+        };
+        this.battle.set(updatedBattle);
+        this.snackBar.open('Creature removed successfully', 'Close', { duration: 3000 });
+      },
+      error: () => {
+        this.snackBar.open('Failed to remove creature', 'Close', { duration: 3000 });
+      }
+    });
   }
 }

@@ -41,6 +41,9 @@ class Battle private constructor() {
     var round: Int = 0
         private set
 
+    // Creature state
+    private val creatures: MutableList<Creature> = mutableListOf()
+
     // === Event Sourcing Infrastructure ===
     private val uncommittedEvents: MutableList<BattleEvent> = mutableListOf()
 
@@ -111,23 +114,26 @@ class Battle private constructor() {
      *
      * @throws IllegalStateException if preconditions not met
      */
-    fun startCombat(userId: UUID) {
+    fun startCombat(userId: UUID): Battle {
         require(status == CombatStatus.NOT_STARTED) {
             "Cannot start combat: battle is in $status status"
         }
 
-        // TODO: Validate at least one creature exists (User Story 2)
-        // For now, allow starting without creatures for testing
+        // Sort creatures by initiative (descending - highest first)
+        // Use sortedByDescending which provides a stable sort (preserves original order for ties)
+        val sortedCreatures = creatures.sortedByDescending { it.initiative }
+        val initiativeOrder = sortedCreatures.map { it.id }
 
         val event = CombatStarted(
             battleId = battleId,
             eventId = UUID.randomUUID(),
             timestamp = Instant.now(),
             userId = userId,
-            initiativeOrder = emptyList() // TODO: Sort creatures by initiative (User Story 2)
+            initiativeOrder = initiativeOrder
         )
 
         applyEvent(event)
+        return this
     }
 
     /**
@@ -138,7 +144,7 @@ class Battle private constructor() {
      *
      * @throws IllegalStateException if preconditions not met
      */
-    fun pauseCombat(userId: UUID) {
+    fun pauseCombat(userId: UUID): Battle {
         require(status == CombatStatus.ACTIVE) {
             "Cannot pause combat: battle is in $status status"
         }
@@ -151,6 +157,7 @@ class Battle private constructor() {
         )
 
         applyEvent(event)
+        return this
     }
 
     /**
@@ -161,7 +168,7 @@ class Battle private constructor() {
      *
      * @throws IllegalStateException if preconditions not met
      */
-    fun resumeCombat(userId: UUID) {
+    fun resumeCombat(userId: UUID): Battle {
         require(status == CombatStatus.PAUSED) {
             "Cannot resume combat: battle is in $status status"
         }
@@ -174,6 +181,7 @@ class Battle private constructor() {
         )
 
         applyEvent(event)
+        return this
     }
 
     /**
@@ -189,20 +197,174 @@ class Battle private constructor() {
      *
      * @throws IllegalStateException if preconditions not met
      */
-    fun endCombat(userId: UUID, outcome: CombatOutcome) {
+    fun endCombat(userId: UUID, outcome: CombatOutcome): Battle {
         require(status == CombatStatus.ACTIVE || status == CombatStatus.PAUSED) {
             "Cannot end combat: battle is in $status status"
         }
+
+        // Collect IDs of all MONSTER creatures for auto-removal (User Story 5)
+        val monsterIds = creatures
+            .filter { it.type == CreatureType.MONSTER }
+            .map { it.id }
 
         val event = CombatEnded(
             battleId = battleId,
             eventId = UUID.randomUUID(),
             timestamp = Instant.now(),
             userId = userId,
-            outcome = outcome
+            outcome = outcome,
+            removedMonsterIds = monsterIds
         )
 
         applyEvent(event)
+        return this
+    }
+
+    // === Creature Management Methods ===
+
+    /**
+     * Add a creature to the battle.
+     *
+     * Business rules:
+     * - Cannot add creatures to ended battles
+     * - Creature attributes must be valid (validated by Creature value object)
+     *
+     * @throws IllegalStateException if battle has ended
+     * @throws IllegalArgumentException if creature attributes invalid
+     */
+    fun addCreature(
+        userId: UUID,
+        name: String,
+        type: CreatureType,
+        currentHp: Int,
+        maxHp: Int,
+        initiative: Int,
+        armorClass: Int
+    ): Battle {
+        check(status != CombatStatus.ENDED) {
+            "Cannot add creatures to ended battle"
+        }
+
+        // Validate creature by attempting to create it (will throw if invalid)
+        val creature = Creature(
+            id = UUID.randomUUID(),
+            name = name,
+            type = type,
+            currentHp = currentHp,
+            maxHp = maxHp,
+            initiative = initiative,
+            armorClass = armorClass
+        )
+
+        val event = CreatureAdded(
+            battleId = battleId,
+            eventId = UUID.randomUUID(),
+            timestamp = Instant.now(),
+            userId = userId,
+            creatureId = creature.id,
+            name = creature.name,
+            type = creature.type,
+            currentHp = creature.currentHp,
+            maxHp = creature.maxHp,
+            initiative = creature.initiative,
+            armorClass = creature.armorClass
+        )
+
+        applyEvent(event)
+        return this
+    }
+
+    /**
+     * Get all creatures in this battle.
+     */
+    fun getCreatures(): List<Creature> = creatures.toList()
+
+    /**
+     * Find a creature by ID.
+     * @return Creature if found, null otherwise
+     */
+    fun getCreature(creatureId: UUID): Creature? {
+        return creatures.find { it.id == creatureId }
+    }
+
+    /**
+     * Update a creature's attributes.
+     *
+     * Business rules:
+     * - Creature must exist in this battle
+     * - New attributes must be valid (validated by Creature value object)
+     * - Can be called before or during combat
+     *
+     * @throws IllegalArgumentException if creature not found or attributes invalid
+     */
+    fun updateCreature(
+        userId: UUID,
+        creatureId: UUID,
+        name: String,
+        currentHp: Int,
+        maxHp: Int,
+        initiative: Int,
+        armorClass: Int
+    ): Battle {
+        // Find existing creature
+        val existingCreature = creatures.find { it.id == creatureId }
+            ?: throw IllegalArgumentException("Creature not found: $creatureId")
+
+        // Validate new attributes by creating a new Creature (will throw if invalid)
+        val updatedCreature = Creature(
+            id = creatureId,
+            name = name,
+            type = existingCreature.type, // Type cannot be changed
+            currentHp = currentHp,
+            maxHp = maxHp,
+            initiative = initiative,
+            armorClass = armorClass
+        )
+
+        // Emit event
+        val event = CreatureUpdated(
+            battleId = battleId,
+            eventId = UUID.randomUUID(),
+            timestamp = Instant.now(),
+            userId = userId,
+            creatureId = creatureId,
+            name = name,
+            type = existingCreature.type,
+            currentHp = currentHp,
+            maxHp = maxHp,
+            initiative = initiative,
+            armorClass = armorClass
+        )
+
+        applyEvent(event)
+        return this
+    }
+
+    /**
+     * Remove a creature from the battle.
+     *
+     * Business rules:
+     * - Creature must exist in this battle
+     * - Can be called before or during combat
+     *
+     * @throws IllegalArgumentException if creature not found
+     */
+    fun removeCreature(userId: UUID, creatureId: UUID): Battle {
+        // Find existing creature
+        val existingCreature = creatures.find { it.id == creatureId }
+            ?: throw IllegalArgumentException("Creature not found: $creatureId")
+
+        // Emit event
+        val event = CreatureRemoved(
+            battleId = battleId,
+            eventId = UUID.randomUUID(),
+            timestamp = Instant.now(),
+            userId = userId,
+            creatureId = creatureId
+        )
+
+        applyEvent(event)
+        return this
     }
 
     // === Event Application Logic ===
@@ -233,7 +395,15 @@ class Battle private constructor() {
                 status = CombatStatus.ACTIVE
                 round = 1
                 currentTurn = 0
-                // TODO: Sort creatures by initiative (User Story 2)
+
+                // Reorder creatures by initiative order from event
+                if (event.initiativeOrder.isNotEmpty()) {
+                    val orderedCreatures = event.initiativeOrder.mapNotNull { id ->
+                        creatures.find { it.id == id }
+                    }
+                    creatures.clear()
+                    creatures.addAll(orderedCreatures)
+                }
             }
 
             is CombatPaused -> {
@@ -248,14 +418,51 @@ class Battle private constructor() {
 
             is CombatEnded -> {
                 status = CombatStatus.ENDED
-                // TODO: Remove MONSTER creatures (User Story 2)
+                // Remove monsters specified in event
+                if (event.removedMonsterIds.isNotEmpty()) {
+                    creatures.removeIf { it.id in event.removedMonsterIds }
+                }
                 // TODO: Clear status effects (User Story 7)
                 // TODO: Clear combat log (User Story 5)
             }
 
+            is CreatureAdded -> {
+                val creature = Creature(
+                    id = event.creatureId,
+                    name = event.name,
+                    type = event.type,
+                    currentHp = event.currentHp,
+                    maxHp = event.maxHp,
+                    initiative = event.initiative,
+                    armorClass = event.armorClass
+                )
+                creatures.add(creature)
+            }
+
+            is CreatureUpdated -> {
+                // Find the index of the creature to update
+                val index = creatures.indexOfFirst { it.id == event.creatureId }
+                if (index != -1) {
+                    // Create updated creature and replace in list
+                    val updatedCreature = Creature(
+                        id = event.creatureId,
+                        name = event.name,
+                        type = event.type,
+                        currentHp = event.currentHp,
+                        maxHp = event.maxHp,
+                        initiative = event.initiative,
+                        armorClass = event.armorClass
+                    )
+                    creatures[index] = updatedCreature
+                }
+            }
+
+            is CreatureRemoved -> {
+                creatures.removeIf { it.id == event.creatureId }
+            }
+
             else -> {
-                // Future events from User Story 2+ will be handled here
-                // For now, ignore unknown events gracefully
+                // Unknown event type - ignore gracefully for forward compatibility
             }
         }
 
