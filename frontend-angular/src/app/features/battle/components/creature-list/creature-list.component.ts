@@ -59,8 +59,8 @@ export class CreatureListComponent {
           id: creature.id,
           name: creature.name,
           type: creature.type,
-          currentHp: creature.currentHP,
-          maxHp: creature.maxHP,
+          currentHp: creature.currentHp,
+          maxHp: creature.maxHp,
           initiative: creature.initiative,
           armorClass: creature.armorClass
         }
@@ -84,7 +84,7 @@ export class CreatureListComponent {
   }
 
   getHpPercentage(creature: Creature): number {
-    return (creature.currentHP / creature.maxHP) * 100;
+    return (creature.currentHp / creature.maxHp) * 100;
   }
 
   getHpClass(percentage: number): string {

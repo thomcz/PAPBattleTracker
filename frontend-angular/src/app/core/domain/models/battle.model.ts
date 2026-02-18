@@ -34,8 +34,8 @@ export interface Creature {
   id: string;
   name: string;
   type: CreatureType;
-  currentHP: number;
-  maxHP: number;
+  currentHp: number;
+  maxHp: number;
   initiative: number;
   armorClass: number;
   isDefeated: boolean;
