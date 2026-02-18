@@ -56,34 +56,14 @@
       (battleUpdated)="onBattleUpdated($event)">
     </app-combat-controls>
 
-    <!-- Creatures Section (Story 2 - Not Yet Implemented) -->
-    <div class="creatures-section">
-      <h2>Creatures</h2>
-      @if (battle()!.creatures.length === 0) {
-        <div class="empty-state">
-          <p>No creatures added yet.</p>
-          @if (battle()!.status === CombatStatus.NOT_STARTED) {
-            <p class="hint">Add creatures to start combat (Story 2 feature - coming soon)</p>
-          }
-        </div>
-      } @else {
-        <div class="creatures-list">
-          @for (creature of battle()!.creatures; track creature.id) {
-            <div class="creature-card">
-              <div class="creature-name">{{ creature.name }}</div>
-              <div class="creature-stats">
-                <span>HP: {{ creature.currentHP }}/{{ creature.maxHP }}</span>
-                <span>Initiative: {{ creature.initiative }}</span>
-                <span>AC: {{ creature.armorClass }}</span>
-              </div>
-              @if (creature.isDefeated) {
-                <span class="defeated-badge">Defeated</span>
-              }
-            </div>
-          }
-        </div>
-      }
-    </div>
+    <!-- Creatures Section - Now Implemented! -->
+    <app-creature-list
+      [creatures]="battle()!.creatures"
+      [battleId]="battle()!.id"
+      (addCreature)="onAddCreature($event)"
+      (updateCreature)="onUpdateCreature($event)"
+      (removeCreature)="onRemoveCreature($event)">
+    </app-creature-list>
 
     <!-- Combat Log Section (Story 5 - Not Yet Implemented) -->
     @if (battle()!.combatLog.length > 0) {

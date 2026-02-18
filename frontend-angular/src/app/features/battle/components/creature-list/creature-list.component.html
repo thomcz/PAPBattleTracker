@@ -1,0 +1,75 @@
+<div class="creature-list-container">
+  <div class="header">
+    <h3>Creatures ({{ creatures.length }})</h3>
+    <button mat-raised-button color="primary" (click)="onAddCreature()">
+      <mat-icon>add</mat-icon>
+      Add Creature
+    </button>
+  </div>
+
+  @if (creatures.length === 0) {
+    <div class="empty-state">
+      <mat-icon>sentiment_neutral</mat-icon>
+      <p>No creatures yet. Add one to get started!</p>
+    </div>
+  } @else {
+    <div class="creatures-grid">
+      @for (creature of creatures; track creature.id) {
+        <mat-card class="creature-card">
+          <mat-card-header>
+            <mat-card-title>
+              {{ creature.name }}
+              <span class="creature-type" [class.type-player]="creature.type === CreatureType.PLAYER">
+                {{ creature.type }}
+              </span>
+              @if (creature.isDefeated) {
+                <span class="defeated-badge">DEFEATED</span>
+              }
+            </mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="hp-bar-container">
+              <div class="hp-bar">
+                <div
+                  class="hp-fill"
+                  [class]="getHpClass(getHpPercentage(creature))"
+                  [style.width.%]="getHpPercentage(creature)">
+                </div>
+              </div>
+              <span class="hp-text">{{ creature.currentHp }} / {{ creature.maxHp }} HP</span>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <span class="stat-label">Initiative:</span>
+                <span class="stat-value">{{ creature.initiative }}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">AC:</span>
+                <span class="stat-value">{{ creature.armorClass }}</span>
+              </div>
+            </div>
+
+            @if (creature.effects && creature.effects.length > 0) {
+              <div class="effects">
+                @for (effect of creature.effects; track effect) {
+                  <span class="effect-badge">{{ effect }}</span>
+                }
+              </div>
+            }
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button mat-icon-button (click)="onEditCreature(creature)" matTooltip="Edit" aria-label="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="onRemoveCreature(creature.id)" matTooltip="Remove" aria-label="Remove">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

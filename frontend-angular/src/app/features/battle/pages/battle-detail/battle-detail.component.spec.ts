@@ -6,6 +6,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { BattleDetailComponent } from './battle-detail.component';
 import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
 import { Battle, CombatStatus, CreatureType } from '../../../../core/domain/models/battle.model';
+import { BattlePort } from '../../../../core/ports/battle.port';
+import { AddCreatureUseCase } from '../../../../core/domain/use-cases/add-creature.use-case';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 describe('BattleDetailComponent', () => {
   const mockBattle: Battle = {
@@ -17,8 +20,8 @@ describe('BattleDetailComponent', () => {
         id: 'creature-1',
         name: 'Ancient Red Dragon',
         type: CreatureType.MONSTER,
-        currentHP: 100,
-        maxHP: 100,
+        currentHp: 100,
+        maxHp: 100,
         initiative: 15,
         armorClass: 22,
         isDefeated: false,
@@ -28,8 +31,8 @@ describe('BattleDetailComponent', () => {
         id: 'creature-2',
         name: 'Brave Warrior',
         type: CreatureType.PLAYER,
-        currentHP: 45,
-        maxHP: 50,
+        currentHp: 45,
+        maxHp: 50,
         initiative: 12,
         armorClass: 18,
         isDefeated: false,
@@ -51,7 +54,10 @@ describe('BattleDetailComponent', () => {
     pauseCombat: vi.fn(),
     resumeCombat: vi.fn(),
     endCombat: vi.fn(),
-    deleteBattle: vi.fn()
+    deleteBattle: vi.fn(),
+    addCreature: vi.fn(),
+    updateCreature: vi.fn(),
+    removeCreature: vi.fn()
   };
 
   const mockRouter = {
@@ -66,6 +72,10 @@ describe('BattleDetailComponent', () => {
     }
   };
 
+  const mockSnackBar = {
+    open: vi.fn()
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockActivatedRoute.snapshot.paramMap.get.mockReturnValue('battle-123');
@@ -77,8 +87,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -91,8 +104,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -105,8 +121,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -121,8 +140,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -138,8 +160,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -155,16 +180,19 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
     await waitFor(() => {
       expect(screen.getByText('Ancient Red Dragon')).toBeTruthy();
       expect(screen.getByText('Brave Warrior')).toBeTruthy();
-      expect(screen.getByText(/HP: 100\/100/)).toBeTruthy();
-      expect(screen.getByText(/HP: 45\/50/)).toBeTruthy();
+      expect(screen.getByText('100 / 100 HP')).toBeTruthy();
+      expect(screen.getByText('45 / 50 HP')).toBeTruthy();
     });
   });
 
@@ -178,13 +206,16 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/no creatures added yet/i)).toBeTruthy();
+      expect(screen.getByText(/no creatures yet/i)).toBeTruthy();
     });
   });
 
@@ -199,8 +230,11 @@ describe('BattleDetailComponent', () => {
     const { fixture } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -235,8 +269,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -255,8 +292,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -272,8 +312,11 @@ describe('BattleDetailComponent', () => {
     const { fixture } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -291,8 +334,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -311,8 +357,11 @@ describe('BattleDetailComponent', () => {
     await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -332,8 +381,11 @@ describe('BattleDetailComponent', () => {
     const { fixture } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -361,8 +413,11 @@ describe('BattleDetailComponent', () => {
     const { fixture } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -380,8 +435,11 @@ describe('BattleDetailComponent', () => {
     const { fixture } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 
@@ -401,8 +459,8 @@ describe('BattleDetailComponent', () => {
           id: 'creature-1',
           name: 'Defeated Goblin',
           type: CreatureType.MONSTER,
-          currentHP: 0,
-          maxHP: 30,
+          currentHp: 0,
+          maxHp: 30,
           initiative: 10,
           armorClass: 15,
           isDefeated: true,
@@ -415,8 +473,11 @@ describe('BattleDetailComponent', () => {
     const { fixture, container } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
+        { provide: BattlePort, useValue: mockBattleApiAdapter },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MatSnackBar, useValue: mockSnackBar },
+        AddCreatureUseCase
       ]
     });
 

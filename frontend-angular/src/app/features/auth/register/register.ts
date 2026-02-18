@@ -4,11 +4,12 @@ import {AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators
 import {RegisterRequest} from '../../../core/domain/models/auth-request.model';
 import {RegisterUseCase} from '../../../core/domain/use-cases/register.use-case';
 import {NavigationPort} from '../../../core/ports/navigation.port';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.scss',
 })

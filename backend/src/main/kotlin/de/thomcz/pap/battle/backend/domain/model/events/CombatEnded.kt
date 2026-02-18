@@ -21,7 +21,8 @@ data class CombatEnded(
     override val eventId: UUID,
     override val timestamp: Instant,
     override val userId: UUID,
-    val outcome: CombatOutcome
+    val outcome: CombatOutcome,
+    val removedMonsterIds: List<UUID> = emptyList()
 ) : BattleEvent
 
 /**

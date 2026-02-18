@@ -7,8 +7,8 @@ export interface Creature {
   id: string;
   name: string;
   type: CreatureType;
-  currentHP: number;
-  maxHP: number;
+  currentHp: number;
+  maxHp: number;
   initiative: number;
   armorClass: number;
   isDefeated: boolean;
@@ -31,8 +31,8 @@ export enum CreatureType {
 export interface AddCreatureRequest {
   name: string;
   type: CreatureType;
-  maxHP: number;
-  currentHP: number;
+  maxHp: number;
+  currentHp: number;
   initiative: number;
   armorClass: number;
 }

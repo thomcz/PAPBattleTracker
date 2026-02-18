@@ -51,6 +51,30 @@ For detailed architecture guidance:
 - Angular: See `frontend-angular/CLAUDE.md`
 - Next.js: See `frontend-next-js/CLAUDE.md`
 
+## Definition of Done: Feature Completion Requires Tests
+
+**CRITICAL**: A feature is NOT considered complete without comprehensive tests for both backend and frontend.
+
+### Backend Test Requirements
+- ✅ **Unit tests** for all domain logic (use cases, aggregates, value objects)
+- ✅ **Integration tests** for API endpoints (controllers)
+- ✅ **Repository tests** if using database
+- ✅ **Minimum 80% code coverage** for new features
+- ✅ All tests must pass before merging
+
+### Frontend Test Requirements
+- ✅ **Unit tests** for all use cases and services
+- ✅ **Component tests** for all UI components (using @testing-library/angular)
+- ✅ **Integration tests** for key user flows
+- ✅ **Minimum 80% code coverage** for new features
+- ✅ All tests must pass before merging
+
+**When implementing a new feature:**
+1. Write tests alongside implementation (TDD approach recommended)
+2. Verify all tests pass: `npm test` (frontend) or `./gradlew test` (backend)
+3. Check coverage meets minimum threshold
+4. Only mark feature as complete when all tests are green ✅
+
 ## Technology Stack
 
 ### Backend (Kotlin)
@@ -241,6 +265,8 @@ Both backends implement identical APIs with the same hexagonal architecture:
 
 ## Active Technologies
 - H2 in-memory database (development), event sourcing with JSON event store (001-battle-tracker-features)
+- Kotlin 1.9.25 (JVM 25), TypeScript (Angular 21.0.2) + Spring Boot 3.5.7, Spring Data JPA, Jackson (Kotlin backend); Angular 21, RxJS, Angular Signals (frontend) (002-creature-management)
+- H2 in-memory database with event sourcing (events stored as JSON) (002-creature-management)
 
 ## Recent Changes
 - 001-battle-tracker-features: Added H2 in-memory database (development), event sourcing with JSON event store
