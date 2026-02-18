@@ -22,6 +22,9 @@
               <span class="creature-type" [class.type-player]="creature.type === CreatureType.PLAYER">
                 {{ creature.type }}
               </span>
+              @if (creature.isDefeated) {
+                <span class="defeated-badge">DEFEATED</span>
+              }
             </mat-card-title>
           </mat-card-header>
 
@@ -58,10 +61,10 @@
           </mat-card-content>
 
           <mat-card-actions align="end">
-            <button mat-icon-button (click)="onEditCreature(creature)" matTooltip="Edit">
+            <button mat-icon-button (click)="onEditCreature(creature)" matTooltip="Edit" aria-label="Edit">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" (click)="onRemoveCreature(creature.id)" matTooltip="Remove">
+            <button mat-icon-button color="warn" (click)="onRemoveCreature(creature.id)" matTooltip="Remove" aria-label="Remove">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-card-actions>

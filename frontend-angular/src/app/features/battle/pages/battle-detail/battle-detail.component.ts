@@ -58,10 +58,9 @@ export class BattleDetailComponent implements OnInit {
         this.battle.set(battle);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.error.set('Failed to load battle details. Please try again.');
         this.loading.set(false);
-        console.error('Error loading battle:', err);
       }
     });
   }

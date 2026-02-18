@@ -48,10 +48,9 @@ export class BattleListComponent implements OnInit {
         this.battles.set(battles);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.error.set('Failed to load battles. Please try again.');
         this.loading.set(false);
-        console.error('Error loading battles:', err);
       }
     });
   }

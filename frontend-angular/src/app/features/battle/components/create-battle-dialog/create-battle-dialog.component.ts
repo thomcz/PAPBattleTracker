@@ -60,10 +60,9 @@ export class CreateBattleDialogComponent {
         this.battleCreated.emit(summary);
         this.battleForm.reset();
       },
-      error: (err) => {
+      error: () => {
         this.loading.set(false);
         this.error.set('Failed to create battle. Please try again.');
-        console.error('Error creating battle:', err);
       }
     });
   }

@@ -61,10 +61,9 @@ export class CombatControlsComponent {
         this.loading.set(false);
         this.battleUpdated.emit(updatedBattle);
       },
-      error: (err) => {
+      error: () => {
         this.loading.set(false);
         this.error.set('Failed to start combat. Please try again.');
-        console.error('Error starting combat:', err);
       }
     });
   }
@@ -80,10 +79,9 @@ export class CombatControlsComponent {
         this.loading.set(false);
         this.battleUpdated.emit(updatedBattle);
       },
-      error: (err) => {
+      error: () => {
         this.loading.set(false);
         this.error.set('Failed to pause combat. Please try again.');
-        console.error('Error pausing combat:', err);
       }
     });
   }
@@ -99,10 +97,9 @@ export class CombatControlsComponent {
         this.loading.set(false);
         this.battleUpdated.emit(updatedBattle);
       },
-      error: (err) => {
+      error: () => {
         this.loading.set(false);
         this.error.set('Failed to resume combat. Please try again.');
-        console.error('Error resuming combat:', err);
       }
     });
   }
@@ -125,10 +122,9 @@ export class CombatControlsComponent {
         this.showEndDialog.set(false);
         this.battleUpdated.emit(updatedBattle);
       },
-      error: (err) => {
+      error: () => {
         this.loading.set(false);
         this.error.set('Failed to end combat. Please try again.');
-        console.error('Error ending combat:', err);
       }
     });
   }
