@@ -34,7 +34,9 @@ describe('AddCreatureUseCase', () => {
       deleteBattle: vi.fn(),
       addCreature: vi.fn(),
       updateCreature: vi.fn(),
-      removeCreature: vi.fn()
+      removeCreature: vi.fn(),
+      applyDamage: vi.fn(),
+      getCombatLog: vi.fn()
     } as BattlePort;
 
     TestBed.configureTestingModule({

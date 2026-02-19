@@ -14,7 +14,6 @@ describe('CreateBattleDialogComponent', () => {
     creatures: [],
     currentTurn: 0,
     round: 0,
-    combatLog: [],
     createdAt: '2024-01-01T12:00:00Z',
     lastModified: '2024-01-01T12:00:00Z'
   };
@@ -27,7 +26,9 @@ describe('CreateBattleDialogComponent', () => {
     pauseCombat: vi.fn(),
     resumeCombat: vi.fn(),
     endCombat: vi.fn(),
-    deleteBattle: vi.fn()
+    deleteBattle: vi.fn(),
+    applyDamage: vi.fn(),
+    getCombatLog: vi.fn()
   };
 
   beforeEach(() => {

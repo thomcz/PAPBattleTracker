@@ -1,0 +1,32 @@
+<div class="combat-log-container">
+  <div class="log-header">
+    <h3>Combat Log ({{ total() }} entries)</h3>
+    <button class="btn-refresh" (click)="loadLog()" [disabled]="loading()" title="Refresh log">
+      &#8635;
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-indicator">Loading...</div>
+  }
+
+  @if (error()) {
+    <div class="error-message">{{ error() }}</div>
+  }
+
+  @if (entries().length === 0 && !loading()) {
+    <div class="empty-log">
+      <p>No combat events yet.</p>
+    </div>
+  } @else {
+    <div class="log-entries">
+      @for (entry of entries(); track $index) {
+        <div class="log-entry" [class]="getTypeClass(entry.type)">
+          <span class="log-type-badge">{{ entry.type }}</span>
+          <span class="log-message">{{ entry.message }}</span>
+          <span class="log-time">{{ entry.timestamp | date: 'shortTime' }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

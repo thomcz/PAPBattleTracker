@@ -15,7 +15,7 @@
   } @else {
     <div class="creatures-grid">
       @for (creature of creatures; track creature.id) {
-        <mat-card class="creature-card">
+        <mat-card class="creature-card" [class.creature-defeated]="creature.isDefeated">
           <mat-card-header>
             <mat-card-title>
               {{ creature.name }}

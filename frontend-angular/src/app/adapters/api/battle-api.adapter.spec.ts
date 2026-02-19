@@ -29,7 +29,6 @@ describe('BattleApiAdapter', () => {
     ],
     currentTurn: 0,
     round: 0,
-    combatLog: [],
     createdAt: '2024-01-01T10:00:00Z',
     lastModified: '2024-01-01T11:00:00Z'
   };
@@ -217,7 +216,7 @@ describe('BattleApiAdapter', () => {
 
       adapter.advanceTurn('battle-123').subscribe((result) => {
         expect(httpClient.post).toHaveBeenCalledWith(
-          'http://localhost:8080/api/battles/battle-123/next-turn',
+          'http://localhost:8080/api/battles/battle-123/turn',
           {}
         );
         expect(result.currentTurn).toBe(1);

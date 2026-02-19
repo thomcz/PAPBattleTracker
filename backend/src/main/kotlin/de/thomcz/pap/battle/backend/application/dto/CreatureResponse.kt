@@ -16,12 +16,10 @@ data class CreatureResponse(
     val maxHp: Int,
     val initiative: Int,
     val armorClass: Int,
-    val statusEffects: List<String> = emptyList() // User Story 7 - not yet implemented
+    val isDefeated: Boolean,
+    val statusEffects: List<String> = emptyList()
 ) {
     companion object {
-        /**
-         * Factory method to create CreatureResponse from Creature domain object.
-         */
         fun fromCreature(creature: Creature): CreatureResponse {
             return CreatureResponse(
                 id = creature.id,
@@ -31,7 +29,8 @@ data class CreatureResponse(
                 maxHp = creature.maxHp,
                 initiative = creature.initiative,
                 armorClass = creature.armorClass,
-                statusEffects = emptyList() // TODO: User Story 7 - status effects
+                isDefeated = creature.isDefeated(),
+                statusEffects = creature.statusEffects
             )
         }
     }

@@ -4,6 +4,7 @@ import de.thomcz.pap.battle.backend.application.dto.CreateCreatureRequest
 import de.thomcz.pap.battle.backend.domain.model.Battle
 import de.thomcz.pap.battle.backend.domain.model.CreatureType
 import de.thomcz.pap.battle.backend.domain.port.out.BattleRepository
+import de.thomcz.pap.battle.backend.domain.port.out.EventStore
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -26,6 +27,9 @@ class BattleServiceCreatureTest {
 
     @Mock
     private lateinit var battleRepository: BattleRepository
+
+    @Mock
+    private lateinit var eventStore: EventStore
 
     @InjectMocks
     private lateinit var battleService: BattleService

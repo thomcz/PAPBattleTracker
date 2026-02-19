@@ -13,23 +13,31 @@ data class BattleDetailResponse(
     val id: UUID,
     val name: String,
     val status: CombatStatus,
-    val creatures: List<Any>, // TODO: CreatureResponse from User Story 2
+    val creatures: List<CreatureResponse>,
     val currentTurn: Int,
     val round: Int,
-    val combatLog: List<Any>, // TODO: LogEntryResponse from User Story 5
+    val currentActor: CreatureResponse?,
     val createdAt: Instant,
     val lastModified: Instant
 ) {
     companion object {
         fun from(battle: Battle): BattleDetailResponse {
+            val creatureResponses = battle.getCreatures().map { CreatureResponse.fromCreature(it) }
+            val currentActor = if (battle.status == CombatStatus.ACTIVE && battle.getCreatures().isNotEmpty()) {
+                val creatures = battle.getCreatures()
+                if (battle.currentTurn < creatures.size) {
+                    CreatureResponse.fromCreature(creatures[battle.currentTurn])
+                } else null
+            } else null
+
             return BattleDetailResponse(
                 id = battle.battleId,
                 name = battle.name,
                 status = battle.status,
-                creatures = emptyList(), // TODO: Map creatures (User Story 2)
+                creatures = creatureResponses,
                 currentTurn = battle.currentTurn,
                 round = battle.round,
-                combatLog = emptyList(), // TODO: Map combat log (User Story 5)
+                currentActor = currentActor,
                 createdAt = battle.createdAt,
                 lastModified = battle.lastModified
             )
