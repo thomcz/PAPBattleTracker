@@ -18,9 +18,19 @@
         <span class="spinner-small"></span>
         Starting...
       } @else {
-        <span class="icon">▶</span>
+        <span class="icon">&#9654;</span>
         Start Combat
       }
+    </button>
+
+    <!-- Next Turn Button -->
+    <button
+      class="btn-control btn-next-turn"
+      (click)="advanceTurn()"
+      [disabled]="!canAdvanceTurn() || loading()"
+      title="Advance to next creature's turn">
+      <span class="icon">&#9193;</span>
+      Next Turn
     </button>
 
     <!-- Pause Combat Button -->
@@ -29,13 +39,8 @@
       (click)="pauseCombat()"
       [disabled]="!canPauseCombat() || loading()"
       title="Pause the current combat">
-      @if (loading() && battle.status === CombatStatus.ACTIVE) {
-        <span class="spinner-small"></span>
-        Pausing...
-      } @else {
-        <span class="icon">⏸</span>
-        Pause Combat
-      }
+      <span class="icon">&#9208;</span>
+      Pause Combat
     </button>
 
     <!-- Resume Combat Button -->
@@ -44,13 +49,8 @@
       (click)="resumeCombat()"
       [disabled]="!canResumeCombat() || loading()"
       title="Resume paused combat">
-      @if (loading() && battle.status === CombatStatus.PAUSED) {
-        <span class="spinner-small"></span>
-        Resuming...
-      } @else {
-        <span class="icon">▶</span>
-        Resume Combat
-      }
+      <span class="icon">&#9654;</span>
+      Resume Combat
     </button>
 
     <!-- End Combat Button -->
@@ -59,7 +59,7 @@
       (click)="openEndDialog()"
       [disabled]="!canEndCombat() || loading()"
       title="End the combat session">
-      <span class="icon">⏹</span>
+      <span class="icon">&#9209;</span>
       End Combat
     </button>
   </div>
@@ -78,8 +78,8 @@
       <div class="info-item">
         <span class="label">Current Turn:</span>
         <span class="value">
-          @if (battle.creatures.length > 0 && battle.currentTurn < battle.creatures.length) {
-            {{ battle.creatures[battle.currentTurn].name }}
+          @if (getCurrentActor(); as actor) {
+            {{ actor.name }}
           } @else {
             N/A
           }
@@ -88,6 +88,24 @@
     }
   </div>
 
+  <!-- Damage Target Selection (shown when combat is active) -->
+  @if (battle.status === CombatStatus.ACTIVE) {
+    <div class="damage-targets">
+      <h3>Apply Damage</h3>
+      <div class="target-grid">
+        @for (creature of getActiveCreatures(); track creature.id) {
+          <button
+            class="btn-target"
+            (click)="openDamageDialog(creature)"
+            [disabled]="loading()">
+            <span class="target-name">{{ creature.name }}</span>
+            <span class="target-hp">{{ creature.currentHp }}/{{ creature.maxHp }} HP</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+
   <!-- End Combat Dialog -->
   @if (showEndDialog()) {
     <div class="dialog-overlay" (click)="closeEndDialog()">
@@ -95,7 +113,7 @@
         <div class="dialog-header">
           <h3>End Combat</h3>
           <button class="close-btn" (click)="closeEndDialog()" aria-label="Close dialog">
-            ×
+            &times;
           </button>
         </div>
 
@@ -106,25 +124,25 @@
               class="btn-outcome victory"
               (click)="endCombat(CombatOutcome.PLAYERS_VICTORIOUS)"
               [disabled]="loading()">
-              🎉 Players Victory
+              Players Victory
             </button>
             <button
               class="btn-outcome defeat"
               (click)="endCombat(CombatOutcome.PLAYERS_DEFEATED)"
               [disabled]="loading()">
-              ☠️ Players Defeated
+              Players Defeated
             </button>
             <button
               class="btn-outcome draw"
               (click)="endCombat(CombatOutcome.DRAW)"
               [disabled]="loading()">
-              🤝 Draw
+              Draw
             </button>
             <button
               class="btn-outcome aborted"
               (click)="endCombat(CombatOutcome.ABORTED)"
               [disabled]="loading()">
-              ⚠️ Aborted
+              Aborted
             </button>
           </div>
         </div>
@@ -135,6 +153,131 @@
             (click)="closeEndDialog()"
             [disabled]="loading()">
             Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Initiative Dialog -->
+  @if (showInitiativeDialog()) {
+    <div class="dialog-overlay" (click)="closeInitiativeDialog()">
+      <div class="dialog-content" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3>Roll Initiative</h3>
+          <button class="close-btn" (click)="closeInitiativeDialog()" aria-label="Close dialog">
+            &times;
+          </button>
+        </div>
+
+        <div class="dialog-body">
+          <p>Enter initiative rolls for each creature:</p>
+          <div class="initiative-list">
+            @for (entry of initiativeEntries(); track entry.creature.id; let i = $index) {
+              <div class="initiative-entry">
+                <span class="initiative-name">{{ entry.creature.name }}</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  class="initiative-input"
+                  [ngModel]="entry.initiative"
+                  (ngModelChange)="updateInitiativeEntry(i, $event)"
+                  [attr.aria-label]="'Initiative for ' + entry.creature.name" />
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button
+            class="btn-cancel"
+            (click)="closeInitiativeDialog()"
+            [disabled]="loading()">
+            Cancel
+          </button>
+          <button
+            class="btn-start-combat"
+            (click)="confirmInitiativeAndStartCombat()"
+            [disabled]="loading()">
+            @if (loading()) {
+              <span class="spinner-small"></span>
+              Starting...
+            } @else {
+              Start Combat
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Damage Dialog -->
+  @if (showDamageDialog()) {
+    <div class="dialog-overlay" (click)="closeDamageDialog()">
+      <div class="dialog-content" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <h3>Apply Damage to {{ damageTarget()?.name }}</h3>
+          <button class="close-btn" (click)="closeDamageDialog()" aria-label="Close dialog">
+            &times;
+          </button>
+        </div>
+
+        <div class="dialog-body">
+          <div class="damage-form">
+            <div class="form-group">
+              <label for="damageAmount">Damage Amount</label>
+              <input
+                id="damageAmount"
+                type="number"
+                min="1"
+                max="999"
+                [ngModel]="damageAmount()"
+                (ngModelChange)="damageAmount.set($event)"
+                class="damage-input"
+                autofocus />
+            </div>
+            <div class="form-group">
+              <label for="damageSource">Source (optional)</label>
+              <input
+                id="damageSource"
+                type="text"
+                [ngModel]="damageSource()"
+                (ngModelChange)="damageSource.set($event)"
+                class="source-input"
+                placeholder="e.g., Attack by Fighter" />
+            </div>
+            <div class="target-info">
+              <span>Current HP: {{ damageTarget()?.currentHp }} / {{ damageTarget()?.maxHp }}</span>
+              @if (damageAmount() > 0) {
+                <span class="damage-preview">
+                  After damage: {{ (damageTarget()?.currentHp ?? 0) - damageAmount() < 0 ? 0 : (damageTarget()?.currentHp ?? 0) - damageAmount() }} HP
+                  @if ((damageTarget()?.currentHp ?? 0) - damageAmount() <= 0) {
+                    <span class="defeat-warning">DEFEATED!</span>
+                  }
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button
+            class="btn-cancel"
+            (click)="closeDamageDialog()"
+            [disabled]="loading()">
+            Cancel
+          </button>
+          <button
+            class="btn-apply-damage"
+            (click)="applyDamage()"
+            [disabled]="loading() || damageAmount() < 1">
+            @if (loading()) {
+              <span class="spinner-small"></span>
+              Applying...
+            } @else {
+              Apply Damage
+            }
           </button>
         </div>
       </div>

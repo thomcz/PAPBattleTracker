@@ -65,20 +65,12 @@
       (removeCreature)="onRemoveCreature($event)">
     </app-creature-list>
 
-    <!-- Combat Log Section (Story 5 - Not Yet Implemented) -->
-    @if (battle()!.combatLog.length > 0) {
-      <div class="combat-log-section">
-        <h2>Combat Log</h2>
-        <div class="combat-log">
-          @for (entry of battle()!.combatLog; track entry.id) {
-            <div class="log-entry">
-              <span class="log-round">Round {{ entry.round }}</span>
-              <span class="log-text">{{ entry.text }}</span>
-              <span class="log-time">{{ entry.timestamp | date: 'short' }}</span>
-            </div>
-          }
-        </div>
-      </div>
+    <!-- Combat Log Section -->
+    @if (battle()!.status !== 'NOT_STARTED') {
+      <app-combat-log
+        [battleId]="battle()!.id"
+        [refreshTrigger]="logRefreshTrigger()">
+      </app-combat-log>
     }
   }
 </div>

@@ -40,6 +40,9 @@ class BattleController(
     private val pauseCombat: PauseCombatUseCase,
     private val resumeCombat: ResumeCombatUseCase,
     private val endCombat: EndCombatUseCase,
+    private val advanceTurn: AdvanceTurnUseCase,
+    private val applyDamage: ApplyDamageUseCase,
+    private val getCombatLog: GetCombatLogUseCase,
     private val battleService: BattleService
 ) {
 
@@ -147,6 +150,59 @@ class BattleController(
         val battle = endCombat.execute(id, command, userId)
 
         return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * POST /api/battles/{id}/turn - Advance to next turn
+     * User Story 2: Track Rounds and Turns
+     */
+    @PostMapping("/{id}/turn")
+    fun advanceTurn(
+        @PathVariable id: UUID,
+        authentication: Authentication
+    ): ResponseEntity<BattleDetailResponse> {
+        val userId = getUserId(authentication)
+        val battle = advanceTurn.execute(id, userId)
+
+        return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * POST /api/battles/{id}/damage - Apply damage to a creature
+     * User Story 3: Apply Damage
+     */
+    @PostMapping("/{id}/damage")
+    fun applyDamage(
+        @PathVariable id: UUID,
+        @Valid @RequestBody command: ApplyDamageCommand,
+        authentication: Authentication
+    ): ResponseEntity<BattleDetailResponse> {
+        val userId = getUserId(authentication)
+        val battle = applyDamage.execute(id, command, userId)
+
+        return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * GET /api/battles/{id}/log - Get combat log (paginated)
+     * User Story 4: Combat Log
+     */
+    @GetMapping("/{id}/log")
+    fun getCombatLog(
+        @PathVariable id: UUID,
+        @RequestParam(defaultValue = "100") limit: Int,
+        @RequestParam(defaultValue = "0") offset: Int,
+        authentication: Authentication
+    ): ResponseEntity<CombatLogResponse> {
+        val userId = getUserId(authentication)
+        val result = getCombatLog.execute(id, userId, limit, offset)
+
+        return ResponseEntity.ok(CombatLogResponse(
+            entries = result.entries,
+            total = result.total,
+            limit = result.limit,
+            offset = result.offset
+        ))
     }
 
     /**

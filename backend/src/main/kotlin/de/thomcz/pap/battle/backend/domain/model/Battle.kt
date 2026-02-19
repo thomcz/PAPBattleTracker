@@ -220,6 +220,115 @@ class Battle private constructor() {
         return this
     }
 
+    // === Combat Mechanics Methods ===
+
+    /**
+     * Advance to the next turn in initiative order.
+     *
+     * Business rules:
+     * - Status must be ACTIVE
+     * - Skips defeated creatures
+     * - When all creatures have acted, increments round and resets to first creature
+     *
+     * @throws IllegalStateException if battle is not ACTIVE
+     */
+    fun advanceTurn(userId: UUID): Battle {
+        require(status == CombatStatus.ACTIVE) {
+            "Cannot advance turn: battle is in $status status"
+        }
+
+        val activeCreatures = creatures.filter { !it.isDefeated() }
+        require(activeCreatures.isNotEmpty()) {
+            "Cannot advance turn: no active creatures"
+        }
+
+        var nextTurn = currentTurn + 1
+        var nextRound = round
+
+        // Skip defeated creatures and wrap around
+        while (true) {
+            if (nextTurn >= creatures.size) {
+                nextTurn = 0
+                nextRound++
+            }
+            if (!creatures[nextTurn].isDefeated()) {
+                break
+            }
+            nextTurn++
+        }
+
+        val event = TurnAdvanced(
+            battleId = battleId,
+            eventId = UUID.randomUUID(),
+            timestamp = Instant.now(),
+            userId = userId,
+            newTurn = nextTurn,
+            newRound = nextRound,
+            activeCreatureId = creatures[nextTurn].id
+        )
+
+        applyEvent(event)
+        return this
+    }
+
+    /**
+     * Apply damage to a creature.
+     *
+     * Business rules:
+     * - Status must be ACTIVE
+     * - Target creature must exist and not already be defeated
+     * - Damage must be positive (at least 1)
+     * - If HP reaches 0, a CreatureDefeated event is also emitted
+     *
+     * @throws IllegalStateException if battle is not ACTIVE
+     * @throws IllegalArgumentException if creature not found, already defeated, or damage invalid
+     */
+    fun applyDamage(userId: UUID, targetCreatureId: UUID, damage: Int, source: String? = null): Battle {
+        require(status == CombatStatus.ACTIVE) {
+            "Cannot apply damage: battle is in $status status"
+        }
+        require(damage > 0) {
+            "Damage must be positive, was: $damage"
+        }
+
+        val target = creatures.find { it.id == targetCreatureId }
+            ?: throw IllegalArgumentException("Creature not found: $targetCreatureId")
+
+        require(!target.isDefeated()) {
+            "Cannot damage defeated creature: ${target.name}"
+        }
+
+        val remainingHp = (target.currentHp - damage).coerceAtLeast(0)
+
+        val damageEvent = DamageApplied(
+            battleId = battleId,
+            eventId = UUID.randomUUID(),
+            timestamp = Instant.now(),
+            userId = userId,
+            targetCreatureId = targetCreatureId,
+            damage = damage,
+            remainingHp = remainingHp,
+            source = source
+        )
+
+        applyEvent(damageEvent)
+
+        // If creature is now defeated, emit CreatureDefeated event
+        if (remainingHp == 0) {
+            val defeatedEvent = CreatureDefeated(
+                battleId = battleId,
+                eventId = UUID.randomUUID(),
+                timestamp = Instant.now(),
+                userId = userId,
+                creatureId = targetCreatureId,
+                creatureName = target.name
+            )
+            applyEvent(defeatedEvent)
+        }
+
+        return this
+    }
+
     // === Creature Management Methods ===
 
     /**
@@ -461,8 +570,21 @@ class Battle private constructor() {
                 creatures.removeIf { it.id == event.creatureId }
             }
 
-            else -> {
-                // Unknown event type - ignore gracefully for forward compatibility
+            is TurnAdvanced -> {
+                currentTurn = event.newTurn
+                round = event.newRound
+            }
+
+            is DamageApplied -> {
+                val index = creatures.indexOfFirst { it.id == event.targetCreatureId }
+                if (index != -1) {
+                    creatures[index] = creatures[index].withHp(event.remainingHp)
+                }
+            }
+
+            is CreatureDefeated -> {
+                // State already updated by DamageApplied (HP = 0).
+                // This event exists for audit trail / combat log purposes.
             }
         }
 

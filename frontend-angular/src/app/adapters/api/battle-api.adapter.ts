@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { BattlePort, CombatOutcome } from '../../core/ports/battle.port';
+import { BattlePort, CombatLogResponse, CombatOutcome } from '../../core/ports/battle.port';
 import { Battle, BattleSummary, CombatStatus, Creature, CreatureType } from '../../core/domain/models/battle.model';
 import { environment } from '../../../environments/environment';
 
@@ -61,7 +61,22 @@ export class BattleApiAdapter implements BattlePort {
   }
 
   advanceTurn(battleId: string): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/next-turn`, {});
+    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/turn`, {});
+  }
+
+  applyDamage(battleId: string, creatureId: string, damage: number, source?: string): Observable<Battle> {
+    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/damage`, {
+      creatureId,
+      damage,
+      source
+    });
+  }
+
+  getCombatLog(battleId: string, limit: number = 100, offset: number = 0): Observable<CombatLogResponse> {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString());
+    return this.http.get<CombatLogResponse>(`${this.apiUrl}/${battleId}/log`, { params });
   }
 
   deleteBattle(battleId: string): Observable<void> {

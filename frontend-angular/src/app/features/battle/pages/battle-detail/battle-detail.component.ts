@@ -6,6 +6,7 @@ import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
 import { Battle, CombatStatus } from '../../../../core/domain/models/battle.model';
 import { CombatControlsComponent } from '../../components/combat-controls/combat-controls.component';
 import { CreatureListComponent } from '../../components/creature-list/creature-list.component';
+import { CombatLogComponent } from '../../components/combat-log/combat-log.component';
 import { AddCreatureUseCase } from '../../../../core/domain/use-cases/add-creature.use-case';
 
 /**
@@ -19,7 +20,7 @@ import { AddCreatureUseCase } from '../../../../core/domain/use-cases/add-creatu
 @Component({
   selector: 'app-battle-detail',
   standalone: true,
-  imports: [CommonModule, CombatControlsComponent, CreatureListComponent, MatSnackBarModule],
+  imports: [CommonModule, CombatControlsComponent, CreatureListComponent, CombatLogComponent, MatSnackBarModule],
   templateUrl: './battle-detail.component.html',
   styleUrls: ['./battle-detail.component.css']
 })
@@ -28,6 +29,7 @@ export class BattleDetailComponent implements OnInit {
   battle = signal<Battle | null>(null);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
+  logRefreshTrigger = signal<number>(0);
 
   // Expose CombatStatus enum to template
   CombatStatus = CombatStatus;
@@ -67,6 +69,7 @@ export class BattleDetailComponent implements OnInit {
 
   onBattleUpdated(updatedBattle: Battle): void {
     this.battle.set(updatedBattle);
+    this.logRefreshTrigger.update(v => v + 1);
   }
 
   goBackToList(): void {

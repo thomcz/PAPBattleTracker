@@ -56,6 +56,18 @@ export abstract class BattlePort {
   abstract advanceTurn(battleId: string): Observable<Battle>;
 
   /**
+   * Apply damage to a creature in an active battle.
+   * User Story 3: Apply Damage
+   */
+  abstract applyDamage(battleId: string, creatureId: string, damage: number, source?: string): Observable<Battle>;
+
+  /**
+   * Get combat log entries for a battle (paginated).
+   * User Story 4: Combat Log
+   */
+  abstract getCombatLog(battleId: string, limit?: number, offset?: number): Observable<CombatLogResponse>;
+
+  /**
    * Delete a battle and all associated data.
    */
   abstract deleteBattle(battleId: string): Observable<void>;
@@ -103,4 +115,20 @@ export enum CombatOutcome {
   PLAYERS_DEFEATED = 'PLAYERS_DEFEATED',
   DRAW = 'DRAW',
   ABORTED = 'ABORTED'
+}
+
+/**
+ * Combat log response with pagination.
+ */
+export interface CombatLogResponse {
+  entries: CombatLogEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface CombatLogEntry {
+  timestamp: string;
+  message: string;
+  type: 'ROUND_START' | 'CREATURE_ACTION' | 'DAMAGE' | 'DEFEAT' | 'BATTLE_END';
 }

@@ -1,14 +1,11 @@
 package de.thomcz.pap.battle.backend.application.service
 
-import de.thomcz.pap.battle.backend.application.dto.CreateBattleCommand
-import de.thomcz.pap.battle.backend.application.dto.CreateCreatureRequest
-import de.thomcz.pap.battle.backend.application.dto.CreatureResponse
-import de.thomcz.pap.battle.backend.application.dto.EndCombatCommand
-import de.thomcz.pap.battle.backend.application.dto.UpdateCreatureRequest
+import de.thomcz.pap.battle.backend.application.dto.*
 import de.thomcz.pap.battle.backend.domain.model.Battle
 import de.thomcz.pap.battle.backend.domain.model.CombatStatus
 import de.thomcz.pap.battle.backend.domain.port.`in`.*
 import de.thomcz.pap.battle.backend.domain.port.out.BattleRepository
+import de.thomcz.pap.battle.backend.domain.port.out.EventStore
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.nio.charset.StandardCharsets
@@ -29,14 +26,18 @@ import java.util.UUID
 @Service
 @Transactional
 class BattleService(
-    private val battleRepository: BattleRepository
+    private val battleRepository: BattleRepository,
+    private val eventStore: EventStore
 ) : CreateBattleUseCase,
     GetBattleUseCase,
     ListBattlesUseCase,
     StartCombatUseCase,
     PauseCombatUseCase,
     ResumeCombatUseCase,
-    EndCombatUseCase {
+    EndCombatUseCase,
+    AdvanceTurnUseCase,
+    ApplyDamageUseCase,
+    GetCombatLogUseCase {
 
     override fun execute(command: CreateBattleCommand, userId: String): Battle {
         // Create new battle aggregate (emits BattleCreated event)
@@ -167,6 +168,72 @@ class BattleService(
         battleRepository.save(battle)
 
         return battle
+    }
+
+    // === Combat Mechanics Use Cases ===
+
+    override fun execute(battleId: UUID, userId: String): Battle {
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        try {
+            battle.advanceTurn(userUUID)
+        } catch (e: IllegalArgumentException) {
+            throw StateConflictException("Cannot advance turn: ${e.message}", e)
+        }
+
+        battleRepository.save(battle)
+        return battle
+    }
+
+    override fun execute(battleId: UUID, command: ApplyDamageCommand, userId: String): Battle {
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        try {
+            battle.applyDamage(userUUID, command.creatureId, command.damage, command.source)
+        } catch (e: IllegalArgumentException) {
+            throw StateConflictException("Cannot apply damage: ${e.message}", e)
+        }
+
+        battleRepository.save(battle)
+        return battle
+    }
+
+    @Transactional(readOnly = true)
+    override fun execute(battleId: UUID, userId: String, limit: Int, offset: Int): CombatLogResult {
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        // Get all events and convert to combat log entries
+        val allEvents = eventStore.getEvents(battleId)
+        val logEntries = allEvents.mapNotNull { CombatLogEntryResponse.fromEvent(it) }
+
+        // Apply pagination
+        val total = logEntries.size
+        val paginated = logEntries.drop(offset).take(limit)
+
+        return CombatLogResult(
+            entries = paginated,
+            total = total,
+            limit = limit,
+            offset = offset
+        )
     }
 
     /**

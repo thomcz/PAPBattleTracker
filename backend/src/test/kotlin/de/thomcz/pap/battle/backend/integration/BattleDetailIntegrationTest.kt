@@ -42,7 +42,6 @@ class BattleDetailIntegrationTest : BaseIntegrationTest() {
         assertThat(body["creatures"]).isNotNull()
         assertThat(body["currentTurn"]).isNotNull()
         assertThat(body["round"]).isNotNull()
-        assertThat(body["combatLog"]).isNotNull()
     }
 
     @Test

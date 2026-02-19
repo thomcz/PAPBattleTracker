@@ -11,7 +11,7 @@ export interface Battle {
   creatures: Creature[];
   currentTurn: number;
   round: number;
-  combatLog: LogEntry[];
+  currentActor?: Creature;
   createdAt: string;
   lastModified: string;
 }

@@ -1,0 +1,124 @@
+.combat-log-container {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.log-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.btn-refresh {
+  background: none;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #f8f9fa;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 1rem;
+  color: #6c757d;
+}
+
+.error-message {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.empty-log {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.log-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  border-left: 3px solid transparent;
+}
+
+.log-type-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #e9ecef;
+  color: #495057;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: center;
+}
+
+.log-message {
+  flex: 1;
+  color: #333;
+}
+
+.log-time {
+  color: #6c757d;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.log-round-start {
+  border-left-color: #007bff;
+  background: #f0f7ff;
+}
+
+.log-action {
+  border-left-color: #17a2b8;
+  background: #f0fbff;
+}
+
+.log-damage {
+  border-left-color: #dc3545;
+  background: #fff5f5;
+}
+
+.log-defeat {
+  border-left-color: #6c757d;
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.log-battle-end {
+  border-left-color: #28a745;
+  background: #f0fff0;
+  font-weight: 600;
+}

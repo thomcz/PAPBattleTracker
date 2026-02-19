@@ -41,7 +41,6 @@ describe('BattleDetailComponent', () => {
     ],
     currentTurn: 0,
     round: 0,
-    combatLog: [],
     createdAt: '2024-01-01T10:00:00Z',
     lastModified: '2024-01-01T11:00:00Z'
   };
@@ -57,7 +56,9 @@ describe('BattleDetailComponent', () => {
     deleteBattle: vi.fn(),
     addCreature: vi.fn(),
     updateCreature: vi.fn(),
-    removeCreature: vi.fn()
+    removeCreature: vi.fn(),
+    applyDamage: vi.fn(),
+    getCombatLog: vi.fn()
   };
 
   const mockRouter = {
@@ -79,6 +80,8 @@ describe('BattleDetailComponent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockActivatedRoute.snapshot.paramMap.get.mockReturnValue('battle-123');
+    // Default mock for combat log (needed when CombatLogComponent renders for active battles)
+    mockBattleApiAdapter.getCombatLog.mockReturnValue(of({ entries: [], total: 0, limit: 50, offset: 0 }));
   });
 
   it('should render the component with back button', async () => {
@@ -246,27 +249,16 @@ describe('BattleDetailComponent', () => {
     });
   });
 
-  it('should show combat log when entries exist', async () => {
-    const battleWithLog: Battle = {
+  it('should show combat log component for active battles', async () => {
+    const activeBattle: Battle = {
       ...mockBattle,
-      combatLog: [
-        {
-          id: 'log-1',
-          round: 1,
-          timestamp: '2024-01-01T12:00:00Z',
-          text: 'Combat started!'
-        },
-        {
-          id: 'log-2',
-          round: 1,
-          timestamp: '2024-01-01T12:01:00Z',
-          text: 'Dragon attacks warrior for 15 damage'
-        }
-      ]
+      status: CombatStatus.ACTIVE,
+      round: 1
     };
-    mockBattleApiAdapter.getBattle.mockReturnValue(of(battleWithLog));
+    mockBattleApiAdapter.getBattle.mockReturnValue(of(activeBattle));
+    mockBattleApiAdapter.getCombatLog.mockReturnValue(of({ entries: [], total: 0, limit: 50, offset: 0 }));
 
-    await render(BattleDetailComponent, {
+    const { container } = await render(BattleDetailComponent, {
       providers: [
         { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
         { provide: BattlePort, useValue: mockBattleApiAdapter },
@@ -278,9 +270,7 @@ describe('BattleDetailComponent', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/combat log/i)).toBeTruthy();
-      expect(screen.getByText('Combat started!')).toBeTruthy();
-      expect(screen.getByText('Dragon attacks warrior for 15 damage')).toBeTruthy();
+      expect(container.querySelector('app-combat-log')).toBeTruthy();
     });
   });
 
