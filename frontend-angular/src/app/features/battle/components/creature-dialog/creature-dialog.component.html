@@ -1,6 +1,69 @@
 <h2 mat-dialog-title>{{ isEditMode ? 'Edit Creature' : 'Add Creature' }}</h2>
 
 <mat-dialog-content>
+  @if (isEditMode) {
+    <!-- Edit mode: just the form -->
+    <ng-container *ngTemplateOutlet="creatureForm"></ng-container>
+  } @else {
+    <!-- Add mode: tabs for New Creature vs From Player -->
+    <mat-tab-group>
+      <mat-tab label="New Creature">
+        <div class="tab-content">
+          <ng-container *ngTemplateOutlet="creatureForm"></ng-container>
+        </div>
+      </mat-tab>
+      <mat-tab label="From Player">
+        <div class="tab-content">
+          @if (playersLoading()) {
+            <div class="players-loading">Loading players...</div>
+          } @else if (players().length === 0) {
+            <div class="players-empty">
+              <p>No players created yet.</p>
+              <p class="hint">Create players in the "My Players" section first, then select them here.</p>
+            </div>
+          } @else {
+            <div class="player-select-list">
+              @for (player of players(); track player.playerId) {
+                <div
+                  class="player-select-item"
+                  [class.selected]="selectedPlayer()?.playerId === player.playerId"
+                  (click)="selectPlayer(player)">
+                  <div class="player-select-info">
+                    <strong>{{ player.name }}</strong>
+                    <span class="player-select-class">{{ player.characterClass }}</span>
+                  </div>
+                  <div class="player-select-stats">
+                    <span>Lv {{ player.level }}</span>
+                    <span>{{ player.maxHp }} HP</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  @if (isEditMode) {
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!form.valid">
+      Update
+    </button>
+  } @else {
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!form.valid">
+      Add
+    </button>
+    <button mat-raised-button color="accent" (click)="onAddSelectedPlayer()" [disabled]="!selectedPlayer()">
+      Add Selected Player
+    </button>
+  }
+</mat-dialog-actions>
+
+<!-- Reusable creature form template -->
+<ng-template #creatureForm>
   <form [formGroup]="form">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Name</mat-label>
@@ -51,11 +114,4 @@
       </mat-form-field>
     </div>
   </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!form.valid">
-    {{ isEditMode ? 'Update' : 'Add' }}
-  </button>
-</mat-dialog-actions>
+</ng-template>

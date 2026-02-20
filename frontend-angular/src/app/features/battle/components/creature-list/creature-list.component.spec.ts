@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Creature, CreatureType } from '../../../../core/domain/models/battle.model';
 import { of, Subject } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { PlayerPort } from '../../../../core/ports/player.port';
 
 describe('CreatureListComponent', () => {
   const mockCreatures: Creature[] = [
@@ -46,8 +47,17 @@ describe('CreatureListComponent', () => {
 
   let mockDialog: any;
 
+  const mockPlayerPort = {
+    createPlayer: vi.fn(),
+    listPlayers: vi.fn().mockReturnValue(of({ players: [], total: 0 })),
+    getPlayer: vi.fn(),
+    updatePlayer: vi.fn(),
+    deletePlayer: vi.fn()
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPlayerPort.listPlayers.mockReturnValue(of({ players: [], total: 0 }));
 
     // Create proper MatDialog mock with Subjects
     const afterAllClosed = new Subject();
@@ -75,7 +85,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -90,7 +101,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -106,7 +118,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -122,7 +135,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -136,7 +150,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -154,7 +169,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -170,7 +186,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -187,7 +204,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -202,7 +220,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -219,7 +238,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -235,7 +255,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -251,7 +272,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -267,7 +289,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -286,7 +309,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -306,7 +330,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -331,7 +356,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -349,7 +375,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -367,7 +394,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -387,7 +415,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 
@@ -413,7 +442,8 @@ describe('CreatureListComponent', () => {
           battleId: 'battle-123'
         },
         providers: [
-          { provide: MatDialog, useValue: mockDialog }
+          { provide: MatDialog, useValue: mockDialog },
+          { provide: PlayerPort, useValue: mockPlayerPort }
         ]
       });
 

@@ -34,9 +34,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/battle/pages/battle-detail/battle-detail.component').then(m => m.BattleDetailComponent),
     canActivate: [authGuard]  // Requires authentication
   },
-  // Add more protected routes here
+  {
+    path: 'players',
+    loadComponent: () => import('./features/player/pages/player-list/player-list.component').then(m => m.PlayerListComponent),
+    canActivate: [authGuard]
+  },
   {
     path: '**',
-    redirectTo: '/home'  // Fallback route
+    redirectTo: '/home'
   }
 ];

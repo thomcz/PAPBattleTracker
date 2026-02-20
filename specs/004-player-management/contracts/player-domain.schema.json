@@ -1,0 +1,233 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Player Domain Events Schema",
+  "description": "Schema definition for Player aggregate events used in event sourcing",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/PlayerCreatedEvent"
+    },
+    {
+      "$ref": "#/definitions/PlayerUpdatedEvent"
+    },
+    {
+      "$ref": "#/definitions/PlayerDeletedEvent"
+    }
+  ],
+  "definitions": {
+    "BaseEvent": {
+      "type": "object",
+      "properties": {
+        "aggregateId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Player ID (aggregate root identifier)"
+        },
+        "aggregateType": {
+          "type": "string",
+          "enum": ["Player"],
+          "description": "Type of aggregate"
+        },
+        "eventType": {
+          "type": "string",
+          "description": "Type of event"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Session ID for context and isolation"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of event occurrence"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Event version within the aggregate"
+        }
+      },
+      "required": [
+        "aggregateId",
+        "aggregateType",
+        "eventType",
+        "sessionId",
+        "timestamp",
+        "version"
+      ]
+    },
+    "PlayerCreatedEvent": {
+      "title": "PlayerCreated Event",
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "eventType": {
+              "enum": ["PlayerCreated"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "description": "Player character name"
+                },
+                "characterClass": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50,
+                  "description": "Character class (Fighter, Wizard, etc.)"
+                },
+                "level": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 20,
+                  "description": "Character level (1-20)"
+                },
+                "maxHp": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000,
+                  "description": "Maximum hit points"
+                }
+              },
+              "required": ["name", "characterClass", "level", "maxHp"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["data"]
+        }
+      ]
+    },
+    "PlayerUpdatedEvent": {
+      "title": "PlayerUpdated Event",
+      "description": "Fired when any player attribute is modified",
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "eventType": {
+              "enum": ["PlayerUpdated"]
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "changes": {
+                  "type": "object",
+                  "description": "Map of changed fields and their new values",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "characterClass": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 20
+                    },
+                    "maxHp": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    }
+                  },
+                  "minProperties": 1,
+                  "additionalProperties": false
+                }
+              },
+              "required": ["changes"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["data"]
+        }
+      ]
+    },
+    "PlayerDeletedEvent": {
+      "title": "PlayerDeleted Event",
+      "description": "Soft delete event - player marked as deleted but data preserved",
+      "allOf": [
+        {
+          "$ref": "#/definitions/BaseEvent"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "eventType": {
+              "enum": ["PlayerDeleted"]
+            },
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "No additional data for deletion event"
+            }
+          },
+          "required": ["data"]
+        }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "title": "PlayerCreated Example",
+      "value": {
+        "aggregateId": "550e8400-e29b-41d4-a716-446655440000",
+        "aggregateType": "Player",
+        "eventType": "PlayerCreated",
+        "sessionId": "7c6e3b7b-5f8c-4a2d-9e1f-8b5c3d8e7f6a",
+        "data": {
+          "name": "Aragorn",
+          "characterClass": "Ranger",
+          "level": 10,
+          "maxHp": 85
+        },
+        "timestamp": "2026-02-19T10:30:00Z",
+        "version": 1
+      }
+    },
+    {
+      "title": "PlayerUpdated Example",
+      "value": {
+        "aggregateId": "550e8400-e29b-41d4-a716-446655440000",
+        "aggregateType": "Player",
+        "eventType": "PlayerUpdated",
+        "sessionId": "7c6e3b7b-5f8c-4a2d-9e1f-8b5c3d8e7f6a",
+        "data": {
+          "changes": {
+            "level": 11,
+            "maxHp": 90
+          }
+        },
+        "timestamp": "2026-02-19T11:00:00Z",
+        "version": 2
+      }
+    },
+    {
+      "title": "PlayerDeleted Example",
+      "value": {
+        "aggregateId": "550e8400-e29b-41d4-a716-446655440000",
+        "aggregateType": "Player",
+        "eventType": "PlayerDeleted",
+        "sessionId": "7c6e3b7b-5f8c-4a2d-9e1f-8b5c3d8e7f6a",
+        "data": {},
+        "timestamp": "2026-02-19T12:00:00Z",
+        "version": 3
+      }
+    }
+  ]
+}

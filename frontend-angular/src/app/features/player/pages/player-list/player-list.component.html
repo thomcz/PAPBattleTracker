@@ -1,0 +1,85 @@
+<div class="player-list-container">
+  <button class="btn-back" (click)="goBack()">
+    ← Back to Home
+  </button>
+
+  <div class="header">
+    <h1>My Players</h1>
+    <button class="btn-primary" (click)="openCreateDialog()">
+      <span class="icon">+</span> Create Player
+    </button>
+  </div>
+
+  @if (playerList.isLoading()) {
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading players...</p>
+    </div>
+  }
+
+  @if (playerList.error()) {
+    <div class="error-message">
+      <p>{{ playerList.error() }}</p>
+      <button class="btn-secondary" (click)="playerList.loadPlayers().subscribe()">Retry</button>
+    </div>
+  }
+
+  @if (!playerList.isLoading() && !playerList.error()) {
+    @if (playerList.players().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🛡️</div>
+        <h2>No players yet</h2>
+        <p>Create your first player character to use in battle sessions!</p>
+        <button class="btn-primary" (click)="openCreateDialog()">
+          <span class="icon">+</span> Create Your First Player
+        </button>
+      </div>
+    } @else {
+      <div class="players-grid">
+        @for (player of playerList.players(); track player.playerId) {
+          <div class="player-card">
+            <div class="player-header">
+              <h3>{{ player.name }}</h3>
+              <span class="class-badge">{{ player.characterClass }}</span>
+            </div>
+            <div class="player-stats">
+              <div class="stat">
+                <span class="stat-label">Level</span>
+                <span class="stat-value">{{ player.level }}</span>
+              </div>
+              <div class="stat">
+                <span class="stat-label">HP</span>
+                <span class="stat-value">{{ player.maxHp }}</span>
+              </div>
+            </div>
+            <div class="player-actions">
+              <button class="btn-edit" (click)="openEditDialog(player)">Edit</button>
+              <button class="btn-delete" (click)="confirmDelete(player)">Delete</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  @if (showFormDialog()) {
+    <app-player-form-dialog
+      [player]="editingPlayer()"
+      (playerSaved)="onPlayerSaved()"
+      (dialogClosed)="closeFormDialog()">
+    </app-player-form-dialog>
+  }
+
+  @if (deleteConfirmPlayer()) {
+    <div class="dialog-overlay" (click)="cancelDelete()">
+      <div class="confirm-dialog" (click)="$event.stopPropagation()">
+        <h3>Delete Player</h3>
+        <p>Are you sure you want to delete <strong>{{ deleteConfirmPlayer()!.name }}</strong>?</p>
+        <div class="dialog-actions">
+          <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
+          <button class="btn-danger" (click)="executeDelete()">Delete</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

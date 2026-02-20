@@ -4,11 +4,26 @@ import { vi } from 'vitest';
 import { CreatureDialogComponent, CreatureDialogData } from './creature-dialog.component';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CreatureType } from '../../../../core/domain/models/battle.model';
+import { PlayerPort } from '../../../../core/ports/player.port';
+import { of } from 'rxjs';
 
 describe('CreatureDialogComponent', () => {
   const mockDialogRef = {
     close: vi.fn()
   };
+
+  const mockPlayerPort = {
+    createPlayer: vi.fn(),
+    listPlayers: vi.fn().mockReturnValue(of({ players: [], total: 0 })),
+    getPlayer: vi.fn(),
+    updatePlayer: vi.fn(),
+    deletePlayer: vi.fn()
+  };
+
+  const defaultProviders = [
+    { provide: MatDialogRef, useValue: mockDialogRef },
+    { provide: PlayerPort, useValue: mockPlayerPort }
+  ];
 
   describe('Add Mode', () => {
     const addModeData: CreatureDialogData = {
@@ -18,19 +33,18 @@ describe('CreatureDialogComponent', () => {
     it('should render add creature dialog', async () => {
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
 
       expect(screen.getByText('Add Creature')).toBeTruthy();
-      expect(screen.getByRole('button', { name: /add/i })).toBeTruthy();
     });
 
     it('should have all form fields', async () => {
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -46,7 +60,7 @@ describe('CreatureDialogComponent', () => {
     it('should have default values for add mode', async () => {
       const { fixture } = await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -65,12 +79,12 @@ describe('CreatureDialogComponent', () => {
     it('should disable submit button when form is invalid', async () => {
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
 
-      const submitButton = screen.getByRole('button', { name: /add/i });
+      const submitButton = screen.getByRole('button', { name: /^add$/i });
       expect(submitButton.hasAttribute('disabled')).toBe(true);
     });
 
@@ -79,7 +93,7 @@ describe('CreatureDialogComponent', () => {
 
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -88,7 +102,7 @@ describe('CreatureDialogComponent', () => {
       await user.type(nameInput, 'Goblin');
 
       await waitFor(() => {
-        const submitButton = screen.getByRole('button', { name: /add/i });
+        const submitButton = screen.getByRole('button', { name: /^add$/i });
         expect(submitButton.hasAttribute('disabled')).toBe(false);
       });
     });
@@ -96,9 +110,9 @@ describe('CreatureDialogComponent', () => {
     it('should close dialog with form data when submitted', async () => {
       const user = userEvent.setup();
 
-      const { fixture } = await render(CreatureDialogComponent, {
+      await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -106,7 +120,7 @@ describe('CreatureDialogComponent', () => {
       const nameInput = screen.getByLabelText(/name/i) as HTMLInputElement;
       await user.type(nameInput, 'Goblin');
 
-      const submitButton = screen.getByRole('button', { name: /add/i });
+      const submitButton = screen.getByRole('button', { name: /^add$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -126,7 +140,7 @@ describe('CreatureDialogComponent', () => {
 
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -142,7 +156,7 @@ describe('CreatureDialogComponent', () => {
 
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -161,7 +175,7 @@ describe('CreatureDialogComponent', () => {
 
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -181,7 +195,7 @@ describe('CreatureDialogComponent', () => {
 
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: addModeData }
         ]
       });
@@ -214,7 +228,7 @@ describe('CreatureDialogComponent', () => {
     it('should render edit creature dialog', async () => {
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: editModeData }
         ]
       });
@@ -226,7 +240,7 @@ describe('CreatureDialogComponent', () => {
     it('should pre-populate form with creature data', async () => {
       const { fixture } = await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: editModeData }
         ]
       });
@@ -245,7 +259,7 @@ describe('CreatureDialogComponent', () => {
     it('should have submit button enabled with pre-populated valid data', async () => {
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: editModeData }
         ]
       });
@@ -259,7 +273,7 @@ describe('CreatureDialogComponent', () => {
 
       await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: editModeData }
         ]
       });
@@ -288,7 +302,7 @@ describe('CreatureDialogComponent', () => {
 
       const { fixture } = await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: editModeData }
         ]
       });
@@ -310,7 +324,7 @@ describe('CreatureDialogComponent', () => {
     it('should return true when mode is edit', async () => {
       const { fixture } = await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: { mode: 'edit' } as CreatureDialogData }
         ]
       });
@@ -322,7 +336,7 @@ describe('CreatureDialogComponent', () => {
     it('should return false when mode is add', async () => {
       const { fixture } = await render(CreatureDialogComponent, {
         providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
+          ...defaultProviders,
           { provide: MAT_DIALOG_DATA, useValue: { mode: 'add' } as CreatureDialogData }
         ]
       });
