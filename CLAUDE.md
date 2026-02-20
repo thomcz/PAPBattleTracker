@@ -267,6 +267,7 @@ Both backends implement identical APIs with the same hexagonal architecture:
 - H2 in-memory database (development), event sourcing with JSON event store (001-battle-tracker-features)
 - Kotlin 1.9.25 (JVM 25), TypeScript (Angular 21.0.2) + Spring Boot 3.5.7, Spring Data JPA, Jackson (Kotlin backend); Angular 21, RxJS, Angular Signals (frontend) (002-creature-management)
 - H2 in-memory database with event sourcing (events stored as JSON) (002-creature-management)
+- H2 in-memory database with event sourcing pattern (events stored as JSON) (004-player-management)
 
 ## Recent Changes
 - 001-battle-tracker-features: Added H2 in-memory database (development), event sourcing with JSON event store

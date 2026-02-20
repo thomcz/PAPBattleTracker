@@ -1,0 +1,396 @@
+openapi: 3.0.0
+info:
+  title: Player Management API
+  description: REST API for managing reusable player characters within a session
+  version: 1.0.0
+  contact:
+    name: PAPBattleTracker Team
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /api/sessions/{sessionId}/players:
+    get:
+      summary: List all players in a session
+      description: Retrieve all active (non-deleted) players for a given session
+      operationId: getPlayersBySession
+      tags:
+        - Players
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The session ID
+        - name: includeDeleted
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Include soft-deleted players in response
+      responses:
+        200:
+          description: Successfully retrieved player list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  players:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Player'
+                  total:
+                    type: integer
+                    description: Total number of players
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      summary: Create a new player
+      description: Create a new player character within a session
+      operationId: createPlayer
+      tags:
+        - Players
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlayerRequest'
+      responses:
+        201:
+          description: Player created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/sessions/{sessionId}/players/{playerId}:
+    get:
+      summary: Get a specific player
+      description: Retrieve details for a specific player
+      operationId: getPlayer
+      tags:
+        - Players
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successfully retrieved player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      summary: Update a player
+      description: Update player attributes (name, class, level, or maxHp)
+      operationId: updatePlayer
+      tags:
+        - Players
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlayerRequest'
+      responses:
+        200:
+          description: Player updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        400:
+          $ref: '#/components/responses/BadRequestError'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Delete a player
+      description: Soft delete a player (sets isDeleted flag). Requires confirmation.
+      operationId: deletePlayer
+      tags:
+        - Players
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: confirmed
+          in: query
+          required: true
+          schema:
+            type: boolean
+          description: User must explicitly confirm deletion (safety check)
+      responses:
+        204:
+          description: Player deleted successfully (no response body)
+        400:
+          description: Deletion not confirmed
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+    Player:
+      type: object
+      description: A player character that can be used in battles
+      properties:
+        playerId:
+          type: string
+          format: uuid
+          description: Unique player identifier
+        sessionId:
+          type: string
+          format: uuid
+          description: Session this player belongs to
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Character name
+        characterClass:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Character class (e.g., Fighter, Wizard)
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Character level
+        maxHp:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum hit points
+        isDeleted:
+          type: boolean
+          description: Soft delete flag
+        createdAt:
+          type: string
+          format: date-time
+          description: Player creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+      required:
+        - playerId
+        - sessionId
+        - name
+        - characterClass
+        - level
+        - maxHp
+        - createdAt
+        - updatedAt
+
+    CreatePlayerRequest:
+      type: object
+      description: Request body for creating a new player
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Character name
+          example: "Aragorn"
+        characterClass:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Character class
+          example: "Ranger"
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Character level
+          example: 10
+        maxHp:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum hit points
+          example: 85
+      required:
+        - name
+        - characterClass
+        - level
+        - maxHp
+
+    UpdatePlayerRequest:
+      type: object
+      description: Request body for updating a player (all fields optional)
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Character name
+        characterClass:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Character class
+        level:
+          type: integer
+          minimum: 1
+          maximum: 20
+          description: Character level
+        maxHp:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum hit points
+      minProperties: 1
+      description: At least one field must be present
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code identifier
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context
+      required:
+        - code
+        - message
+
+  responses:
+    BadRequestError:
+      description: Invalid request (validation failed)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VALIDATION_ERROR
+            message: "Validation failed"
+            details:
+              level: "must be between 1 and 20"
+              maxHp: "must be positive"
+
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: "Authentication required"
+
+    ForbiddenError:
+      description: User not authorized for this session
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: FORBIDDEN
+            message: "You do not have permission to access this session"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: NOT_FOUND
+            message: "Player or session not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from login endpoint
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Players
+    description: Player character management endpoints

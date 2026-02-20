@@ -6,6 +6,7 @@ import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {authInterceptor} from './adapters/interceptors/auth.interceptor';
 import {authProviders} from './core/providers/auth.providers';
 import {battleProviders} from './core/providers/battle.providers';
+import {playerProviders} from './core/providers/player.providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
     ...authProviders,
-    ...battleProviders
+    ...battleProviders,
+    ...playerProviders
   ]
 };

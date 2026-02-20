@@ -32,6 +32,13 @@ import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
             <button class="btn-action">Go to Battles</button>
           </div>
 
+          <div class="action-card" (click)="goToPlayers()">
+            <div class="action-icon">🛡️</div>
+            <h3>My Players</h3>
+            <p>Create and manage your reusable player characters</p>
+            <button class="btn-action">Go to Players</button>
+          </div>
+
           @if (loginUserCase.currentUser(); as user) {
             <div class="action-card">
               <div class="action-icon">👤</div>
@@ -157,5 +164,9 @@ export class HomeComponent {
 
   goToBattles(): void {
     this.router.navigate(['/battles']);
+  }
+
+  goToPlayers(): void {
+    this.router.navigate(['/players']);
   }
 }
