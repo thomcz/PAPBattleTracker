@@ -39,6 +39,13 @@ import {LoginUseCase} from '../core/domain/use-cases/login.use-case';
             <button class="btn-action">Go to Players</button>
           </div>
 
+          <div class="action-card" (click)="goToBeastery()">
+            <div class="action-icon">🐉</div>
+            <h3>My Beastery</h3>
+            <p>Create reusable creature templates for your battles</p>
+            <button class="btn-action">Go to Beastery</button>
+          </div>
+
           @if (loginUserCase.currentUser(); as user) {
             <div class="action-card">
               <div class="action-icon">👤</div>
@@ -168,5 +175,9 @@ export class HomeComponent {
 
   goToPlayers(): void {
     this.router.navigate(['/players']);
+  }
+
+  goToBeastery(): void {
+    this.router.navigate(['/beastery']);
   }
 }

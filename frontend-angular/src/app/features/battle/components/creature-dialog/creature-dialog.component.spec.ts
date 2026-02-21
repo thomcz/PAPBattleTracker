@@ -5,6 +5,7 @@ import { CreatureDialogComponent, CreatureDialogData } from './creature-dialog.c
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CreatureType } from '../../../../core/domain/models/battle.model';
 import { PlayerPort } from '../../../../core/ports/player.port';
+import { BeasteryPort } from '../../../../core/ports/beastery.port';
 import { of } from 'rxjs';
 
 describe('CreatureDialogComponent', () => {
@@ -20,9 +21,19 @@ describe('CreatureDialogComponent', () => {
     deletePlayer: vi.fn()
   };
 
+  const mockBeasteryPort = {
+    createCreature: vi.fn(),
+    listCreatures: vi.fn().mockReturnValue(of({ creatures: [], total: 0 })),
+    getCreature: vi.fn(),
+    updateCreature: vi.fn(),
+    deleteCreature: vi.fn(),
+    duplicateCreature: vi.fn()
+  };
+
   const defaultProviders = [
     { provide: MatDialogRef, useValue: mockDialogRef },
-    { provide: PlayerPort, useValue: mockPlayerPort }
+    { provide: PlayerPort, useValue: mockPlayerPort },
+    { provide: BeasteryPort, useValue: mockBeasteryPort }
   ];
 
   describe('Add Mode', () => {
@@ -208,6 +219,121 @@ describe('CreatureDialogComponent', () => {
       await waitFor(() => {
         expect(screen.getByText(/must be at least 1/i)).toBeTruthy();
       });
+    });
+  });
+
+  describe('From Beastery Tab', () => {
+    const addModeData: CreatureDialogData = {
+      mode: 'add'
+    };
+
+    it('should show "From Beastery" tab in add mode', async () => {
+      await render(CreatureDialogComponent, {
+        providers: [
+          ...defaultProviders,
+          { provide: MAT_DIALOG_DATA, useValue: addModeData }
+        ]
+      });
+
+      expect(screen.getByText('From Beastery')).toBeTruthy();
+    });
+
+    it('should show empty state when no beasts exist', async () => {
+      const user = userEvent.setup();
+
+      await render(CreatureDialogComponent, {
+        providers: [
+          ...defaultProviders,
+          { provide: MAT_DIALOG_DATA, useValue: addModeData }
+        ]
+      });
+
+      const beasteryTab = screen.getByText('From Beastery');
+      await user.click(beasteryTab);
+
+      await waitFor(() => {
+        expect(screen.getByText(/no creatures in beastery yet/i)).toBeTruthy();
+      });
+    });
+
+    it('should display beasts from beastery', async () => {
+      const user = userEvent.setup();
+
+      mockBeasteryPort.listCreatures.mockReturnValue(of({
+        creatures: [
+          { creatureId: 'beast-1', name: 'Goblin', hitPoints: 12, armorClass: 13, isDeleted: false, createdAt: '', lastModified: '' },
+          { creatureId: 'beast-2', name: 'Orc', hitPoints: 30, armorClass: 16, isDeleted: false, createdAt: '', lastModified: '' }
+        ],
+        total: 2
+      }));
+
+      await render(CreatureDialogComponent, {
+        providers: [
+          ...defaultProviders,
+          { provide: MAT_DIALOG_DATA, useValue: addModeData }
+        ]
+      });
+
+      const beasteryTab = screen.getByText('From Beastery');
+      await user.click(beasteryTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Goblin')).toBeTruthy();
+        expect(screen.getByText('Orc')).toBeTruthy();
+        expect(screen.getByText('12 HP')).toBeTruthy();
+        expect(screen.getByText('AC 13')).toBeTruthy();
+      });
+    });
+
+    it('should select a beast and close dialog with mapped creature data', async () => {
+      const user = userEvent.setup();
+
+      mockBeasteryPort.listCreatures.mockReturnValue(of({
+        creatures: [
+          { creatureId: 'beast-1', name: 'Goblin', hitPoints: 12, armorClass: 13, isDeleted: false, createdAt: '', lastModified: '' }
+        ],
+        total: 1
+      }));
+
+      const { fixture } = await render(CreatureDialogComponent, {
+        providers: [
+          ...defaultProviders,
+          { provide: MAT_DIALOG_DATA, useValue: addModeData }
+        ]
+      });
+
+      const beasteryTab = screen.getByText('From Beastery');
+      await user.click(beasteryTab);
+
+      await waitFor(() => {
+        expect(screen.getByText('Goblin')).toBeTruthy();
+      });
+
+      await user.click(screen.getByText('Goblin'));
+
+      const addBeastButton = screen.getByRole('button', { name: /add selected beast/i });
+      await user.click(addBeastButton);
+
+      expect(mockDialogRef.close).toHaveBeenCalledWith({
+        name: 'Goblin',
+        type: CreatureType.MONSTER,
+        currentHp: 12,
+        maxHp: 12,
+        initiative: 0,
+        armorClass: 13
+      });
+    });
+
+    it('should disable "Add Selected Beast" button when no beast is selected', async () => {
+      await render(CreatureDialogComponent, {
+        providers: [
+          ...defaultProviders,
+          { provide: MAT_DIALOG_DATA, useValue: addModeData }
+        ]
+      });
+
+      const addBeastButton = screen.getByRole('button', { name: /add selected beast/i });
+      expect(addBeastButton.hasAttribute('disabled')).toBe(true);
     });
   });
 

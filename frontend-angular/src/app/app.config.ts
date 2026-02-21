@@ -7,6 +7,7 @@ import {authInterceptor} from './adapters/interceptors/auth.interceptor';
 import {authProviders} from './core/providers/auth.providers';
 import {battleProviders} from './core/providers/battle.providers';
 import {playerProviders} from './core/providers/player.providers';
+import {beasteryProviders} from './core/providers/beastery.providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     ...authProviders,
     ...battleProviders,
-    ...playerProviders
+    ...playerProviders,
+    ...beasteryProviders
   ]
 };

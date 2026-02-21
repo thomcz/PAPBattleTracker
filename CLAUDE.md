@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Session Optimization
+
+Before scanning the repository at the start of a session, check the persistent memory files for cached architecture patterns and file locations:
+
+- `.claude/memory/MEMORY.md` - Index and user preferences
+- `.claude/memory/backend-patterns.md` - Backend architecture patterns (ports, services, controllers, persistence, event sourcing conventions)
+- `.claude/memory/file-map.md` - Key directories, file locations, and current implementation status
+
+Use these instead of re-exploring the codebase each session. Update them when patterns change or new features are completed.
+
 ## Project Overview
 
 PAPBattleTracker is a full-stack battle tracking application for tabletop RPGs. The project consists of:

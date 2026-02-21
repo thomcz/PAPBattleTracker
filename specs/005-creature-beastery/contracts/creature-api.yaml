@@ -1,0 +1,360 @@
+openapi: 3.0.0
+info:
+  title: Creature Beastery API
+  version: 1.0.0
+  description: API for creating, managing, and selecting creatures from the beastery
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development
+
+paths:
+  /creatures:
+    post:
+      summary: Create a new creature
+      operationId: createCreature
+      tags:
+        - Creatures
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreatureRequest'
+      responses:
+        '201':
+          description: Creature created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400':
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (missing or invalid JWT)
+      security:
+        - bearerAuth: []
+
+    get:
+      summary: List all creatures for the authenticated user
+      operationId: listCreatures
+      tags:
+        - Creatures
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search by creature name (case-insensitive substring match)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+          description: Maximum number of results
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Number of results to skip
+      responses:
+        '200':
+          description: List of creatures retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  creatures:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreatureResponse'
+                  total:
+                    type: integer
+                    description: Total number of creatures matching query
+        '401':
+          description: Unauthorized
+      security:
+        - bearerAuth: []
+
+  /creatures/{creatureId}:
+    get:
+      summary: Get creature details
+      operationId: getCreature
+      tags:
+        - Creatures
+      parameters:
+        - name: creatureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Creature details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '404':
+          description: Creature not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+      security:
+        - bearerAuth: []
+
+    put:
+      summary: Update creature
+      operationId: updateCreature
+      tags:
+        - Creatures
+      parameters:
+        - name: creatureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreatureRequest'
+      responses:
+        '200':
+          description: Creature updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Creature not found
+        '401':
+          description: Unauthorized
+      security:
+        - bearerAuth: []
+
+    delete:
+      summary: Delete creature (hard delete - permanent)
+      operationId: deleteCreature
+      tags:
+        - Creatures
+      parameters:
+        - name: creatureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Creature deleted successfully (no content)
+        '404':
+          description: Creature not found
+        '401':
+          description: Unauthorized
+      security:
+        - bearerAuth: []
+
+  /creatures/{creatureId}/duplicate:
+    post:
+      summary: Duplicate a creature
+      operationId: duplicateCreature
+      tags:
+        - Creatures
+      parameters:
+        - name: creatureId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Custom name for duplicate (optional, defaults to "[Original] Copy")
+      responses:
+        '201':
+          description: Creature duplicated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '404':
+          description: Source creature not found
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    CreateCreatureRequest:
+      type: object
+      required:
+        - name
+        - hitPoints
+        - armorClass
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Creature name (e.g., "Orc", "Dragon")
+        hitPoints:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Maximum health points
+        armorClass:
+          type: integer
+          minimum: 0
+          maximum: 20
+          description: Armor class (defense value)
+        abilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbilityInput'
+          description: Optional - can be added later
+
+    UpdateCreatureRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        hitPoints:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        armorClass:
+          type: integer
+          minimum: 0
+          maximum: 20
+        abilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbilityInput'
+      description: All fields optional - send only fields to update
+
+    CreatureResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique creature ID
+        name:
+          type: string
+        hitPoints:
+          type: integer
+        armorClass:
+          type: integer
+        abilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/AbilityResponse'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AbilityInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Ability name (e.g., "Attack", "Fireball")
+        description:
+          type: string
+          maxLength: 500
+          description: What the ability does
+        damageType:
+          type: string
+          enum:
+            - PHYSICAL
+            - FIRE
+            - COLD
+            - LIGHTNING
+            - POISON
+            - PSYCHIC
+          description: Type of damage
+        damage:
+          type: string
+          maxLength: 50
+          description: Damage formula (e.g., "2d6+3", "1d8")
+        range:
+          type: string
+          maxLength: 50
+          description: Range (e.g., "5 ft", "60 ft range")
+
+    AbilityResponse:
+      allOf:
+        - $ref: '#/components/schemas/AbilityInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code (e.g., VALIDATION_ERROR, NOT_FOUND)
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Field-level validation errors (optional)
+          additionalProperties:
+            type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token from authentication endpoint
+
+tags:
+  - name: Creatures
+    description: Creature beastery management - create, list, edit, delete, duplicate creatures

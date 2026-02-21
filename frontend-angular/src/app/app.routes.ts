@@ -40,6 +40,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'beastery',
+    loadComponent: () => import('./features/beastery/pages/beastery-list/beastery-list.component').then(m => m.BeasteryListComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: '/home'
   }
