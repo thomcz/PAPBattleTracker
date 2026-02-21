@@ -1,6 +1,10 @@
 package de.thomcz.pap.battle.backend.infrastructure.adapter.`in`.rest
 
-import de.thomcz.pap.battle.backend.application.dto.*
+import de.thomcz.pap.battle.backend.application.dto.BeasteryCreatureListResponse
+import de.thomcz.pap.battle.backend.application.dto.BeasteryCreatureResponse
+import de.thomcz.pap.battle.backend.domain.port.`in`.command.CreateBeasteryCreatureCommand
+import de.thomcz.pap.battle.backend.domain.port.`in`.command.DeleteBeasteryCreatureCommand
+import de.thomcz.pap.battle.backend.domain.port.`in`.command.UpdateBeasteryCreatureCommand
 import de.thomcz.pap.battle.backend.application.service.AccessDeniedException
 import de.thomcz.pap.battle.backend.application.service.EntityNotFoundException
 import de.thomcz.pap.battle.backend.domain.port.`in`.*

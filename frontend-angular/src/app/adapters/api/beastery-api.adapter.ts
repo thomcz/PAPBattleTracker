@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BeasteryPort } from '../../core/ports/beastery.port';
 import {
@@ -10,12 +9,13 @@ import {
   UpdateBeasteryCreatureRequest
 } from '../../core/domain/models/beastery-creature.model';
 import { environment } from '../../../environments/environment';
+import { HttpClientPort } from '../../core/ports/http-client.port';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class BeasteryApiAdapter extends BeasteryPort {
   private readonly apiUrl = `${environment.apiUrl}/beastery/creatures`;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClientPort) {
     super();
   }
 
@@ -24,11 +24,8 @@ export class BeasteryApiAdapter extends BeasteryPort {
   }
 
   listCreatures(includeDeleted = false): Observable<BeasteryCreatureListResponse> {
-    let params = new HttpParams();
-    if (includeDeleted) {
-      params = params.set('includeDeleted', 'true');
-    }
-    return this.http.get<BeasteryCreatureListResponse>(this.apiUrl, { params });
+    const url = includeDeleted ? `${this.apiUrl}?includeDeleted=true` : this.apiUrl;
+    return this.http.get<BeasteryCreatureListResponse>(url);
   }
 
   getCreature(creatureId: string): Observable<BeasteryCreature> {

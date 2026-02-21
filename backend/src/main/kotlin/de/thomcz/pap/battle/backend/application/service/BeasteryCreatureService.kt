@@ -1,8 +1,8 @@
 package de.thomcz.pap.battle.backend.application.service
 
-import de.thomcz.pap.battle.backend.application.dto.CreateBeasteryCreatureCommand
-import de.thomcz.pap.battle.backend.application.dto.DeleteBeasteryCreatureCommand
-import de.thomcz.pap.battle.backend.application.dto.UpdateBeasteryCreatureCommand
+import de.thomcz.pap.battle.backend.domain.port.`in`.command.CreateBeasteryCreatureCommand
+import de.thomcz.pap.battle.backend.domain.port.`in`.command.DeleteBeasteryCreatureCommand
+import de.thomcz.pap.battle.backend.domain.port.`in`.command.UpdateBeasteryCreatureCommand
 import de.thomcz.pap.battle.backend.domain.model.BeasteryCreature
 import de.thomcz.pap.battle.backend.domain.port.`in`.*
 import de.thomcz.pap.battle.backend.domain.port.out.BeasteryCreatureRepository
