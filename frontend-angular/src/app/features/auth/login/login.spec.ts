@@ -31,7 +31,7 @@ describe('Login', () => {
     vi.clearAllMocks();
   });
 
-  it('should render the login form with all elements', async () => {
+  it('should render the login form with all themed elements', async () => {
     await render(Login, {
       providers: [
         { provide: LoginUseCase, useValue: mockLoginUseCase },
@@ -40,11 +40,36 @@ describe('Login', () => {
       ]
     });
 
-    expect(screen.getByRole('heading', { name: /login to pap battle tracker/i })).toBeTruthy();
-    expect(screen.getByLabelText(/username/i)).toBeTruthy();
-    expect(screen.getByLabelText(/password/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /login/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /register here/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /dungeon master/i })).toBeTruthy();
+    expect(screen.getByText(/campaign management suite/i)).toBeTruthy();
+    expect(screen.getByLabelText(/grandmaster id/i)).toBeTruthy();
+    expect(screen.getByLabelText(/secret sigil/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: /enter the sanctum/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /create new campaign/i })).toBeTruthy();
+  });
+
+  it('should display OR JOIN THE GUILD divider', async () => {
+    await render(Login, {
+      providers: [
+        { provide: LoginUseCase, useValue: mockLoginUseCase },
+        { provide: NavigationPort, useValue: mockNavigationPort },
+        provideRouter([])
+      ]
+    });
+
+    expect(screen.getByText(/or join the guild/i)).toBeTruthy();
+  });
+
+  it('should display FORGOTTEN? link', async () => {
+    await render(Login, {
+      providers: [
+        { provide: LoginUseCase, useValue: mockLoginUseCase },
+        { provide: NavigationPort, useValue: mockNavigationPort },
+        provideRouter([])
+      ]
+    });
+
+    expect(screen.getByText(/forgotten\?/i)).toBeTruthy();
   });
 
   it('should show validation error when username is empty and form is touched', async () => {
@@ -58,7 +83,7 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
 
     // Focus and blur without entering text
     await user.click(usernameInput);
@@ -80,7 +105,7 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
 
     await user.type(usernameInput, 'ab');
     await user.tab();
@@ -101,7 +126,7 @@ describe('Login', () => {
       ]
     });
 
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
 
     // Focus and blur without entering text
     await user.click(passwordInput);
@@ -123,7 +148,7 @@ describe('Login', () => {
       ]
     });
 
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
 
     await user.type(passwordInput, '12345');
     await user.tab();
@@ -144,7 +169,7 @@ describe('Login', () => {
       ]
     });
 
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /enter the sanctum/i });
     await user.click(submitButton);
 
     // Use case should not be called with invalid form
@@ -169,13 +194,13 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
 
     await user.type(usernameInput, 'testuser');
     await user.type(passwordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /enter the sanctum/i });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -209,18 +234,18 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
 
     await user.type(usernameInput, 'testuser');
     await user.type(passwordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /enter the sanctum/i });
     await user.click(submitButton);
 
     // Should show loading state
     await waitFor(() => {
-      expect(screen.getByText(/logging in.../i)).toBeTruthy();
+      expect(screen.getByText(/entering the sanctum.../i)).toBeTruthy();
     });
 
     // Submit button should be disabled during loading
@@ -241,13 +266,13 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
 
     await user.type(usernameInput, 'wronguser');
     await user.type(passwordInput, 'wrongpass');
 
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /enter the sanctum/i });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -272,13 +297,13 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
 
     await user.type(usernameInput, 'testuser');
     await user.type(passwordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const submitButton = screen.getByRole('button', { name: /enter the sanctum/i });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -301,9 +326,9 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i);
-    const passwordInput = screen.getByLabelText(/password/i);
-    const submitButton = screen.getByRole('button', { name: /login/i });
+    const usernameInput = screen.getByLabelText(/grandmaster id/i);
+    const passwordInput = screen.getByLabelText(/secret sigil/i);
+    const submitButton = screen.getByRole('button', { name: /enter the sanctum/i });
 
     // First failed login
     await user.type(usernameInput, 'wronguser');
@@ -329,9 +354,7 @@ describe('Login', () => {
     });
   });
 
-  it('should navigate to register page when clicking register link', async () => {
-    const user = userEvent.setup();
-
+  it('should navigate to register page when clicking Create New Campaign link', async () => {
     await render(Login, {
       providers: [
         { provide: LoginUseCase, useValue: mockLoginUseCase },
@@ -340,7 +363,7 @@ describe('Login', () => {
       ]
     });
 
-    const registerLink = screen.getByRole('link', { name: /register here/i });
+    const registerLink = screen.getByRole('link', { name: /create new campaign/i });
     expect(registerLink.getAttribute('href')).toBe('/register');
   });
 
@@ -368,7 +391,7 @@ describe('Login', () => {
       ]
     });
 
-    const usernameInput = screen.getByLabelText(/username/i) as HTMLInputElement;
+    const usernameInput = screen.getByLabelText(/grandmaster id/i) as HTMLInputElement;
     await user.type(usernameInput, 'myusername');
 
     expect(usernameInput.value).toBe('myusername');
@@ -385,10 +408,72 @@ describe('Login', () => {
       ]
     });
 
-    const passwordInput = screen.getByLabelText(/password/i) as HTMLInputElement;
+    const passwordInput = screen.getByLabelText(/secret sigil/i) as HTMLInputElement;
     await user.type(passwordInput, 'mypassword');
 
     expect(passwordInput.value).toBe('mypassword');
     expect(passwordInput.type).toBe('password');
+  });
+
+  // === Password Visibility Toggle Tests ===
+
+  it('should toggle password visibility when eye icon is clicked', async () => {
+    const user = userEvent.setup();
+
+    await render(Login, {
+      providers: [
+        { provide: LoginUseCase, useValue: mockLoginUseCase },
+        { provide: NavigationPort, useValue: mockNavigationPort },
+        provideRouter([])
+      ]
+    });
+
+    const passwordInput = screen.getByLabelText(/secret sigil/i) as HTMLInputElement;
+    const toggleButton = screen.getByRole('button', { name: /toggle password visibility/i });
+
+    // Initially password type
+    expect(passwordInput.type).toBe('password');
+
+    // Click to show password
+    await user.click(toggleButton);
+    expect(passwordInput.type).toBe('text');
+
+    // Click again to hide password
+    await user.click(toggleButton);
+    expect(passwordInput.type).toBe('password');
+  });
+
+  it('should render the password visibility toggle button', async () => {
+    await render(Login, {
+      providers: [
+        { provide: LoginUseCase, useValue: mockLoginUseCase },
+        { provide: NavigationPort, useValue: mockNavigationPort },
+        provideRouter([])
+      ]
+    });
+
+    const toggleButton = screen.getByRole('button', { name: /toggle password visibility/i });
+    expect(toggleButton).toBeTruthy();
+  });
+
+  it('should be keyboard accessible for password toggle', async () => {
+    const user = userEvent.setup();
+
+    await render(Login, {
+      providers: [
+        { provide: LoginUseCase, useValue: mockLoginUseCase },
+        { provide: NavigationPort, useValue: mockNavigationPort },
+        provideRouter([])
+      ]
+    });
+
+    const passwordInput = screen.getByLabelText(/secret sigil/i) as HTMLInputElement;
+    const toggleButton = screen.getByRole('button', { name: /toggle password visibility/i });
+
+    // Tab to the toggle button and activate with Enter/Space
+    toggleButton.focus();
+    await user.keyboard('{Enter}');
+
+    expect(passwordInput.type).toBe('text');
   });
 });

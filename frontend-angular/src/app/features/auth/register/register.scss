@@ -1,116 +1,150 @@
-.login-container {
+@use '../shared/auth-theme' as *;
+
+.auth-container {
+  @include auth-container;
+}
+
+.auth-card {
+  @include auth-card;
+}
+
+// === Logo Section ===
+
+.logo-section {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.login-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-
-  h2 {
-    margin: 0 0 1.5rem;
-    color: #333;
-    text-align: center;
-    font-size: 1.75rem;
-  }
+.logo-diamond {
+  width: 80px;
+  height: 80px;
+  background: $auth-purple;
+  border-radius: 14px;
+  transform: rotate(45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(107, 70, 193, 0.3);
 }
+
+.castle-icon {
+  width: 44px;
+  height: 44px;
+  transform: rotate(-45deg);
+  color: $auth-text-white;
+}
+
+// === Title ===
+
+.title {
+  margin: 1rem 0 0.25rem;
+  color: $auth-text-white;
+  text-align: center;
+  font-size: 1.75rem;
+  font-family: $auth-font-title;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  margin: 0 0 2rem;
+  color: $auth-text-light;
+  text-align: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+// === Alert ===
 
 .alert {
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-
   &.alert-error {
-    background-color: #fee;
-    color: #c33;
-    border: 1px solid #fcc;
+    @include auth-alert-error;
   }
 }
+
+// === Form ===
 
 .form-group {
   margin-bottom: 1.25rem;
 
   label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #555;
-    font-weight: 500;
-    font-size: 0.9rem;
+    @include auth-label;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 0.875rem;
+    color: $auth-text-light;
+    font-size: 1.1rem;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    z-index: 1;
   }
 
   input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-
-    &:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    &.error {
-      border-color: #c33;
-    }
+    @include auth-input;
   }
 
   .error-message {
-    display: block;
-    color: #c33;
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
+    @include auth-error-message;
   }
 }
+
+// === Buttons ===
 
 .btn-primary {
-  width: 100%;
-  padding: 0.875rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  @include auth-btn-primary;
+  margin-top: 0.5rem;
 }
+
+// === Footer ===
 
 .footer-link {
   margin-top: 1.5rem;
   text-align: center;
-  color: #666;
+  color: $auth-text-light;
   font-size: 0.9rem;
 
   a {
-    color: #667eea;
+    color: $auth-purple-light;
     text-decoration: none;
     font-weight: 600;
 
     &:hover {
       text-decoration: underline;
+      color: $auth-text-white;
     }
+  }
+}
+
+// === Responsive ===
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 0 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .logo-diamond {
+    width: 64px;
+    height: 64px;
+  }
+
+  .castle-icon {
+    width: 36px;
+    height: 36px;
   }
 }
