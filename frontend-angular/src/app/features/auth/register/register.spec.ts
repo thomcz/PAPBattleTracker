@@ -28,7 +28,7 @@ describe('Register', () => {
     vi.clearAllMocks();
   });
 
-  it('should render the registration form with all elements', async () => {
+  it('should render the registration form with all themed elements', async () => {
     await render(Register, {
       providers: [
         { provide: RegisterUseCase, useValue: mockRegisterUseCase },
@@ -37,13 +37,14 @@ describe('Register', () => {
       ]
     });
 
-    expect(screen.getByRole('heading', { name: /create account/i })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /join the guild/i })).toBeTruthy();
+    expect(screen.getByText(/create your campaign/i)).toBeTruthy();
     expect(screen.getByLabelText(/^username$/i)).toBeTruthy();
     expect(screen.getByLabelText(/email/i)).toBeTruthy();
     expect(screen.getByLabelText(/^password$/i)).toBeTruthy();
     expect(screen.getByLabelText(/confirm password/i)).toBeTruthy();
-    expect(screen.getByRole('button', { name: /register/i })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /login here/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /join the guild/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /return to sanctum/i })).toBeTruthy();
   });
 
   it('should show validation error when username is empty and form is touched', async () => {
@@ -253,7 +254,7 @@ describe('Register', () => {
       ]
     });
 
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
     await user.click(submitButton);
 
     // Use case should not be called with invalid form
@@ -289,7 +290,7 @@ describe('Register', () => {
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password456');
 
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
     await user.click(submitButton);
 
     // Use case should not be called
@@ -323,7 +324,7 @@ describe('Register', () => {
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -368,12 +369,12 @@ describe('Register', () => {
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
     await user.click(submitButton);
 
     // Should show loading state
     await waitFor(() => {
-      expect(screen.getByText(/creating account.../i)).toBeTruthy();
+      expect(screen.getByText(/forging your identity.../i)).toBeTruthy();
     });
 
     // Submit button should be disabled during loading
@@ -404,7 +405,7 @@ describe('Register', () => {
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -439,7 +440,7 @@ describe('Register', () => {
     await user.type(passwordInput, 'password123');
     await user.type(confirmPasswordInput, 'password123');
 
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
     await user.click(submitButton);
 
     await waitFor(() => {
@@ -467,7 +468,7 @@ describe('Register', () => {
     const emailInput = screen.getByLabelText(/email/i);
     const passwordInput = screen.getByLabelText(/^password$/i);
     const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const submitButton = screen.getByRole('button', { name: /register/i });
+    const submitButton = screen.getByRole('button', { name: /join the guild/i });
 
     // First failed registration
     await user.type(usernameInput, 'existinguser');
@@ -508,7 +509,7 @@ describe('Register', () => {
       ]
     });
 
-    const loginLink = screen.getByRole('link', { name: /login here/i });
+    const loginLink = screen.getByRole('link', { name: /return to sanctum/i });
     expect(loginLink.getAttribute('href')).toBe('/login');
   });
 

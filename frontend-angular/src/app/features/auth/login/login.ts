@@ -17,6 +17,7 @@ export class Login {
   loginForm: FormGroup;
   errorMessage = signal<string>('');
   isLoading = signal<boolean>(false);
+  passwordVisible = signal<boolean>(false);
 
   constructor(
     private fb: FormBuilder,
@@ -27,6 +28,10 @@ export class Login {
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible.update(v => !v);
   }
 
   /**

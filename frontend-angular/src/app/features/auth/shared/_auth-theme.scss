@@ -1,0 +1,150 @@
+// Dark RPG Theme - Shared variables and mixins for auth screens
+// Used by login.scss and register.scss
+
+// === Color Palette ===
+$auth-bg: #1a1a2e;
+$auth-bg-secondary: #16213e;
+$auth-purple: #6b46c1;
+$auth-purple-light: #9b7dd4;
+$auth-purple-dark: #4a2d8a;
+$auth-gold: #d4a843;
+$auth-gold-hover: #e0b84d;
+$auth-gold-border: #b8922f;
+$auth-text: #c0c0c0;
+$auth-text-light: #888;
+$auth-text-white: #f0f0f0;
+$auth-input-bg: rgba(255, 255, 255, 0.08);
+$auth-input-border: rgba(255, 255, 255, 0.15);
+$auth-input-focus-border: rgba(107, 70, 193, 0.6);
+$auth-error: #ff6b6b;
+$auth-error-bg: rgba(255, 107, 107, 0.1);
+$auth-divider: rgba(255, 255, 255, 0.15);
+
+// === Typography ===
+$auth-font-title: 'Georgia', 'Times New Roman', serif;
+$auth-font-body: 'Roboto', 'Helvetica Neue', sans-serif;
+
+// === Mixins ===
+
+@mixin auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(180deg, $auth-bg-secondary 0%, $auth-bg 100%);
+  padding: 2rem 1rem;
+  color: $auth-text;
+  font-family: $auth-font-body;
+}
+
+@mixin auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 0 1rem;
+}
+
+@mixin auth-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: $auth-text;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@mixin auth-input {
+  width: 100%;
+  padding: 0.875rem 0.875rem 0.875rem 3rem;
+  background: $auth-input-bg;
+  border: 1.5px solid $auth-input-border;
+  border-radius: 10px;
+  color: $auth-text-white;
+  font-size: 1rem;
+  font-family: $auth-font-body;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  &::placeholder {
+    color: $auth-text-light;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $auth-input-focus-border;
+    box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+  }
+
+  &.error {
+    border-color: $auth-error;
+  }
+}
+
+@mixin auth-btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: $auth-gold;
+  border: none;
+  border-radius: 10px;
+  color: #1a1a2e;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background: $auth-gold-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(212, 168, 67, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin auth-btn-outlined {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  border: 1.5px solid $auth-input-border;
+  border-radius: 10px;
+  color: $auth-text;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: $auth-text;
+    color: $auth-text-white;
+  }
+}
+
+@mixin auth-error-message {
+  display: block;
+  color: $auth-error;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+@mixin auth-alert-error {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  background-color: $auth-error-bg;
+  color: $auth-error;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+}
