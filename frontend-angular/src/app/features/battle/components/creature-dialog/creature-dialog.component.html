@@ -42,6 +42,35 @@
           }
         </div>
       </mat-tab>
+      <mat-tab label="From Beastery">
+        <div class="tab-content">
+          @if (beastsLoading()) {
+            <div class="players-loading">Loading creatures...</div>
+          } @else if (beasts().length === 0) {
+            <div class="players-empty">
+              <p>No creatures in beastery yet.</p>
+              <p class="hint">Create creatures in the "Beastery" section first, then select them here.</p>
+            </div>
+          } @else {
+            <div class="player-select-list">
+              @for (beast of beasts(); track beast.creatureId) {
+                <div
+                  class="player-select-item"
+                  [class.selected]="selectedBeast()?.creatureId === beast.creatureId"
+                  (click)="selectBeast(beast)">
+                  <div class="player-select-info">
+                    <strong>{{ beast.name }}</strong>
+                  </div>
+                  <div class="player-select-stats">
+                    <span>{{ beast.hitPoints }} HP</span>
+                    <span>AC {{ beast.armorClass }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
     </mat-tab-group>
   }
 </mat-dialog-content>
@@ -58,6 +87,9 @@
     </button>
     <button mat-raised-button color="accent" (click)="onAddSelectedPlayer()" [disabled]="!selectedPlayer()">
       Add Selected Player
+    </button>
+    <button mat-raised-button color="accent" (click)="onAddSelectedBeast()" [disabled]="!selectedBeast()">
+      Add Selected Beast
     </button>
   }
 </mat-dialog-actions>

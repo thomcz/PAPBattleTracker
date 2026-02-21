@@ -7,6 +7,7 @@ import { Creature, CreatureType } from '../../../../core/domain/models/battle.mo
 import { of, Subject } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { PlayerPort } from '../../../../core/ports/player.port';
+import { BeasteryPort } from '../../../../core/ports/beastery.port';
 
 describe('CreatureListComponent', () => {
   const mockCreatures: Creature[] = [
@@ -55,6 +56,15 @@ describe('CreatureListComponent', () => {
     deletePlayer: vi.fn()
   };
 
+  const mockBeasteryPort = {
+    createCreature: vi.fn(),
+    listCreatures: vi.fn().mockReturnValue(of({ creatures: [], total: 0 })),
+    getCreature: vi.fn(),
+    updateCreature: vi.fn(),
+    deleteCreature: vi.fn(),
+    duplicateCreature: vi.fn()
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockPlayerPort.listPlayers.mockReturnValue(of({ players: [], total: 0 }));
@@ -86,7 +96,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -102,7 +113,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -119,7 +131,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -136,7 +149,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -151,7 +165,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -170,7 +185,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -187,7 +203,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -205,7 +222,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -221,7 +239,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -239,7 +258,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -256,7 +276,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -273,7 +294,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -290,7 +312,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -310,7 +333,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -331,7 +355,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -357,7 +382,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -376,7 +402,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -395,7 +422,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -416,7 +444,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 
@@ -443,7 +472,8 @@ describe('CreatureListComponent', () => {
         },
         providers: [
           { provide: MatDialog, useValue: mockDialog },
-          { provide: PlayerPort, useValue: mockPlayerPort }
+          { provide: PlayerPort, useValue: mockPlayerPort },
+          { provide: BeasteryPort, useValue: mockBeasteryPort }
         ]
       });
 

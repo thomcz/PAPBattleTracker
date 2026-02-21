@@ -9,7 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { CreatureType } from '../../../../core/domain/models/battle.model';
 import { Player } from '../../../../core/domain/models/player.model';
+import { BeasteryCreature } from '../../../../core/domain/models/beastery-creature.model';
 import { PlayerListUseCase } from '../../../../core/domain/use-cases/player-list.use-case';
+import { BeasteryListUseCase } from '../../../../core/domain/use-cases/beastery-list.use-case';
 
 export interface CreatureDialogData {
   creature?: {
@@ -28,9 +30,10 @@ export interface CreatureDialogData {
  * Dialog component for adding or editing creatures.
  * User Stories 1 & 2: Add/Edit Creatures
  *
- * In 'add' mode, provides two tabs:
+ * In 'add' mode, provides three tabs:
  * - "New Creature": Manual form to create a new creature from scratch
  * - "From Player": Select an existing player character to add to the battle
+ * - "From Beastery": Select a creature template from the beastery to add to the battle
  */
 @Component({
   selector: 'app-creature-dialog',
@@ -54,12 +57,16 @@ export class CreatureDialogComponent implements OnInit {
   selectedPlayer = signal<Player | null>(null);
   players = signal<Player[]>([]);
   playersLoading = signal<boolean>(false);
+  selectedBeast = signal<BeasteryCreature | null>(null);
+  beasts = signal<BeasteryCreature[]>([]);
+  beastsLoading = signal<boolean>(false);
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<CreatureDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: CreatureDialogData,
-    private playerListUseCase: PlayerListUseCase
+    private playerListUseCase: PlayerListUseCase,
+    private beasteryListUseCase: BeasteryListUseCase
   ) {
     this.form = this.fb.group({
       name: [data.creature?.name || '', [Validators.required, Validators.minLength(1)]],
@@ -74,6 +81,7 @@ export class CreatureDialogComponent implements OnInit {
   ngOnInit(): void {
     if (!this.isEditMode) {
       this.loadPlayers();
+      this.loadBeasts();
     }
   }
 
@@ -90,6 +98,19 @@ export class CreatureDialogComponent implements OnInit {
     });
   }
 
+  private loadBeasts(): void {
+    this.beastsLoading.set(true);
+    this.beasteryListUseCase.loadCreatures().subscribe({
+      next: (response) => {
+        this.beasts.set(response.creatures);
+        this.beastsLoading.set(false);
+      },
+      error: () => {
+        this.beastsLoading.set(false);
+      }
+    });
+  }
+
   onCancel(): void {
     this.dialogRef.close();
   }
@@ -102,6 +123,24 @@ export class CreatureDialogComponent implements OnInit {
 
   selectPlayer(player: Player): void {
     this.selectedPlayer.set(player);
+  }
+
+  selectBeast(beast: BeasteryCreature): void {
+    this.selectedBeast.set(beast);
+  }
+
+  onAddSelectedBeast(): void {
+    const beast = this.selectedBeast();
+    if (!beast) return;
+
+    this.dialogRef.close({
+      name: beast.name,
+      type: CreatureType.MONSTER,
+      currentHp: beast.hitPoints,
+      maxHp: beast.hitPoints,
+      initiative: 0,
+      armorClass: beast.armorClass
+    });
   }
 
   onAddSelectedPlayer(): void {
