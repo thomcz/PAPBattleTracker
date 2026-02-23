@@ -21,13 +21,13 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    loadComponent: () => import('./home/home').then(m => m.HomeComponent),
+    loadComponent: () => import('./features/battle/pages/battle-list/battle-list.component').then(m => m.BattleListComponent),
     canActivate: [authGuard]  // Requires authentication
   },
   {
     path: 'battles',
-    loadComponent: () => import('./features/battle/pages/battle-list/battle-list.component').then(m => m.BattleListComponent),
-    canActivate: [authGuard]  // Requires authentication
+    redirectTo: '/home',
+    pathMatch: 'full'
   },
   {
     path: 'battles/:id',

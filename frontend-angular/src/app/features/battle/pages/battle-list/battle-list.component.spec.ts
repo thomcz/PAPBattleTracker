@@ -1,34 +1,39 @@
-import { render, screen, waitFor } from '@testing-library/angular';
+import {render, screen, waitFor} from '@testing-library/angular';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
-import { of, throwError, Observable } from 'rxjs';
-import { Router } from '@angular/router';
-import { BattleListComponent } from './battle-list.component';
-import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
-import { BattleSummary, CombatStatus } from '../../../../core/domain/models/battle.model';
+import {vi} from 'vitest';
+import {of, throwError, Observable} from 'rxjs';
+import {Router} from '@angular/router';
+import {BattleListComponent} from './battle-list.component';
+import {BattleApiAdapter} from '../../../../adapters/api/battle-api.adapter';
+import {BattleSummary, CombatStatus} from '../../../../core/domain/models/battle.model';
+import {LoginUseCase} from '../../../../core/domain/use-cases/login.use-case';
+import {LogoutUseCase} from '../../../../core/domain/use-cases/logout.use-case';
+import {AuthPort} from '../../../../core/ports/auth.port';
+import {StoragePort} from '../../../../core/ports/storage.port';
+import {NavigationPort} from '../../../../core/ports/navigation.port';
 
 describe('BattleListComponent', () => {
   const mockBattles: BattleSummary[] = [
     {
       id: 'battle-1',
-      name: 'Dragon\'s Lair',
+      name: 'Shadow of Aethelgard',
       status: CombatStatus.ACTIVE,
-      createdAt: '2024-01-01T10:00:00Z',
-      lastModified: '2024-01-01T11:00:00Z'
+      createdAt: '2026-02-20T10:00:00Z',
+      lastModified: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: 'battle-2',
-      name: 'Goblin Ambush',
+      name: 'Siege of Ironhold',
       status: CombatStatus.NOT_STARTED,
-      createdAt: '2024-01-02T10:00:00Z',
-      lastModified: '2024-01-02T10:00:00Z'
+      createdAt: '2026-02-19T08:00:00Z',
+      lastModified: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: 'battle-3',
       name: 'Ancient Temple',
       status: CombatStatus.ENDED,
-      createdAt: '2024-01-03T10:00:00Z',
-      lastModified: '2024-01-03T12:00:00Z'
+      createdAt: '2026-02-18T10:00:00Z',
+      lastModified: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     }
   ];
 
@@ -40,136 +45,180 @@ describe('BattleListComponent', () => {
     pauseCombat: vi.fn(),
     resumeCombat: vi.fn(),
     endCombat: vi.fn(),
-    deleteBattle: vi.fn()
+    deleteBattle: vi.fn(),
+    addCreature: vi.fn(),
+    updateCreature: vi.fn(),
+    removeCreature: vi.fn(),
+    advanceTurn: vi.fn(),
+    applyDamage: vi.fn(),
+    getCombatLog: vi.fn(),
   };
 
   const mockRouter = {
     navigate: vi.fn()
   };
 
+  const mockLoginUseCase = {
+    execute: vi.fn(),
+    currentUser: vi.fn().mockReturnValue({userName: 'TestGM', email: 'gm@realm.com'}),
+    isAuthenticated: vi.fn().mockReturnValue(true),
+    getToken: vi.fn(),
+    clearAuthState: vi.fn(),
+  };
+
+  const mockLogoutUseCase = {
+    execute: vi.fn(),
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockLoginUseCase.currentUser.mockReturnValue({userName: 'TestGM', email: 'gm@realm.com'});
   });
 
-  it('should render the component with header', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of([]));
+  async function setup(overrides: { battles?: BattleSummary[] | 'error' } = {}) {
+    if (overrides.battles === 'error') {
+      mockBattleApiAdapter.listBattles.mockReturnValue(throwError(() => new Error('Network error')));
+    } else if (overrides.battles !== undefined) {
+      mockBattleApiAdapter.listBattles.mockReturnValue(of(overrides.battles));
+    } else {
+      mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
+    }
 
-    await render(BattleListComponent, {
+    const result = await render(BattleListComponent, {
       providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
+        {provide: BattleApiAdapter, useValue: mockBattleApiAdapter},
+        {provide: Router, useValue: mockRouter},
+        {provide: LoginUseCase, useValue: mockLoginUseCase},
+        {provide: LogoutUseCase, useValue: mockLogoutUseCase},
+        {provide: AuthPort, useValue: {login: vi.fn(), register: vi.fn(), getCurrentUser: vi.fn(), isAuthenticated: vi.fn()}},
+        {provide: StoragePort, useValue: {getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn(), clear: vi.fn()}},
+        {provide: NavigationPort, useValue: {navigate: vi.fn(), navigateByUrl: vi.fn()}},
       ]
     });
 
-    expect(screen.getByRole('heading', { name: /battle sessions/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /create new battle/i })).toBeTruthy();
+    await result.fixture.whenStable();
+    return result;
+  }
+
+  // === Header & Dashboard ===
+
+  it('should render "Active Sessions" heading', async () => {
+    await setup();
+    expect(screen.getByText('Active Sessions')).toBeTruthy();
   });
+
+  it('should render user avatar with first letter of username', async () => {
+    await setup();
+    const avatar = screen.getByText('T');
+    expect(avatar.classList.contains('user-avatar')).toBe(true);
+  });
+
+  it('should render logout button', async () => {
+    await setup();
+    const logoutBtn = screen.getByRole('button', {name: /logout/i});
+    expect(logoutBtn).toBeTruthy();
+  });
+
+  it('should call logout when logout button is clicked', async () => {
+    const user = userEvent.setup();
+    await setup();
+    const logoutBtn = screen.getByRole('button', {name: /logout/i});
+    await user.click(logoutBtn);
+    expect(mockLogoutUseCase.execute).toHaveBeenCalled();
+  });
+
+  it('should render "Current Battles" section heading', async () => {
+    await setup();
+    expect(screen.getByText('Current Battles')).toBeTruthy();
+  });
+
+  // === Stats Cards ===
+
+  it('should display "In Progress" stat', async () => {
+    await setup();
+    expect(screen.getByText(/in progress/i)).toBeTruthy();
+  });
+
+  it('should display stats with correct values', async () => {
+    await setup();
+    const statValues = document.querySelectorAll('.stat-value');
+    expect(statValues.length).toBe(2);
+    expect(statValues[0].textContent?.trim()).toBe('2'); // 2 non-ended battles
+    expect(statValues[1].textContent?.trim()).toBe('3'); // 3 total battles
+  });
+
+  it('should display stats with zero when no battles', async () => {
+    await setup({battles: []});
+    const statValues = document.querySelectorAll('.stat-value');
+    expect(statValues.length).toBe(2);
+    expect(statValues[0].textContent?.trim()).toBe('0');
+    expect(statValues[1].textContent?.trim()).toBe('0');
+  });
+
+  // === Battle Cards ===
 
   it('should load battles on initialization', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    await setup();
     expect(mockBattleApiAdapter.listBattles).toHaveBeenCalled();
   });
 
-  it('should show loading state while fetching battles', async () => {
-    // Create a promise we control
-    let resolveBattles: (value: BattleSummary[]) => void;
-    const battlesPromise = new Promise<BattleSummary[]>((resolve) => {
-      resolveBattles = resolve;
-    });
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles).pipe(
-      (source) => new Observable(subscriber => {
-        battlesPromise.then(battles => {
-          subscriber.next(battles);
-          subscriber.complete();
-        });
-      })
-    ));
-
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
-    // Should show loading state
-    expect(screen.getByText(/loading battles.../i)).toBeTruthy();
+  it('should display battle cards when battles exist', async () => {
+    await setup();
+    expect(screen.getByText('Shadow of Aethelgard')).toBeTruthy();
+    expect(screen.getByText('Siege of Ironhold')).toBeTruthy();
+    expect(screen.getByText('Ancient Temple')).toBeTruthy();
   });
 
-  it('should display empty state when no battles exist', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of([]));
-
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/ready to begin your adventure/i)).toBeTruthy();
-      expect(screen.getByText(/create your first battle session/i)).toBeTruthy();
-    });
+  it('should show status badges on battle cards', async () => {
+    await setup();
+    expect(screen.getByText('Active')).toBeTruthy();
+    expect(screen.getByText('Not Started')).toBeTruthy();
+    expect(screen.getByText('Ended')).toBeTruthy();
   });
 
-  it('should display battles in a table', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Dragon\'s Lair')).toBeTruthy();
-      expect(screen.getByText('Goblin Ambush')).toBeTruthy();
-      expect(screen.getByText('Ancient Temple')).toBeTruthy();
-    });
+  it('should show "Resume Session" button on each battle card', async () => {
+    await setup();
+    const resumeButtons = screen.getAllByText(/resume session/i);
+    expect(resumeButtons.length).toBe(3);
   });
 
-  it('should display correct status labels for battles', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Active')).toBeTruthy();
-      expect(screen.getByText('Not Started')).toBeTruthy();
-      expect(screen.getByText('Ended')).toBeTruthy();
-    });
+  it('should show relative last activity time', async () => {
+    await setup();
+    const timeTexts = screen.getAllByText(/ago/i);
+    expect(timeTexts.length).toBeGreaterThan(0);
   });
 
-  it('should show error message when loading battles fails', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(
-      throwError(() => new Error('Network error'))
-    );
+  it('should navigate to battle detail when Resume Session is clicked', async () => {
+    const user = userEvent.setup();
+    await setup();
+    const resumeButtons = screen.getAllByRole('button', {name: /resume session/i});
+    await user.click(resumeButtons[0]);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/battles', 'battle-1']);
+  });
 
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
+  // === Empty State ===
 
-    await waitFor(() => {
-      expect(screen.getByText(/failed to load battles/i)).toBeTruthy();
-      expect(screen.getByRole('button', { name: /retry/i })).toBeTruthy();
-    });
+  it('should show empty state when no battles exist', async () => {
+    await setup({battles: []});
+    expect(screen.getByText(/no battles yet/i)).toBeTruthy();
+  });
+
+  it('should show create battle button in empty state', async () => {
+    await setup({battles: []});
+    const btn = screen.getByRole('button', {name: /create battle/i});
+    expect(btn).toBeTruthy();
+  });
+
+  // === Error State ===
+
+  it('should show error state when battles fail to load', async () => {
+    await setup({battles: 'error'});
+    expect(screen.getByText(/failed to load/i)).toBeTruthy();
+  });
+
+  it('should show retry button on error', async () => {
+    await setup({battles: 'error'});
+    expect(screen.getByRole('button', {name: /retry/i})).toBeTruthy();
   });
 
   it('should retry loading battles when retry button is clicked', async () => {
@@ -178,133 +227,69 @@ describe('BattleListComponent', () => {
       .mockReturnValueOnce(throwError(() => new Error('Network error')))
       .mockReturnValueOnce(of(mockBattles));
 
-    await render(BattleListComponent, {
+    const result = await render(BattleListComponent, {
       providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
+        {provide: BattleApiAdapter, useValue: mockBattleApiAdapter},
+        {provide: Router, useValue: mockRouter},
+        {provide: LoginUseCase, useValue: mockLoginUseCase},
+        {provide: LogoutUseCase, useValue: mockLogoutUseCase},
+        {provide: AuthPort, useValue: {login: vi.fn(), register: vi.fn(), getCurrentUser: vi.fn(), isAuthenticated: vi.fn()}},
+        {provide: StoragePort, useValue: {getItem: vi.fn(), setItem: vi.fn(), removeItem: vi.fn(), clear: vi.fn()}},
+        {provide: NavigationPort, useValue: {navigate: vi.fn(), navigateByUrl: vi.fn()}},
       ]
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(/failed to load battles/i)).toBeTruthy();
-    });
+    await result.fixture.whenStable();
 
-    const retryButton = screen.getByRole('button', { name: /retry/i });
+    expect(screen.getByText(/failed to load/i)).toBeTruthy();
+
+    const retryButton = screen.getByRole('button', {name: /retry/i});
     await user.click(retryButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Dragon\'s Lair')).toBeTruthy();
+      expect(screen.getByText('Shadow of Aethelgard')).toBeTruthy();
       expect(mockBattleApiAdapter.listBattles).toHaveBeenCalledTimes(2);
     });
   });
 
-  it('should open create dialog when create button is clicked', async () => {
+  // === Create Battle ===
+
+  it('should show "New Battle" button in section header', async () => {
+    await setup();
+    expect(screen.getByRole('button', {name: /new battle/i})).toBeTruthy();
+  });
+
+  it('should open create dialog when "New Battle" button is clicked', async () => {
     const user = userEvent.setup();
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    const { fixture } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    const {fixture} = await setup();
     const component = fixture.componentInstance;
     expect(component.showCreateDialog()).toBe(false);
 
-    const createButton = screen.getByRole('button', { name: /create new battle/i });
+    const createButton = screen.getByRole('button', {name: /new battle/i});
     await user.click(createButton);
-
     expect(component.showCreateDialog()).toBe(true);
   });
 
   it('should open create dialog from empty state', async () => {
     const user = userEvent.setup();
-    mockBattleApiAdapter.listBattles.mockReturnValue(of([]));
-
-    const { fixture } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    const {fixture} = await setup({battles: []});
     const component = fixture.componentInstance;
 
-    await waitFor(() => {
-      expect(screen.getByText(/ready to begin your adventure/i)).toBeTruthy();
-    });
-
-    const createButton = screen.getByRole('button', { name: /create your first battle/i });
+    const createButton = screen.getByRole('button', {name: /create battle/i});
     await user.click(createButton);
-
     expect(component.showCreateDialog()).toBe(true);
   });
 
-  it('should navigate to battle detail when view button is clicked', async () => {
-    const user = userEvent.setup();
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Dragon\'s Lair')).toBeTruthy();
-    });
-
-    // Get all view buttons and click the first one
-    const viewButtons = screen.getAllByRole('button', { name: /view battle details/i });
-    await user.click(viewButtons[0]);
-
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/battles', 'battle-1']);
-  });
-
-  it('should navigate to battle detail when row is clicked', async () => {
-    const user = userEvent.setup();
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    const { container } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Dragon\'s Lair')).toBeTruthy();
-    });
-
-    // Find the first battle row and click it
-    const battleRow = container.querySelector('.battle-row') as HTMLElement;
-    await user.click(battleRow);
-
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/battles', 'battle-1']);
-  });
-
   it('should add new battle to list and navigate after creation', async () => {
-    const user = userEvent.setup();
-    mockBattleApiAdapter.listBattles.mockReturnValue(of([]));
-
-    const { fixture } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    const {fixture} = await setup({battles: []});
     const component = fixture.componentInstance;
 
-    // Simulate battle creation
     const newBattle: BattleSummary = {
       id: 'battle-new',
       name: 'New Battle',
       status: CombatStatus.NOT_STARTED,
-      createdAt: '2024-01-04T10:00:00Z',
-      lastModified: '2024-01-04T10:00:00Z'
+      createdAt: '2026-02-23T10:00:00Z',
+      lastModified: '2026-02-23T10:00:00Z'
     };
 
     component.onBattleCreated(newBattle);
@@ -315,15 +300,7 @@ describe('BattleListComponent', () => {
   });
 
   it('should close create dialog when dialogClosed event is emitted', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    const { fixture } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    const {fixture} = await setup();
     const component = fixture.componentInstance;
 
     component.openCreateDialog();
@@ -333,16 +310,10 @@ describe('BattleListComponent', () => {
     expect(component.showCreateDialog()).toBe(false);
   });
 
+  // === Status Helpers ===
+
   it('should apply correct CSS classes for different statuses', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    const { fixture } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    const {fixture} = await setup();
     const component = fixture.componentInstance;
 
     expect(component.getStatusClass(CombatStatus.NOT_STARTED)).toBe('status-not-started');
@@ -352,15 +323,7 @@ describe('BattleListComponent', () => {
   });
 
   it('should return correct status labels', async () => {
-    mockBattleApiAdapter.listBattles.mockReturnValue(of(mockBattles));
-
-    const { fixture } = await render(BattleListComponent, {
-      providers: [
-        { provide: BattleApiAdapter, useValue: mockBattleApiAdapter },
-        { provide: Router, useValue: mockRouter }
-      ]
-    });
-
+    const {fixture} = await setup();
     const component = fixture.componentInstance;
 
     expect(component.getStatusLabel(CombatStatus.NOT_STARTED)).toBe('Not Started');

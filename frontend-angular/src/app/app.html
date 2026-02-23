@@ -1,1 +1,6 @@
-<router-outlet/>
+<div class="app-content" [class.has-bottom-nav]="loginUseCase.isAuthenticated()">
+  <router-outlet/>
+</div>
+@if (loginUseCase.isAuthenticated()) {
+  <app-bottom-nav/>
+}

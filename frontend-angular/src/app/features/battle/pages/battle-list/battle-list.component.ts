@@ -1,38 +1,33 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
-import { BattleSummary, CombatStatus } from '../../../../core/domain/models/battle.model';
-import { CreateBattleDialogComponent } from '../../components/create-battle-dialog/create-battle-dialog.component';
+import {Component, computed, OnInit, signal} from '@angular/core';
+import {Router} from '@angular/router';
+import {BattleApiAdapter} from '../../../../adapters/api/battle-api.adapter';
+import {BattleSummary, CombatStatus} from '../../../../core/domain/models/battle.model';
+import {CreateBattleDialogComponent} from '../../components/create-battle-dialog/create-battle-dialog.component';
+import {LoginUseCase} from '../../../../core/domain/use-cases/login.use-case';
+import {LogoutUseCase} from '../../../../core/domain/use-cases/logout.use-case';
 
-/**
- * Battle List Component
- *
- * Displays all battles for the authenticated user in a table format.
- * Allows creating new battles and navigating to battle details.
- *
- * Uses signals for reactive state management.
- */
 @Component({
   selector: 'app-battle-list',
   standalone: true,
-  imports: [CommonModule, CreateBattleDialogComponent],
+  imports: [CreateBattleDialogComponent],
   templateUrl: './battle-list.component.html',
-  styleUrls: ['./battle-list.component.css']
+  styleUrls: ['./battle-list.component.scss']
 })
 export class BattleListComponent implements OnInit {
-  // Signal-based state
   battles = signal<BattleSummary[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
   showCreateDialog = signal<boolean>(false);
 
-  // Expose CombatStatus enum to template
-  CombatStatus = CombatStatus;
+  readonly battleCount = computed(() =>
+    this.battles().filter(b => b.status !== CombatStatus.ENDED).length
+  );
 
   constructor(
     private battleApi: BattleApiAdapter,
-    private router: Router
+    private router: Router,
+    public loginUseCase: LoginUseCase,
+    public logoutUseCase: LogoutUseCase
   ) {}
 
   ngOnInit(): void {
@@ -64,11 +59,8 @@ export class BattleListComponent implements OnInit {
   }
 
   onBattleCreated(battle: BattleSummary): void {
-    // Add new battle to the list
     this.battles.update(battles => [...battles, battle]);
     this.closeCreateDialog();
-
-    // Navigate to the new battle detail page
     this.router.navigate(['/battles', battle.id]);
   }
 
@@ -76,33 +68,49 @@ export class BattleListComponent implements OnInit {
     this.router.navigate(['/battles', battleId]);
   }
 
+  logout(): void {
+    this.logoutUseCase.execute();
+  }
+
+  getUserInitial(): string {
+    const user = this.loginUseCase.currentUser();
+    return user?.userName?.charAt(0)?.toUpperCase() ?? '?';
+  }
+
   getStatusClass(status: CombatStatus): string {
     switch (status) {
-      case CombatStatus.NOT_STARTED:
-        return 'status-not-started';
-      case CombatStatus.ACTIVE:
-        return 'status-active';
-      case CombatStatus.PAUSED:
-        return 'status-paused';
-      case CombatStatus.ENDED:
-        return 'status-ended';
-      default:
-        return '';
+      case CombatStatus.NOT_STARTED: return 'status-not-started';
+      case CombatStatus.ACTIVE: return 'status-active';
+      case CombatStatus.PAUSED: return 'status-paused';
+      case CombatStatus.ENDED: return 'status-ended';
+      default: return '';
     }
   }
 
   getStatusLabel(status: CombatStatus): string {
     switch (status) {
-      case CombatStatus.NOT_STARTED:
-        return 'Not Started';
-      case CombatStatus.ACTIVE:
-        return 'Active';
-      case CombatStatus.PAUSED:
-        return 'Paused';
-      case CombatStatus.ENDED:
-        return 'Ended';
-      default:
-        return status;
+      case CombatStatus.NOT_STARTED: return 'Not Started';
+      case CombatStatus.ACTIVE: return 'Active';
+      case CombatStatus.PAUSED: return 'Paused';
+      case CombatStatus.ENDED: return 'Ended';
+      default: return status;
     }
+  }
+
+  getRelativeTime(dateString: string): string {
+    const now = Date.now();
+    const date = new Date(dateString).getTime();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+
+    if (diffSec < 60) return 'just now';
+    if (diffMin < 60) return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+    if (diffHour < 24) return `${diffHour} hour${diffHour > 1 ? 's' : ''} ago`;
+    if (diffDay < 30) return `${diffDay} day${diffDay > 1 ? 's' : ''} ago`;
+    const diffMonth = Math.floor(diffDay / 30);
+    return `${diffMonth} month${diffMonth > 1 ? 's' : ''} ago`;
   }
 }

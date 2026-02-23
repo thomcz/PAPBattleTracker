@@ -1,0 +1,51 @@
+@use 'sass:color';
+@use '../../../features/auth/shared/auth-theme' as *;
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: color.adjust($auth-bg, $lightness: -3%);
+  border-top: 1px solid $auth-input-border;
+  padding: 0.5rem 0;
+  z-index: 1000;
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 0.375rem 0.75rem;
+  color: $auth-text-light;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: $auth-text;
+  }
+
+  &.active {
+    color: $auth-purple;
+  }
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-label {
+  font-family: $auth-font-body;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
