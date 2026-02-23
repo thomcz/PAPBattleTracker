@@ -280,6 +280,8 @@ Both backends implement identical APIs with the same hexagonal architecture:
 - H2 in-memory database with event sourcing pattern (events stored as JSON) (004-player-management)
 - TypeScript (Angular 21.0.2) + Angular 18 (standalone components), ReactiveFormsModule, Angular Router, RxJS, Angular Signals (006-login-screen-redesign)
 - N/A (no storage changes - existing JWT/localStorage unchanged) (006-login-screen-redesign)
+- TypeScript (Angular 21.0.2, standalone components) + Angular Router, RxJS, Angular Signals, existing BattlePort/BattleApiAdapter (007-dashboard-redesign)
+- N/A (reads from existing battle API) (007-dashboard-redesign)
 
 ## Recent Changes
 - 001-battle-tracker-features: Added H2 in-memory database (development), event sourcing with JSON event store
