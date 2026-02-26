@@ -31,6 +31,11 @@ interface BattleRepository {
     fun findByUserId(userId: UUID, status: CombatStatus? = null): List<Battle>
 
     /**
+     * Find all battles belonging to a session.
+     */
+    fun findBySessionId(sessionId: UUID): List<Battle>
+
+    /**
      * Save battle metadata after events are persisted.
      * This updates queryable fields like name, status, lastModified.
      *

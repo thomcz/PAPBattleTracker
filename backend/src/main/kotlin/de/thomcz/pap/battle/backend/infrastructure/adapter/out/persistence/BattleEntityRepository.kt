@@ -22,4 +22,6 @@ interface BattleEntityRepository : JpaRepository<BattleEntity, UUID> {
      * Find battles for a user filtered by status.
      */
     fun findByUserIdAndStatus(userId: UUID, status: String): List<BattleEntity>
+
+    fun findBySessionId(sessionId: UUID): List<BattleEntity>
 }

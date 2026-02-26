@@ -44,7 +44,8 @@ class BattleService(
         // Note: userId is username from JWT, convert to deterministic UUID
         val battle = Battle.create(
             userId = userNameToUUID(userId),
-            name = command.name
+            name = command.name,
+            sessionId = command.sessionId
         )
 
         // Save battle (persists events and metadata)

@@ -24,6 +24,8 @@ class Battle private constructor() {
         private set
     var userId: UUID = UUID.randomUUID()
         private set
+    var sessionId: UUID? = null
+        private set
 
     // === Derived State ===
     var name: String = ""
@@ -85,7 +87,7 @@ class Battle private constructor() {
          * @param name Battle name
          * @return Battle aggregate with BattleCreated event
          */
-        fun create(userId: UUID, name: String): Battle {
+        fun create(userId: UUID, name: String, sessionId: UUID? = null): Battle {
             require(name.isNotBlank()) { "Battle name cannot be blank" }
             require(name.length <= 255) { "Battle name cannot exceed 255 characters" }
 
@@ -95,7 +97,8 @@ class Battle private constructor() {
                 eventId = UUID.randomUUID(),
                 timestamp = Instant.now(),
                 userId = userId,
-                name = name
+                name = name,
+                sessionId = sessionId
             )
 
             battle.applyEvent(event)
@@ -493,6 +496,7 @@ class Battle private constructor() {
             is BattleCreated -> {
                 battleId = event.battleId
                 userId = event.userId
+                sessionId = event.sessionId
                 name = event.name
                 status = CombatStatus.NOT_STARTED
                 createdAt = event.timestamp

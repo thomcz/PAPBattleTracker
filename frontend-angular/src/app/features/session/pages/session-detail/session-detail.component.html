@@ -1,0 +1,153 @@
+<div class="detail-page">
+  <!-- Header -->
+  <header class="header">
+    <button class="btn-back" (click)="goBack()" aria-label="Back to sessions">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <h1 class="header-title">{{ sessionDetailUseCase.session()?.name ?? 'Session' }}</h1>
+    <button class="btn-logout" (click)="logout()" aria-label="Logout">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Loading State -->
+  @if (sessionDetailUseCase.loading()) {
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading session...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (sessionDetailUseCase.error()) {
+    <div class="error-state">
+      <p class="error-message">{{ sessionDetailUseCase.error() }}</p>
+      <button class="btn-retry" (click)="goBack()">Back to Sessions</button>
+    </div>
+  }
+
+  <!-- Session Content -->
+  @if (!sessionDetailUseCase.loading() && !sessionDetailUseCase.error() && sessionDetailUseCase.session()) {
+    <div class="content">
+      <!-- Session Actions -->
+      <div class="session-actions-row">
+        <button class="btn-action" (click)="openRenameDialog()">Rename</button>
+        <button class="btn-action btn-action-danger" (click)="openDeleteConfirm()">Delete</button>
+      </div>
+
+      <!-- Session Status & Lifecycle Controls -->
+      <div class="session-status-row">
+        <app-session-status-badge [status]="sessionDetailUseCase.session()?.status ?? ''"></app-session-status-badge>
+        <div class="lifecycle-controls">
+          @if (sessionDetailUseCase.session()?.status === 'PLANNED') {
+            <button class="btn-lifecycle btn-start" (click)="startSession()">Start Session</button>
+          }
+          @if (sessionDetailUseCase.session()?.status === 'STARTED') {
+            <button class="btn-lifecycle btn-finish" (click)="finishSession()">Finish Session</button>
+          }
+        </div>
+      </div>
+      @if (lifecycleError()) {
+        <p class="lifecycle-error">{{ lifecycleError() }}</p>
+      }
+
+      <!-- Section Header -->
+      <div class="section-header">
+        <h2 class="section-title">Battles ({{ sessionDetailUseCase.session()?.battles?.length ?? 0 }})</h2>
+        <button class="btn-create" (click)="openCreateBattleDialog()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Battle
+        </button>
+      </div>
+
+      <!-- Empty Battles State -->
+      @if (sessionDetailUseCase.session()?.battles?.length === 0) {
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" class="empty-icon">
+            <path d="M6 2L2 8l4 2-2 8 8-4 8 4-2-8 4-2-4-6-4 4z"/>
+          </svg>
+          <p class="empty-text">No battles yet</p>
+          <p class="empty-sub">Create your first battle in this session</p>
+          <button class="btn-create-battle" (click)="openCreateBattleDialog()">Create Battle</button>
+        </div>
+      }
+
+      <!-- Battle Cards -->
+      @if (sessionDetailUseCase.session()?.battles?.length ?? 0 > 0) {
+        <div class="battle-list">
+          @for (battle of sessionDetailUseCase.session()?.battles ?? []; track battle.id) {
+            <div class="battle-card">
+              <div class="battle-image">
+                <span class="battle-status-badge" [class]="getStatusClass(battle.status)">
+                  {{ getStatusLabel(battle.status) }}
+                </span>
+              </div>
+              <div class="battle-info">
+                <h3 class="battle-name">{{ battle.name }}</h3>
+                <div class="battle-meta">
+                  <span class="battle-activity">
+                    <span class="meta-label">Last Activity</span>
+                    {{ getRelativeTime(battle.lastModified) }}
+                  </span>
+                </div>
+                <button class="btn-open" (click)="viewBattle(battle.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                    <polygon points="5,3 19,12 5,21"/>
+                  </svg>
+                  Open Battle
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Rename Dialog -->
+  @if (showRenameDialog()) {
+    <div class="modal-backdrop">
+      <div class="modal-box">
+        <h3 class="modal-title">Rename Session</h3>
+        <input class="modal-input" type="text" [value]="pendingRename()" (input)="pendingRename.set($any($event.target).value)" placeholder="Session name" />
+        @if (renameError()) { <p class="modal-error">{{ renameError() }}</p> }
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" (click)="closeRenameDialog()">Cancel</button>
+          <button class="btn-modal-confirm" (click)="submitRename()">Rename</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation -->
+  @if (showDeleteConfirm()) {
+    <div class="modal-backdrop">
+      <div class="modal-box">
+        <h3 class="modal-title">Delete Session?</h3>
+        <p class="modal-text">This will permanently delete the session and all its battles.</p>
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" (click)="closeDeleteConfirm()">Cancel</button>
+          <button class="btn-modal-danger" (click)="confirmDelete()">Delete</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Create Battle Dialog -->
+  @if (showCreateBattleDialog()) {
+    <app-create-battle-dialog
+      [sessionId]="sessionId"
+      (battleCreated)="onBattleCreated($event)"
+      (dialogClosed)="closeCreateBattleDialog()">
+    </app-create-battle-dialog>
+  }
+</div>

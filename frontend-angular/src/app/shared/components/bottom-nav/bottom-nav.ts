@@ -9,7 +9,7 @@ import {RouterLink, RouterLinkActive} from '@angular/router';
 })
 export class BottomNav {
   readonly navItems = [
-    {label: 'Battles', route: '/home', icon: 'battles'},
+    {label: 'Sessions', route: '/home', icon: 'sessions'},
     {label: 'Monsters', route: '/beastery', icon: 'monsters'},
     {label: 'Players', route: '/players', icon: 'players'},
   ];

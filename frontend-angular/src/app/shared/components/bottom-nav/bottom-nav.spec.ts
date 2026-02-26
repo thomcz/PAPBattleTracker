@@ -28,14 +28,14 @@ describe('BottomNav', () => {
 
   it('should display correct tab labels', async () => {
     await setup();
-    expect(screen.getByText('Battles')).toBeTruthy();
+    expect(screen.getByText('Sessions')).toBeTruthy();
     expect(screen.getByText('Monsters')).toBeTruthy();
     expect(screen.getByText('Players')).toBeTruthy();
   });
 
-  it('should have correct routerLink for Battles tab', async () => {
+  it('should have correct routerLink for Sessions tab', async () => {
     await setup();
-    const link = screen.getByText('Battles').closest('a');
+    const link = screen.getByText('Sessions').closest('a');
     expect(link?.getAttribute('href')).toBe('/home');
   });
 

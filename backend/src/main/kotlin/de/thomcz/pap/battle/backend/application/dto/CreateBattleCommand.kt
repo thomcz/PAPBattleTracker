@@ -9,5 +9,6 @@ import jakarta.validation.constraints.Size
 data class CreateBattleCommand(
     @field:NotBlank(message = "Battle name cannot be blank")
     @field:Size(max = 255, message = "Battle name cannot exceed 255 characters")
-    val name: String
+    val name: String,
+    val sessionId: java.util.UUID? = null
 )

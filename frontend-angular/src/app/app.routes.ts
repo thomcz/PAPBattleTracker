@@ -21,8 +21,13 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    loadComponent: () => import('./features/battle/pages/battle-list/battle-list.component').then(m => m.BattleListComponent),
+    loadComponent: () => import('./features/session/pages/session-list/session-list.component').then(m => m.SessionListComponent),
     canActivate: [authGuard]  // Requires authentication
+  },
+  {
+    path: 'sessions/:id',
+    loadComponent: () => import('./features/session/pages/session-detail/session-detail.component').then(m => m.SessionDetailComponent),
+    canActivate: [authGuard]
   },
   {
     path: 'battles',

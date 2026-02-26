@@ -8,6 +8,7 @@ import {authProviders} from './core/providers/auth.providers';
 import {battleProviders} from './core/providers/battle.providers';
 import {playerProviders} from './core/providers/player.providers';
 import {beasteryProviders} from './core/providers/beastery.providers';
+import {sessionProviders} from './core/providers/session.providers';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     ...authProviders,
     ...battleProviders,
     ...playerProviders,
-    ...beasteryProviders
+    ...beasteryProviders,
+    ...sessionProviders
   ]
 };

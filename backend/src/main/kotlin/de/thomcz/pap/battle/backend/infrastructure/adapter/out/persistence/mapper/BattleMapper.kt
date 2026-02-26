@@ -18,6 +18,7 @@ object BattleMapper {
         return BattleEntity(
             battleId = battle.battleId,
             userId = battle.userId,
+            sessionId = battle.sessionId,
             name = battle.name,
             status = battle.status.name,
             createdAt = battle.createdAt,
