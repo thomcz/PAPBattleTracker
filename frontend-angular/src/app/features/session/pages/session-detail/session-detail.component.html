@@ -82,7 +82,7 @@
       }
 
       <!-- Battle Cards -->
-      @if (sessionDetailUseCase.session()?.battles?.length ?? 0 > 0) {
+      @if ((sessionDetailUseCase.session()?.battles?.length ?? 0) > 0) {
         <div class="battle-list">
           @for (battle of sessionDetailUseCase.session()?.battles ?? []; track battle.id) {
             <div class="battle-card">
