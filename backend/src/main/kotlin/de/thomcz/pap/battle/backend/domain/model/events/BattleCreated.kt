@@ -16,5 +16,6 @@ data class BattleCreated(
     override val eventId: UUID,
     override val timestamp: Instant,
     override val userId: UUID,
-    val name: String
+    val name: String,
+    val sessionId: UUID? = null
 ) : BattleEvent

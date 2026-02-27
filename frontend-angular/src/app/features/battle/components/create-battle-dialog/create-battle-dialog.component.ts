@@ -1,14 +1,17 @@
-import { Component, EventEmitter, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Optional, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { map } from 'rxjs';
 import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
 import { BattleSummary } from '../../../../core/domain/models/battle.model';
+import { SessionPort } from '../../../../core/ports/session.port';
 
 /**
  * Create Battle Dialog Component
  *
  * Modal dialog for creating a new battle session.
- * Validates input and communicates with backend via BattleApiAdapter.
+ * When sessionId is provided, creates a battle within that session.
+ * Otherwise creates a standalone battle.
  */
 @Component({
   selector: 'app-create-battle-dialog',
@@ -18,6 +21,7 @@ import { BattleSummary } from '../../../../core/domain/models/battle.model';
   styleUrls: ['./create-battle-dialog.component.css']
 })
 export class CreateBattleDialogComponent {
+  @Input() sessionId: string | null = null;
   @Output() battleCreated = new EventEmitter<BattleSummary>();
   @Output() dialogClosed = new EventEmitter<void>();
 
@@ -34,7 +38,10 @@ export class CreateBattleDialogComponent {
     ])
   });
 
-  constructor(private battleApi: BattleApiAdapter) {}
+  constructor(
+    private battleApi: BattleApiAdapter,
+    @Optional() private sessionPort: SessionPort | null
+  ) {}
 
   onSubmit(): void {
     if (this.battleForm.invalid) {
@@ -46,18 +53,22 @@ export class CreateBattleDialogComponent {
     this.loading.set(true);
     this.error.set(null);
 
-    this.battleApi.createBattle(name).subscribe({
+    const createObs = this.sessionId && this.sessionPort
+      ? this.sessionPort.createBattleInSession(this.sessionId, {name})
+      : this.battleApi.createBattle(name).pipe(
+          map(battle => ({
+            id: battle.id,
+            name: battle.name,
+            status: battle.status,
+            createdAt: battle.createdAt,
+            lastModified: battle.lastModified
+          } as BattleSummary))
+        );
+
+    createObs.subscribe({
       next: (battle) => {
         this.loading.set(false);
-        // Emit the battle as a summary (extract necessary fields)
-        const summary: BattleSummary = {
-          id: battle.id,
-          name: battle.name,
-          status: battle.status,
-          createdAt: battle.createdAt,
-          lastModified: battle.lastModified
-        };
-        this.battleCreated.emit(summary);
+        this.battleCreated.emit(battle);
         this.battleForm.reset();
       },
       error: () => {

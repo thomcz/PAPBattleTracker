@@ -1,0 +1,112 @@
+<div class="dashboard">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="user-avatar">{{ getUserInitial() }}</div>
+      <h1 class="header-title">Game Sessions</h1>
+    </div>
+    <button class="btn-logout" (click)="logout()" aria-label="Logout">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Stats Cards -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" class="stat-icon">
+          <circle cx="12" cy="12" r="3"/>
+          <circle cx="5" cy="12" r="2"/>
+          <circle cx="19" cy="12" r="2"/>
+        </svg>
+        Total Sessions
+      </div>
+      <div class="stat-value">{{ sessionListUseCase.sessionCount() }}</div>
+      <div class="stat-sub">Sessions</div>
+    </div>
+  </div>
+
+  <!-- Section Header -->
+  <div class="section-header">
+    <h2 class="section-title">Your Sessions</h2>
+    <button class="btn-create" (click)="openCreateDialog()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      New Session
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (sessionListUseCase.loading()) {
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading sessions...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (sessionListUseCase.error()) {
+    <div class="error-state">
+      <p class="error-message">{{ sessionListUseCase.error() }}</p>
+      <button class="btn-retry" (click)="sessionListUseCase.loadSessions()">Retry</button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!sessionListUseCase.loading() && !sessionListUseCase.error() && sessionListUseCase.sessions().length === 0) {
+    <div class="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" class="empty-icon">
+        <path d="M6 2L2 8l4 2-2 8 8-4 8 4-2-8 4-2-4-6-4 4z"/>
+      </svg>
+      <p class="empty-text">No sessions yet</p>
+      <p class="empty-sub">Create your first game session to get started</p>
+      <button class="btn-create-session" (click)="openCreateDialog()">Create Session</button>
+    </div>
+  }
+
+  <!-- Session Cards -->
+  @if (!sessionListUseCase.loading() && !sessionListUseCase.error()) {
+    <div class="session-list">
+      @for (session of sessionListUseCase.sessions(); track session.sessionId) {
+        <div class="session-card" (click)="viewSession(session.sessionId)">
+          <div class="session-image">
+            <app-session-status-badge [status]="session.status"></app-session-status-badge>
+          </div>
+          <div class="session-info">
+            <h3 class="session-name">{{ session.name }}</h3>
+            <div class="session-meta">
+              <span class="session-battles">
+                <span class="meta-label">Battles</span>
+                {{ session.battleCount }}
+              </span>
+              <span class="session-activity">
+                <span class="meta-label">Last Activity</span>
+                {{ getRelativeTime(session.lastModified) }}
+              </span>
+            </div>
+            <button class="btn-open" (click)="viewSession(session.sessionId); $event.stopPropagation()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+              Open Session
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Create Session Dialog -->
+  @if (showCreateDialog()) {
+    <app-create-session-dialog
+      (sessionCreated)="onSessionCreated()"
+      (dialogClosed)="closeCreateDialog()">
+    </app-create-session-dialog>
+  }
+</div>

@@ -1,0 +1,263 @@
+@use '../../../auth/shared/auth-theme' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(180deg, $auth-bg-secondary 0%, $auth-bg 100%);
+  color: $auth-text;
+  font-family: $auth-font-body;
+}
+
+.detail-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: $auth-text-light;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+  &:hover { color: $auth-text-white; background: rgba(255,255,255,0.08); }
+}
+
+.header-title {
+  font-family: $auth-font-body;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $auth-text-white;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.btn-logout {
+  background: none;
+  border: none;
+  color: $auth-text-light;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+  &:hover { color: $auth-text-white; background: rgba(255,255,255,0.08); }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: $auth-text-light;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $auth-input-border;
+  border-top-color: $auth-purple;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-state { text-align: center; padding: 2rem 1rem; }
+.error-message { color: $auth-error; margin-bottom: 1rem; }
+.btn-retry { @include auth-btn-outlined; width: auto; display: inline-block; padding: 0.625rem 1.5rem; }
+
+.session-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.btn-action {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid $auth-input-border;
+  border-radius: 6px;
+  background: transparent;
+  color: $auth-text-light;
+  font-size: 0.78rem;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: rgba(255,255,255,0.08); color: $auth-text-white; }
+}
+.btn-action-danger { &:hover { background: rgba(220,38,38,0.15); color: #f87171; border-color: rgba(220,38,38,0.4); } }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-box {
+  background: $auth-bg-secondary;
+  border: 1px solid $auth-input-border;
+  border-radius: 14px;
+  padding: 1.5rem;
+  min-width: 300px;
+  max-width: 90vw;
+}
+
+.modal-title { font-family: $auth-font-title; color: $auth-text-white; margin: 0 0 1rem; font-size: 1.1rem; }
+.modal-text { color: $auth-text-light; font-size: 0.9rem; margin: 0 0 1.25rem; }
+.modal-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background: $auth-input-bg;
+  border: 1px solid $auth-input-border;
+  border-radius: 8px;
+  color: $auth-text-white;
+  font-family: $auth-font-body;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  box-sizing: border-box;
+  &:focus { outline: none; border-color: $auth-purple; }
+}
+.modal-error { color: $auth-error; font-size: 0.8rem; margin: 0 0 0.5rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.btn-modal-cancel { @include auth-btn-outlined; width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; }
+.btn-modal-confirm { @include auth-btn-primary; width: auto; padding: 0.5rem 1rem; font-size: 0.85rem; }
+.btn-modal-danger { background: #dc2626; color: white; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem; font-family: $auth-font-body; cursor: pointer; &:hover { background: #b91c1c; } }
+
+.session-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid $auth-input-border;
+  border-radius: 10px;
+}
+
+.lifecycle-controls { display: flex; gap: 0.5rem; }
+
+.btn-lifecycle {
+  padding: 0.4rem 0.875rem;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-start { background: $auth-gold; color: $auth-bg; &:hover { opacity: 0.85; } }
+.btn-finish { background: rgba(255,255,255,0.12); color: $auth-text; &:hover { background: rgba(255,255,255,0.2); } }
+
+.lifecycle-error { color: $auth-error; font-size: 0.85rem; margin: 0 0 0.75rem; }
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-family: $auth-font-title;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $auth-text-white;
+  margin: 0;
+}
+
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: $auth-purple;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:hover { background: $auth-purple-light; transform: translateY(-1px); }
+}
+
+.empty-state { text-align: center; padding: 3rem 1rem; }
+.empty-icon { color: $auth-text-light; margin-bottom: 1rem; }
+.empty-text { font-size: 1.1rem; color: $auth-text; margin: 0 0 0.5rem; }
+.empty-sub { font-size: 0.85rem; color: $auth-text-light; margin: 0 0 1.5rem; }
+.btn-create-battle { @include auth-btn-primary; display: inline-flex; width: auto; padding: 0.75rem 1.5rem; }
+
+.battle-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.battle-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid $auth-input-border;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  &:hover { border-color: rgba(255,255,255,0.25); }
+}
+
+.battle-image {
+  height: 100px;
+  background: linear-gradient(135deg, rgba(22,33,62,0.8) 0%, rgba(26,26,46,0.9) 100%),
+    linear-gradient(45deg, $auth-purple-dark 0%, $auth-bg 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0.75rem;
+}
+
+.battle-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  &.status-active { background: $auth-gold; color: $auth-bg; }
+  &.status-paused { background: $auth-purple; color: white; }
+  &.status-not-started { background: rgba(255,255,255,0.15); color: $auth-text; }
+  &.status-ended { background: rgba(255,255,255,0.08); color: $auth-text-light; }
+}
+
+.battle-info { padding: 1rem; }
+.battle-name { font-family: $auth-font-title; font-size: 1.15rem; font-weight: 700; color: $auth-text-white; margin: 0 0 0.5rem; }
+.battle-meta { display: flex; gap: 1rem; margin-bottom: 0.875rem; }
+.battle-activity { font-size: 0.8rem; color: $auth-text-light; }
+.meta-label { display: block; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: $auth-text-light; margin-bottom: 0.125rem; }
+
+.btn-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: $auth-purple;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:hover { background: $auth-purple-light; transform: translateY(-1px); }
+}

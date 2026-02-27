@@ -20,7 +20,8 @@ import java.util.UUID
     indexes = [
         Index(name = "idx_battles_user_id", columnList = "user_id"),
         Index(name = "idx_battles_status", columnList = "status"),
-        Index(name = "idx_battles_created_at", columnList = "created_at")
+        Index(name = "idx_battles_created_at", columnList = "created_at"),
+        Index(name = "idx_battles_session_id", columnList = "session_id")
     ]
 )
 class BattleEntity(
@@ -30,6 +31,9 @@ class BattleEntity(
 
     @Column(name = "user_id", nullable = false)
     var userId: UUID? = null,
+
+    @Column(name = "session_id", nullable = true)
+    var sessionId: UUID? = null,
 
     @Column(name = "name", nullable = false, length = 255)
     var name: String? = null,
@@ -47,5 +51,5 @@ class BattleEntity(
     var eventCount: Int = 0
 ) {
     // No-arg constructor for JPA
-    constructor() : this(null, null, null, null, null, null, 0)
+    constructor() : this(null, null, null, null, null, null, null, 0)
 }

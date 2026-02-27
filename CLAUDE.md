@@ -282,6 +282,7 @@ Both backends implement identical APIs with the same hexagonal architecture:
 - N/A (no storage changes - existing JWT/localStorage unchanged) (006-login-screen-redesign)
 - TypeScript (Angular 21.0.2, standalone components) + Angular Router, RxJS, Angular Signals, existing BattlePort/BattleApiAdapter (007-dashboard-redesign)
 - N/A (reads from existing battle API) (007-dashboard-redesign)
+- Kotlin 1.9.25 (JVM 21) + TypeScript (Angular 21.0.2) + Spring Boot 3.5.7, Spring Data JPA, Jackson (backend); Angular 21, RxJS, Angular Signals (frontend) (008-game-sessions)
 
 ## Recent Changes
 - 001-battle-tracker-features: Added H2 in-memory database (development), event sourcing with JSON event store

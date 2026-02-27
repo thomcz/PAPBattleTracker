@@ -1,0 +1,54 @@
+<div class="dialog-overlay" (click)="closeDialog()">
+  <div class="dialog-content" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h2>Create New Session</h2>
+      <button class="close-btn" (click)="closeDialog()" aria-label="Close dialog">
+        ×
+      </button>
+    </div>
+
+    <form [formGroup]="sessionForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="sessionName">Session Name</label>
+        <input
+          id="sessionName"
+          type="text"
+          formControlName="name"
+          placeholder="Enter session name (e.g., 'Friday Night Game')"
+          [class.error]="nameErrors"
+          autocomplete="off"
+        />
+        @if (nameErrors) {
+          <span class="error-text">{{ nameErrors }}</span>
+        }
+      </div>
+
+      @if (error()) {
+        <div class="error-message">
+          {{ error() }}
+        </div>
+      }
+
+      <div class="dialog-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="onCancel()"
+          [disabled]="loading()">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn-create"
+          [disabled]="loading() || sessionForm.invalid">
+          @if (loading()) {
+            <span class="spinner-small"></span>
+            Creating...
+          } @else {
+            Create Session
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

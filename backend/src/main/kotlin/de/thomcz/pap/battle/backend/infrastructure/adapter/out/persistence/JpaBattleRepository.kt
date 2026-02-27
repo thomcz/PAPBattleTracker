@@ -51,6 +51,14 @@ class JpaBattleRepository(
         }
     }
 
+    @Transactional(readOnly = true)
+    override fun findBySessionId(sessionId: UUID): List<Battle> {
+        val entities = battleEntityRepository.findBySessionId(sessionId)
+        return entities.mapNotNull { entity ->
+            entity.battleId?.let { findById(it) }
+        }
+    }
+
     @Transactional
     override fun save(battle: Battle) {
         // First, save uncommitted events
