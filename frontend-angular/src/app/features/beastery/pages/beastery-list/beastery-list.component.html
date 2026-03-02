@@ -1,60 +1,61 @@
-<div class="beastery-list-container">
-  <button class="btn-back" (click)="goBack()">
-    &larr; Back to Home
-  </button>
-
+<div class="dashboard">
   <div class="header">
-    <h1>My Beastery</h1>
-    <button class="btn-primary" (click)="openCreateDialog()">
-      <span class="icon">+</span> Create Creature
+    <button class="btn-back" (click)="goBack()">
+      &#8592; Back
     </button>
+    <div class="section-header">
+      <h2 class="section-title">My Bestiary</h2>
+      <button class="btn-create" (click)="openCreateDialog()">
+        + Create Creature
+      </button>
+    </div>
   </div>
 
   @if (beasteryList.isLoading()) {
-    <div class="loading">
-      <div class="spinner"></div>
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
       <p>Loading creatures...</p>
     </div>
   }
 
   @if (beasteryList.error()) {
-    <div class="error-message">
-      <p>{{ beasteryList.error() }}</p>
-      <button class="btn-secondary" (click)="beasteryList.loadCreatures().subscribe()">Retry</button>
+    <div class="error-state">
+      <p class="error-message">{{ beasteryList.error() }}</p>
+      <button class="btn-retry" (click)="beasteryList.loadCreatures().subscribe()">Retry</button>
     </div>
   }
 
   @if (!beasteryList.isLoading() && !beasteryList.error()) {
     @if (beasteryList.creatures().length === 0) {
       <div class="empty-state">
-        <div class="empty-icon">&#x1f409;</div>
-        <h2>No creatures yet</h2>
-        <p>Create your first creature template to reuse in battles!</p>
-        <button class="btn-primary" (click)="openCreateDialog()">
-          <span class="icon">+</span> Create Your First Creature
+        <div class="empty-icon">🐉</div>
+        <p class="empty-text">No creatures yet</p>
+        <p class="empty-sub">Create your first creature template to reuse in battles!</p>
+        <button class="btn-create-first" (click)="openCreateDialog()">
+          + Create Your First Creature
         </button>
       </div>
     } @else {
-      <div class="creatures-grid">
+      <div class="creature-list">
         @for (creature of beasteryList.creatures(); track creature.creatureId) {
           <div class="creature-card">
-            <div class="creature-header">
-              <h3>{{ creature.name }}</h3>
-            </div>
-            <div class="creature-stats">
-              <div class="stat">
-                <span class="stat-label">HP</span>
-                <span class="stat-value">{{ creature.hitPoints }}</span>
-              </div>
-              <div class="stat">
-                <span class="stat-label">AC</span>
-                <span class="stat-value">{{ creature.armorClass }}</span>
+            <div class="creature-info">
+              <h3 class="creature-name">{{ creature.name }}</h3>
+              <div class="creature-stats">
+                <div class="stat-item">
+                  <span class="stat-label">HP</span>
+                  <span class="stat-value">{{ creature.hitPoints }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">AC</span>
+                  <span class="stat-value">{{ creature.armorClass }}</span>
+                </div>
               </div>
             </div>
             <div class="creature-actions">
-              <button class="btn-edit" (click)="openEditDialog(creature)">Edit</button>
-              <button class="btn-duplicate" (click)="duplicateCreature(creature)">Duplicate</button>
-              <button class="btn-delete" (click)="confirmDelete(creature)">Delete</button>
+              <button class="btn-action" (click)="openEditDialog(creature)">Edit</button>
+              <button class="btn-action btn-duplicate" (click)="duplicateCreature(creature)">Duplicate</button>
+              <button class="btn-action btn-danger" (click)="confirmDelete(creature)">Delete</button>
             </div>
           </div>
         }
@@ -76,8 +77,8 @@
         <h3>Delete Creature</h3>
         <p>Are you sure you want to delete <strong>{{ deleteConfirmCreature()!.name }}</strong>?</p>
         <div class="dialog-actions">
-          <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
-          <button class="btn-danger" (click)="executeDelete()">Delete</button>
+          <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+          <button class="btn-delete-confirm" (click)="executeDelete()">Delete</button>
         </div>
       </div>
     </div>

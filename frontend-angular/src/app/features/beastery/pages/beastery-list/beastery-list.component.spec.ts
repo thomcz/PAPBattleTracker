@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { BeasteryListComponent } from './beastery-list.component';
 import { BeasteryListUseCase } from '../../../../core/domain/use-cases/beastery-list.use-case';
 import { BeasteryPort } from '../../../../core/ports/beastery.port';
@@ -114,5 +114,44 @@ describe('BeasteryListComponent', () => {
   it('should duplicate creature', () => {
     component.duplicateCreature(mockCreature);
     expect(beasteryPortMock.duplicateCreature).toHaveBeenCalledWith('creature-123', undefined);
+  });
+
+  // Dark theme structural tests
+  it('should render dark theme dashboard container', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.dashboard')).toBeTruthy();
+  });
+
+  it('should render section title', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.section-title')).toBeTruthy();
+  });
+
+  it('should render creature list container when creatures exist', () => {
+    (beasteryPortMock.listCreatures as any).mockReturnValue(of({ creatures: [mockCreature], total: 1 }));
+    component.ngOnInit();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.creature-list')).toBeTruthy();
+  });
+
+  it('should render loading state with dark theme class', () => {
+    const subject = new Subject<any>();
+    (beasteryPortMock.listCreatures as any).mockReturnValue(subject.asObservable());
+    component.ngOnInit();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.loading-state')).toBeTruthy();
+  });
+
+  it('should show delete confirmation dialog with dark theme classes', () => {
+    component.confirmDelete(mockCreature);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.dialog-overlay')).toBeTruthy();
+    expect(compiled.querySelector('.confirm-dialog')).toBeTruthy();
   });
 });

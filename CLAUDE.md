@@ -283,6 +283,8 @@ Both backends implement identical APIs with the same hexagonal architecture:
 - TypeScript (Angular 21.0.2, standalone components) + Angular Router, RxJS, Angular Signals, existing BattlePort/BattleApiAdapter (007-dashboard-redesign)
 - N/A (reads from existing battle API) (007-dashboard-redesign)
 - Kotlin 1.9.25 (JVM 21) + TypeScript (Angular 21.0.2) + Spring Boot 3.5.7, Spring Data JPA, Jackson (backend); Angular 21, RxJS, Angular Signals (frontend) (008-game-sessions)
+- TypeScript ~5.9.2 + Angular 21.0.2 (standalone components, signals, `@if`/`@for` control flow), SCSS (`_auth-theme.scss` shared design system) (009-bestiary-player-redesign)
+- N/A — pure presentation-layer change; existing use cases and adapters unchanged (009-bestiary-player-redesign)
 
 ## Recent Changes
 - 001-battle-tracker-features: Added H2 in-memory database (development), event sourcing with JSON event store

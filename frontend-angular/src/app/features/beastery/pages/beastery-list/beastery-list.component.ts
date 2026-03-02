@@ -10,7 +10,7 @@ import {CreatureFormDialogComponent} from '../../components/creature-form-dialog
   standalone: true,
   imports: [CommonModule, CreatureFormDialogComponent],
   templateUrl: './beastery-list.component.html',
-  styleUrls: ['./beastery-list.component.css']
+  styleUrls: ['./beastery-list.component.scss']
 })
 export class BeasteryListComponent implements OnInit {
   showFormDialog = signal<boolean>(false);

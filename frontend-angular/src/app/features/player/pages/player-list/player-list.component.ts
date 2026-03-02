@@ -10,7 +10,7 @@ import { PlayerFormDialogComponent } from '../../components/player-form-dialog/p
   standalone: true,
   imports: [CommonModule, PlayerFormDialogComponent],
   templateUrl: './player-list.component.html',
-  styleUrls: ['./player-list.component.css']
+  styleUrls: ['./player-list.component.scss']
 })
 export class PlayerListComponent implements OnInit {
   showFormDialog = signal<boolean>(false);

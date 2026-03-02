@@ -9,7 +9,7 @@ import { BeasteryListUseCase } from '../../../../core/domain/use-cases/beastery-
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './creature-form-dialog.component.html',
-  styleUrls: ['./creature-form-dialog.component.css']
+  styleUrls: ['./creature-form-dialog.component.scss']
 })
 export class CreatureFormDialogComponent implements OnInit {
   @Input() creature: BeasteryCreature | null = null;
