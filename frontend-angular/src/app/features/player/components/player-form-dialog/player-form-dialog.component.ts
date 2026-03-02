@@ -9,7 +9,7 @@ import { PlayerListUseCase } from '../../../../core/domain/use-cases/player-list
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './player-form-dialog.component.html',
-  styleUrls: ['./player-form-dialog.component.css']
+  styleUrls: ['./player-form-dialog.component.scss']
 })
 export class PlayerFormDialogComponent implements OnInit {
   @Input() player: Player | null = null;

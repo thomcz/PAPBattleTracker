@@ -1,0 +1,359 @@
+@use '../../../auth/shared/auth-theme' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(180deg, $auth-bg-secondary 0%, $auth-bg 100%);
+  color: $auth-text;
+  font-family: $auth-font-body;
+}
+
+.dashboard {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+// === Header ===
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: $auth-text-light;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: $auth-font-body;
+  transition: color 0.2s, background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  &:hover {
+    color: $auth-text-white;
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-family: $auth-font-title;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $auth-text-white;
+  margin: 0;
+}
+
+.btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: $auth-purple;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $auth-purple-light;
+    transform: translateY(-1px);
+  }
+}
+
+// === Loading State ===
+
+.loading-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: $auth-text-light;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $auth-input-border;
+  border-top-color: $auth-purple;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// === Error State ===
+
+.error-state {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.error-message {
+  color: $auth-error;
+  margin-bottom: 1rem;
+}
+
+.btn-retry {
+  @include auth-btn-outlined;
+  width: auto;
+  display: inline-block;
+  padding: 0.625rem 1.5rem;
+}
+
+// === Empty State ===
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: $auth-text-light;
+  margin-bottom: 1rem;
+}
+
+.empty-text {
+  font-size: 1.1rem;
+  color: $auth-text;
+  margin: 0 0 0.5rem;
+}
+
+.empty-sub {
+  font-size: 0.85rem;
+  color: $auth-text-light;
+  margin: 0 0 1.5rem;
+}
+
+.btn-create-first {
+  @include auth-btn-primary;
+  display: inline-flex;
+  width: auto;
+  padding: 0.75rem 1.5rem;
+}
+
+// === Creature List ===
+
+.creature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.creature-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid $auth-input-border;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.creature-info {
+  padding: 1rem 1rem 0.75rem;
+}
+
+.creature-name {
+  font-family: $auth-font-title;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: $auth-text-white;
+  margin: 0 0 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.creature-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $auth-text-light;
+  margin-bottom: 0.125rem;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $auth-text-white;
+}
+
+.creature-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid $auth-input-border;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.875rem;
+  background: $auth-purple;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $auth-purple-light;
+  }
+
+  &.btn-duplicate {
+    background: rgba(107, 70, 193, 0.35);
+    border: 1px solid rgba(107, 70, 193, 0.5);
+
+    &:hover {
+      background: rgba(107, 70, 193, 0.55);
+    }
+  }
+
+  &.btn-danger {
+    background: transparent;
+    border: 1px solid rgba(255, 107, 107, 0.5);
+    color: $auth-error;
+
+    &:hover {
+      background: rgba(255, 107, 107, 0.1);
+      border-color: $auth-error;
+    }
+  }
+}
+
+// === Delete Confirmation Dialog ===
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-dialog {
+  background: $auth-bg-secondary;
+  border: 1px solid $auth-input-border;
+  border-radius: 14px;
+  padding: 1.75rem;
+  max-width: 400px;
+  width: 90%;
+
+  h3 {
+    font-family: $auth-font-title;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: $auth-text-white;
+    margin: 0 0 0.75rem;
+  }
+
+  p {
+    color: $auth-text;
+    margin: 0 0 1.5rem;
+    font-size: 0.9rem;
+
+    strong {
+      color: $auth-text-white;
+    }
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  border: 1px solid $auth-input-border;
+  border-radius: 8px;
+  color: $auth-text;
+  font-size: 0.85rem;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: $auth-text-white;
+  }
+}
+
+.btn-delete-confirm {
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  border-radius: 8px;
+  color: $auth-error;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: $auth-font-body;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: $auth-error;
+  }
+}
+
+// === Responsive ===
+
+@media (min-width: 768px) {
+  .dashboard {
+    max-width: 700px;
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dashboard {
+    max-width: 800px;
+    padding: 2rem;
+  }
+}

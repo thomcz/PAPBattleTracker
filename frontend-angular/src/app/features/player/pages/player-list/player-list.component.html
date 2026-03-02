@@ -1,26 +1,27 @@
-<div class="player-list-container">
-  <button class="btn-back" (click)="goBack()">
-    ← Back to Home
-  </button>
-
+<div class="dashboard">
   <div class="header">
-    <h1>My Players</h1>
-    <button class="btn-primary" (click)="openCreateDialog()">
-      <span class="icon">+</span> Create Player
+    <button class="btn-back" (click)="goBack()">
+      &#8592; Back
     </button>
+    <div class="section-header">
+      <h2 class="section-title">My Players</h2>
+      <button class="btn-create" (click)="openCreateDialog()">
+        + Create Player
+      </button>
+    </div>
   </div>
 
   @if (playerList.isLoading()) {
-    <div class="loading">
-      <div class="spinner"></div>
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
       <p>Loading players...</p>
     </div>
   }
 
   @if (playerList.error()) {
-    <div class="error-message">
-      <p>{{ playerList.error() }}</p>
-      <button class="btn-secondary" (click)="playerList.loadPlayers().subscribe()">Retry</button>
+    <div class="error-state">
+      <p class="error-message">{{ playerList.error() }}</p>
+      <button class="btn-retry" (click)="playerList.loadPlayers().subscribe()">Retry</button>
     </div>
   }
 
@@ -28,33 +29,35 @@
     @if (playerList.players().length === 0) {
       <div class="empty-state">
         <div class="empty-icon">🛡️</div>
-        <h2>No players yet</h2>
-        <p>Create your first player character to use in battle sessions!</p>
-        <button class="btn-primary" (click)="openCreateDialog()">
-          <span class="icon">+</span> Create Your First Player
+        <p class="empty-text">No players yet</p>
+        <p class="empty-sub">Create your first player character to use in battle sessions!</p>
+        <button class="btn-create-first" (click)="openCreateDialog()">
+          + Create Your First Player
         </button>
       </div>
     } @else {
-      <div class="players-grid">
+      <div class="player-list">
         @for (player of playerList.players(); track player.playerId) {
           <div class="player-card">
-            <div class="player-header">
-              <h3>{{ player.name }}</h3>
-              <span class="class-badge">{{ player.characterClass }}</span>
-            </div>
-            <div class="player-stats">
-              <div class="stat">
-                <span class="stat-label">Level</span>
-                <span class="stat-value">{{ player.level }}</span>
+            <div class="player-info">
+              <div class="player-header">
+                <h3 class="player-name">{{ player.name }}</h3>
+                <span class="class-badge">{{ player.characterClass }}</span>
               </div>
-              <div class="stat">
-                <span class="stat-label">HP</span>
-                <span class="stat-value">{{ player.maxHp }}</span>
+              <div class="player-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Level</span>
+                  <span class="stat-value">{{ player.level }}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Max HP</span>
+                  <span class="stat-value">{{ player.maxHp }}</span>
+                </div>
               </div>
             </div>
             <div class="player-actions">
-              <button class="btn-edit" (click)="openEditDialog(player)">Edit</button>
-              <button class="btn-delete" (click)="confirmDelete(player)">Delete</button>
+              <button class="btn-action" (click)="openEditDialog(player)">Edit</button>
+              <button class="btn-action btn-danger" (click)="confirmDelete(player)">Delete</button>
             </div>
           </div>
         }
@@ -76,8 +79,8 @@
         <h3>Delete Player</h3>
         <p>Are you sure you want to delete <strong>{{ deleteConfirmPlayer()!.name }}</strong>?</p>
         <div class="dialog-actions">
-          <button class="btn-secondary" (click)="cancelDelete()">Cancel</button>
-          <button class="btn-danger" (click)="executeDelete()">Delete</button>
+          <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+          <button class="btn-delete-confirm" (click)="executeDelete()">Delete</button>
         </div>
       </div>
     </div>
