@@ -36,6 +36,8 @@ describe('AddCreatureUseCase', () => {
       updateCreature: vi.fn(),
       removeCreature: vi.fn(),
       applyDamage: vi.fn(),
+      applyHealing: vi.fn(),
+      applyStatusEffect: vi.fn(),
       getCombatLog: vi.fn()
     } as BattlePort;
 

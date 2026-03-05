@@ -332,6 +332,79 @@ class Battle private constructor() {
         return this
     }
 
+    /**
+     * Apply healing to a creature in an active battle.
+     * HP is capped at maxHp.
+     *
+     * @throws IllegalStateException if battle is not ACTIVE
+     * @throws IllegalArgumentException if creature not found or healing invalid
+     */
+    fun applyHealing(userId: UUID, targetCreatureId: UUID, healing: Int, source: String? = null): Battle {
+        require(status == CombatStatus.ACTIVE) {
+            "Cannot apply healing: battle is in $status status"
+        }
+        require(healing > 0) {
+            "Healing must be positive, was: $healing"
+        }
+
+        val target = creatures.find { it.id == targetCreatureId }
+            ?: throw IllegalArgumentException("Creature not found: $targetCreatureId")
+
+        val healedCreature = target.heal(healing)
+
+        val event = HealingApplied(
+            battleId = battleId,
+            eventId = UUID.randomUUID(),
+            timestamp = Instant.now(),
+            userId = userId,
+            creatureId = targetCreatureId,
+            healing = healing,
+            newHp = healedCreature.currentHp,
+            source = source
+        )
+
+        applyEvent(event)
+        return this
+    }
+
+    /**
+     * Add or remove a status effect on a creature in an active battle.
+     *
+     * @throws IllegalStateException if battle is not ACTIVE
+     * @throws IllegalArgumentException if creature not found
+     */
+    fun applyStatusEffect(userId: UUID, targetCreatureId: UUID, effect: String, add: Boolean): Battle {
+        require(status == CombatStatus.ACTIVE) {
+            "Cannot apply status effect: battle is in $status status"
+        }
+
+        val target = creatures.find { it.id == targetCreatureId }
+            ?: throw IllegalArgumentException("Creature not found: $targetCreatureId")
+
+        val event: BattleEvent = if (add) {
+            StatusEffectApplied(
+                battleId = battleId,
+                eventId = UUID.randomUUID(),
+                timestamp = Instant.now(),
+                userId = userId,
+                creatureId = targetCreatureId,
+                effect = effect
+            )
+        } else {
+            StatusEffectRemoved(
+                battleId = battleId,
+                eventId = UUID.randomUUID(),
+                timestamp = Instant.now(),
+                userId = userId,
+                creatureId = targetCreatureId,
+                effect = effect
+            )
+        }
+
+        applyEvent(event)
+        return this
+    }
+
     // === Creature Management Methods ===
 
     /**
@@ -351,7 +424,8 @@ class Battle private constructor() {
         currentHp: Int,
         maxHp: Int,
         initiative: Int,
-        armorClass: Int
+        armorClass: Int,
+        dexModifier: Int? = null
     ): Battle {
         check(status != CombatStatus.ENDED) {
             "Cannot add creatures to ended battle"
@@ -365,7 +439,8 @@ class Battle private constructor() {
             currentHp = currentHp,
             maxHp = maxHp,
             initiative = initiative,
-            armorClass = armorClass
+            armorClass = armorClass,
+            dexModifier = dexModifier
         )
 
         val event = CreatureAdded(
@@ -379,7 +454,8 @@ class Battle private constructor() {
             currentHp = creature.currentHp,
             maxHp = creature.maxHp,
             initiative = creature.initiative,
-            armorClass = creature.armorClass
+            armorClass = creature.armorClass,
+            dexModifier = creature.dexModifier
         )
 
         applyEvent(event)
@@ -416,7 +492,8 @@ class Battle private constructor() {
         currentHp: Int,
         maxHp: Int,
         initiative: Int,
-        armorClass: Int
+        armorClass: Int,
+        dexModifier: Int? = null
     ): Battle {
         // Find existing creature
         val existingCreature = creatures.find { it.id == creatureId }
@@ -430,7 +507,8 @@ class Battle private constructor() {
             currentHp = currentHp,
             maxHp = maxHp,
             initiative = initiative,
-            armorClass = armorClass
+            armorClass = armorClass,
+            dexModifier = dexModifier
         )
 
         // Emit event
@@ -445,7 +523,8 @@ class Battle private constructor() {
             currentHp = currentHp,
             maxHp = maxHp,
             initiative = initiative,
-            armorClass = armorClass
+            armorClass = armorClass,
+            dexModifier = dexModifier
         )
 
         applyEvent(event)
@@ -547,7 +626,8 @@ class Battle private constructor() {
                     currentHp = event.currentHp,
                     maxHp = event.maxHp,
                     initiative = event.initiative,
-                    armorClass = event.armorClass
+                    armorClass = event.armorClass,
+                    dexModifier = event.dexModifier
                 )
                 creatures.add(creature)
             }
@@ -564,7 +644,8 @@ class Battle private constructor() {
                         currentHp = event.currentHp,
                         maxHp = event.maxHp,
                         initiative = event.initiative,
-                        armorClass = event.armorClass
+                        armorClass = event.armorClass,
+                        dexModifier = event.dexModifier
                     )
                     creatures[index] = updatedCreature
                 }
@@ -589,6 +670,27 @@ class Battle private constructor() {
             is CreatureDefeated -> {
                 // State already updated by DamageApplied (HP = 0).
                 // This event exists for audit trail / combat log purposes.
+            }
+
+            is HealingApplied -> {
+                val index = creatures.indexOfFirst { it.id == event.creatureId }
+                if (index != -1) {
+                    creatures[index] = creatures[index].withHp(event.newHp)
+                }
+            }
+
+            is StatusEffectApplied -> {
+                val index = creatures.indexOfFirst { it.id == event.creatureId }
+                if (index != -1) {
+                    creatures[index] = creatures[index].addEffect(event.effect)
+                }
+            }
+
+            is StatusEffectRemoved -> {
+                val index = creatures.indexOfFirst { it.id == event.creatureId }
+                if (index != -1) {
+                    creatures[index] = creatures[index].removeEffect(event.effect)
+                }
             }
         }
 

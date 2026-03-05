@@ -1,0 +1,45 @@
+<div class="combat-result">
+  <div class="result-header" [class.victory]="isVictory()" [class.defeat]="!isVictory()">
+    <div class="result-icon">{{ isVictory() ? '🏆' : '💀' }}</div>
+    <h1 class="result-title">{{ isVictory() ? 'VICTORY' : 'DEFEAT' }}</h1>
+    @if (battle()) {
+      <div class="battle-name">{{ battle()!.name }}</div>
+    }
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <span class="stat-value">{{ battle()?.round ?? 0 }}</span>
+      <span class="stat-label">Total Rounds</span>
+    </div>
+    <div class="stat-box">
+      <span class="stat-value">{{ elapsedFormatted() }}</span>
+      <span class="stat-label">Time Elapsed</span>
+    </div>
+  </div>
+
+  @if (playerContributions().length > 0) {
+    <div class="contributions-section">
+      <h2 class="section-title">Combat Contribution</h2>
+      @for (contrib of playerContributions(); track contrib.creatureId) {
+        <div class="contribution-card">
+          <div class="contrib-avatar">{{ contrib.creatureName[0] }}</div>
+          <div class="contrib-info">
+            <span class="contrib-name">{{ contrib.creatureName }}</span>
+            <div class="contrib-stats">
+              <span class="contrib-stat">DMG: {{ contrib.totalDamage }}</span>
+              <span class="contrib-stat">HEAL: {{ contrib.totalHealing }}</span>
+              <span class="contrib-stat">BUFFS: {{ contrib.buffsApplied }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="result-footer">
+    <button class="end-btn" aria-label="End Encounter" (click)="endEncounter()">
+      End Encounter →
+    </button>
+  </div>
+</div>

@@ -1,0 +1,292 @@
+openapi: 3.0.3
+info:
+  title: Combat Redesign — New & Modified API Endpoints
+  description: |
+    Additions and modifications to the battle API required for the combat screen redesign (010).
+    All endpoints require JWT Bearer authentication.
+    Base URL: http://localhost:8080/api
+  version: "010"
+
+paths:
+
+  # ── MODIFIED ENDPOINTS ─────────────────────────────────────────────────────
+
+  /battles/{battleId}/creatures:
+    post:
+      summary: Add a creature to a battle (MODIFIED — adds dexModifier)
+      tags: [Creatures]
+      parameters:
+        - name: battleId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreatureRequest'
+      responses:
+        '201':
+          description: Creature added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400': { description: Invalid request }
+        '401': { description: Unauthorized }
+        '404': { description: Battle not found }
+
+  /battles/{battleId}/creatures/{creatureId}:
+    put:
+      summary: Update creature attributes (MODIFIED — adds dexModifier)
+      tags: [Creatures]
+      parameters:
+        - name: battleId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: creatureId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCreatureRequest'
+      responses:
+        '200':
+          description: Creature updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatureResponse'
+        '400': { description: Invalid request }
+        '401': { description: Unauthorized }
+        '403': { description: Access denied }
+        '404': { description: Not found }
+        '409': { description: Invalid state }
+
+  # ── NEW ENDPOINTS ──────────────────────────────────────────────────────────
+
+  /battles/{battleId}/heal:
+    post:
+      summary: Apply healing to a creature in active combat
+      tags: [Combat Actions]
+      parameters:
+        - name: battleId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyHealingRequest'
+      responses:
+        '200':
+          description: Healing applied; returns updated battle state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400': { description: Invalid amount (must be ≥ 1) }
+        '401': { description: Unauthorized }
+        '403': { description: Access denied }
+        '404': { description: Battle or creature not found }
+        '409': { description: Combat not active }
+
+  /battles/{battleId}/creatures/{creatureId}/effects:
+    post:
+      summary: Apply or remove a status effect on a creature
+      tags: [Combat Actions]
+      parameters:
+        - name: battleId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: creatureId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyStatusEffectRequest'
+      responses:
+        '200':
+          description: Effect applied/removed; returns updated battle state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleDetailResponse'
+        '400': { description: Unknown effect name or invalid action }
+        '401': { description: Unauthorized }
+        '403': { description: Access denied }
+        '404': { description: Battle or creature not found }
+        '409': { description: Combat not active }
+
+components:
+  schemas:
+
+    # ── MODIFIED SCHEMAS ────────────────────────────────────────────────────
+
+    CreateCreatureRequest:
+      type: object
+      required: [name, type, currentHp, maxHp, initiative, armorClass]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        type:
+          type: string
+          enum: [PLAYER, MONSTER]
+        currentHp:
+          type: integer
+          minimum: 0
+        maxHp:
+          type: integer
+          minimum: 1
+        initiative:
+          type: integer
+          default: 0
+        armorClass:
+          type: integer
+          minimum: 0
+        dexModifier:
+          type: integer
+          minimum: -5
+          maximum: 10
+          nullable: true
+          description: Dexterity modifier used for auto-rolling initiative
+
+    UpdateCreatureRequest:
+      type: object
+      required: [name, currentHp, maxHp, initiative, armorClass]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        currentHp:
+          type: integer
+          minimum: 0
+        maxHp:
+          type: integer
+          minimum: 1
+        initiative:
+          type: integer
+        armorClass:
+          type: integer
+          minimum: 0
+        dexModifier:
+          type: integer
+          minimum: -5
+          maximum: 10
+          nullable: true
+
+    CreatureResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [PLAYER, MONSTER]
+        currentHp:
+          type: integer
+        maxHp:
+          type: integer
+        initiative:
+          type: integer
+        armorClass:
+          type: integer
+        isDefeated:
+          type: boolean
+        effects:
+          type: array
+          items:
+            type: string
+        dexModifier:
+          type: integer
+          nullable: true
+
+    # ── NEW SCHEMAS ─────────────────────────────────────────────────────────
+
+    ApplyHealingRequest:
+      type: object
+      required: [creatureId, healing]
+      properties:
+        creatureId:
+          type: string
+          format: uuid
+          description: ID of the creature to heal
+        healing:
+          type: integer
+          minimum: 1
+          description: Amount of HP to restore (capped at maxHp)
+        source:
+          type: string
+          nullable: true
+          description: Optional description of healing source (e.g. "Cure Wounds")
+
+    ApplyStatusEffectRequest:
+      type: object
+      required: [effect, action]
+      properties:
+        effect:
+          type: string
+          enum: [Poisoned, Stunned, Blinded, Blessed, Prone, Restrained, Burning, Frozen]
+          description: Status effect name
+        action:
+          type: string
+          enum: [ADD, REMOVE]
+          description: Whether to apply or remove the effect
+
+    BattleDetailResponse:
+      type: object
+      description: Full battle state returned after any combat action
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+          enum: [NOT_STARTED, ACTIVE, PAUSED, ENDED]
+        round:
+          type: integer
+        currentTurn:
+          type: integer
+        creatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreatureResponse'
+        currentActor:
+          $ref: '#/components/schemas/CreatureResponse'
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

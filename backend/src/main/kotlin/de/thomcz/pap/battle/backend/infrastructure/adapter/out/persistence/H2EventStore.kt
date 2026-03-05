@@ -30,8 +30,9 @@ class H2EventStore(
     override fun saveEvents(battleId: UUID, events: List<BattleEvent>) {
         if (events.isEmpty()) return
 
-        // Get next sequence number (atomically)
-        val currentMaxSequence = eventEntityRepository.getMaxSequenceNumber(battleId)
+        // Acquire pessimistic write lock to serialize concurrent sequence number assignment
+        val latestEvent = eventEntityRepository.findTopByBattleIdOrderBySequenceNumberDesc(battleId)
+        val currentMaxSequence = latestEvent?.sequenceNumber ?: 0
         var nextSequence = currentMaxSequence + 1
 
         // Convert domain events to JPA entities with sequence numbers

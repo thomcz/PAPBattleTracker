@@ -42,6 +42,8 @@ class BattleController(
     private val endCombat: EndCombatUseCase,
     private val advanceTurn: AdvanceTurnUseCase,
     private val applyDamage: ApplyDamageUseCase,
+    private val applyHealing: ApplyHealingUseCase,
+    private val applyStatusEffect: ApplyStatusEffectUseCase,
     private val getCombatLog: GetCombatLogUseCase,
     private val battleService: BattleService
 ) {
@@ -180,6 +182,37 @@ class BattleController(
         val userId = getUserId(authentication)
         val battle = applyDamage.execute(id, command, userId)
 
+        return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * POST /api/battles/{id}/heal - Apply healing to a creature
+     * User Story 3: Active Combat — Healing
+     */
+    @PostMapping("/{id}/heal")
+    fun applyHealing(
+        @PathVariable id: UUID,
+        @Valid @RequestBody command: ApplyHealingCommand,
+        authentication: Authentication
+    ): ResponseEntity<BattleDetailResponse> {
+        val userId = getUserId(authentication)
+        val battle = applyHealing.execute(id, command, userId)
+        return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * POST /api/battles/{id}/creatures/{creatureId}/effects - Apply/remove status effect
+     * User Story 3: Active Combat — Status Effects
+     */
+    @PostMapping("/{id}/creatures/{creatureId}/effects")
+    fun applyStatusEffect(
+        @PathVariable id: UUID,
+        @PathVariable creatureId: UUID,
+        @Valid @RequestBody command: ApplyStatusEffectCommand,
+        authentication: Authentication
+    ): ResponseEntity<BattleDetailResponse> {
+        val userId = getUserId(authentication)
+        val battle = applyStatusEffect.execute(id, creatureId, command, userId)
         return ResponseEntity.ok(BattleDetailResponse.from(battle))
     }
 

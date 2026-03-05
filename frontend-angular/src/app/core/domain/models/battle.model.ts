@@ -40,6 +40,7 @@ export interface Creature {
   armorClass: number;
   isDefeated: boolean;
   effects: string[];
+  dexModifier?: number;
 }
 
 /**

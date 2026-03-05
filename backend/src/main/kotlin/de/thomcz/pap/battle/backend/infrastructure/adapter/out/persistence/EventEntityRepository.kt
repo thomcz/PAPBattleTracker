@@ -1,7 +1,9 @@
 package de.thomcz.pap.battle.backend.infrastructure.adapter.out.persistence
 
 import de.thomcz.pap.battle.backend.infrastructure.adapter.out.persistence.entity.EventEntity
+import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.UUID
@@ -39,6 +41,13 @@ interface EventEntityRepository : JpaRepository<EventEntity, UUID> {
      */
     @Query("SELECT COALESCE(MAX(e.sequenceNumber), 0) FROM EventEntity e WHERE e.battleId = :battleId")
     fun getMaxSequenceNumber(battleId: UUID): Int
+
+    /**
+     * Find the latest event for a battle with a pessimistic write lock.
+     * Used in saveEvents() to serialize concurrent sequence number assignment.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    fun findTopByBattleIdOrderBySequenceNumberDesc(battleId: UUID): EventEntity?
 
     /**
      * Delete all events for a battle (when battle is deleted).
