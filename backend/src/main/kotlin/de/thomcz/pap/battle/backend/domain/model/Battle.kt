@@ -113,13 +113,16 @@ class Battle private constructor() {
      *
      * Business rules:
      * - Status must be NOT_STARTED
-     * - TODO: At least one creature must exist (User Story 2)
+     * - At least one creature must exist
      *
      * @throws IllegalStateException if preconditions not met
      */
     fun startCombat(userId: UUID): Battle {
         require(status == CombatStatus.NOT_STARTED) {
             "Cannot start combat: battle is in $status status"
+        }
+        require(creatures.isNotEmpty()) {
+            "Cannot start combat: battle has no creatures"
         }
 
         // Sort creatures by initiative (descending - highest first)
@@ -652,7 +655,17 @@ class Battle private constructor() {
             }
 
             is CreatureRemoved -> {
+                if (status == CombatStatus.ACTIVE) {
+                    val removedIndex = creatures.indexOfFirst { it.id == event.creatureId }
+                    if (removedIndex != -1 && removedIndex < currentTurn) {
+                        currentTurn--
+                    }
+                }
                 creatures.removeIf { it.id == event.creatureId }
+                // After removal, clamp currentTurn to valid range to guard against edge cases
+                if (status == CombatStatus.ACTIVE && creatures.isNotEmpty()) {
+                    currentTurn = currentTurn.coerceIn(0, creatures.size - 1)
+                }
             }
 
             is TurnAdvanced -> {

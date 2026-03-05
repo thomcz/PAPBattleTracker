@@ -1,5 +1,6 @@
 package de.thomcz.pap.battle.backend.infrastructure.adapter.`in`.security
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -20,7 +21,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    @Value("\${cors.allowed-origins}") private val corsAllowedOrigins: String
 ) {
 
     @Bean
@@ -43,7 +45,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:4200")
+        configuration.allowedOrigins = corsAllowedOrigins.split(",")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true

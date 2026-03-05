@@ -1,8 +1,7 @@
 package de.thomcz.pap.battle.backend.infrastructure.adapter.out.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import de.thomcz.pap.battle.backend.domain.model.events.BattleEvent
+import de.thomcz.pap.battle.backend.domain.model.events.*
 import de.thomcz.pap.battle.backend.domain.port.out.EventStore
 import de.thomcz.pap.battle.backend.infrastructure.adapter.out.persistence.entity.EventEntity
 import org.springframework.stereotype.Component
@@ -78,19 +77,31 @@ class H2EventStore(
     /**
      * Deserialize JSON event data back to domain event object.
      *
-     * Uses reflection to find the event class by name and Jackson to deserialize.
-     * This assumes all event types are in the same package as BattleEvent.
+     * Uses an explicit class map for compile-time safety. If an event class is renamed
+     * or moved, this map will fail to compile rather than silently breaking stored events.
      */
     private fun deserializeEvent(eventType: String, eventData: String): BattleEvent {
-        val packageName = BattleEvent::class.java.packageName
-        val className = "$packageName.$eventType"
+        val eventClass = EVENT_TYPE_MAP[eventType]
+            ?: throw IllegalStateException("Unknown event type: $eventType")
+        return objectMapper.readValue(eventData, eventClass)
+    }
 
-        val eventClass = try {
-            Class.forName(className)
-        } catch (e: ClassNotFoundException) {
-            throw IllegalStateException("Unknown event type: $eventType", e)
-        }
-
-        return objectMapper.readValue(eventData, eventClass) as BattleEvent
+    companion object {
+        private val EVENT_TYPE_MAP: Map<String, Class<out BattleEvent>> = mapOf(
+            "BattleCreated" to BattleCreated::class.java,
+            "CombatStarted" to CombatStarted::class.java,
+            "CombatPaused" to CombatPaused::class.java,
+            "CombatResumed" to CombatResumed::class.java,
+            "CombatEnded" to CombatEnded::class.java,
+            "CreatureAdded" to CreatureAdded::class.java,
+            "CreatureUpdated" to CreatureUpdated::class.java,
+            "CreatureRemoved" to CreatureRemoved::class.java,
+            "TurnAdvanced" to TurnAdvanced::class.java,
+            "DamageApplied" to DamageApplied::class.java,
+            "CreatureDefeated" to CreatureDefeated::class.java,
+            "HealingApplied" to HealingApplied::class.java,
+            "StatusEffectApplied" to StatusEffectApplied::class.java,
+            "StatusEffectRemoved" to StatusEffectRemoved::class.java,
+        )
     }
 }
