@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Battle, CombatStatus, Creature } from '../../../../core/domain/models/battle.model';
 import { BattlePort, CombatOutcome } from '../../../../core/ports/battle.port';
@@ -29,6 +30,8 @@ export class CombatActiveComponent implements OnInit {
     return this.sortedCreatures()[turn] ?? null;
   });
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -42,15 +45,17 @@ export class CombatActiveComponent implements OnInit {
   }
 
   private loadBattle(id: string): void {
-    this.battlePort.getBattle(id).subscribe({
+    this.battlePort.getBattle(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (battle) => {
         this.battle.set(battle);
         if (battle.status === CombatStatus.NOT_STARTED) {
           this.router.navigate(['../'], { relativeTo: this.route });
         } else {
+          this.contributionService.reset();
           this.contributionService.startTimer();
         }
-      }
+      },
+      error: (err) => console.error('Failed to load battle', err)
     });
   }
 
@@ -65,31 +70,33 @@ export class CombatActiveComponent implements OnInit {
   onDamageApplied(event: { creature: Creature; amount: number }): void {
     const battleId = this.battle()?.id;
     if (!battleId) return;
-    this.battlePort.applyDamage(battleId, event.creature.id, event.amount).subscribe({
+    this.battlePort.applyDamage(battleId, event.creature.id, event.amount).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         this.battle.set(updated);
         this.contributionService.recordDamage(event.creature.id, event.creature.name, event.creature.type, event.amount);
         this.closeActionManager();
-      }
+      },
+      error: (err) => console.error('Failed to apply damage', err)
     });
   }
 
   onHealingApplied(event: { creature: Creature; amount: number }): void {
     const battleId = this.battle()?.id;
     if (!battleId) return;
-    this.battlePort.applyHealing(battleId, event.creature.id, event.amount).subscribe({
+    this.battlePort.applyHealing(battleId, event.creature.id, event.amount).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         this.battle.set(updated);
         this.contributionService.recordHealing(event.creature.id, event.creature.name, event.creature.type, event.amount);
         this.closeActionManager();
-      }
+      },
+      error: (err) => console.error('Failed to apply healing', err)
     });
   }
 
   onStatusToggled(event: { creature: Creature; effect: string; action: 'ADD' | 'REMOVE' }): void {
     const battleId = this.battle()?.id;
     if (!battleId) return;
-    this.battlePort.applyStatusEffect(battleId, event.creature.id, event.effect, event.action).subscribe({
+    this.battlePort.applyStatusEffect(battleId, event.creature.id, event.effect, event.action).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         this.battle.set(updated);
         if (event.action === 'ADD') {
@@ -98,15 +105,17 @@ export class CombatActiveComponent implements OnInit {
         // Keep the panel open and refresh the target so active effects update
         const refreshed = updated.creatures.find(c => c.id === event.creature.id) ?? null;
         this.actionTarget.set(refreshed);
-      }
+      },
+      error: (err) => console.error('Failed to toggle status effect', err)
     });
   }
 
   nextTurn(): void {
     const battleId = this.battle()?.id;
     if (!battleId) return;
-    this.battlePort.advanceTurn(battleId).subscribe({
-      next: (updated) => this.battle.set(updated)
+    this.battlePort.advanceTurn(battleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (updated) => this.battle.set(updated),
+      error: (err) => console.error('Failed to advance turn', err)
     });
   }
 
@@ -117,11 +126,12 @@ export class CombatActiveComponent implements OnInit {
   endCombat(outcome: CombatOutcome): void {
     const battleId = this.battle()?.id;
     if (!battleId) return;
-    this.battlePort.endCombat(battleId, outcome).subscribe({
+    this.battlePort.endCombat(battleId, outcome).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.contributionService.stopTimer();
         this.router.navigate(['../result'], { relativeTo: this.route, state: { outcome } });
-      }
+      },
+      error: (err) => console.error('Failed to end combat', err)
     });
   }
 }

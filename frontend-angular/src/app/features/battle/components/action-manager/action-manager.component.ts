@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, input, output, signal, computed } from '@angular/core';
+import { Component, effect, input, output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Battle, Creature } from '../../../../core/domain/models/battle.model';
 import { StatusEffect } from '../../../../core/domain/models/combat.model';
@@ -10,7 +10,7 @@ import { StatusEffect } from '../../../../core/domain/models/combat.model';
   templateUrl: './action-manager.component.html',
   styleUrl: './action-manager.component.scss'
 })
-export class ActionManagerComponent implements OnInit {
+export class ActionManagerComponent {
   battle = input.required<Battle>();
   initialTarget = input<Creature | null>(null);
 
@@ -27,17 +27,14 @@ export class ActionManagerComponent implements OnInit {
   activeEffects = computed<string[]>(() => this.selectedTarget()?.effects ?? []);
 
   constructor() {
-    // Keep selectedTarget in sync when the parent refreshes the initialTarget
-    // (e.g. after a status-effect toggle the parent passes back the updated creature)
+    // Sync selectedTarget when the parent refreshes initialTarget
+    // (e.g. after a status-effect toggle the parent passes back the updated creature).
+    // The null guard is intentionally removed: the parent gates rendering with @if(actionTarget()),
+    // so this component is never alive when initialTarget() would become null.
     effect(() => {
-      const target = this.initialTarget();
-      if (target !== null) {
-        this.selectedTarget.set(target);
-      }
+      this.selectedTarget.set(this.initialTarget());
     });
   }
-
-  ngOnInit(): void {}
 
   selectTarget(creature: Creature): void {
     this.selectedTarget.set(creature);

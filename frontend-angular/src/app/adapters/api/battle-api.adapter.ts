@@ -110,14 +110,14 @@ export class BattleApiAdapter implements BattlePort {
     initiative: number,
     armorClass: number
   ): Observable<Creature> {
-    return this.http.post<Creature>(`${this.apiUrl}/${battleId}/creatures`, {
+    return this.http.post<RawCreature>(`${this.apiUrl}/${battleId}/creatures`, {
       name,
       type,
       currentHp,
       maxHp,
       initiative,
       armorClass
-    });
+    }).pipe(map(c => ({ ...c, effects: c.statusEffects ?? [] })));
   }
 
   updateCreature(
@@ -129,13 +129,13 @@ export class BattleApiAdapter implements BattlePort {
     initiative: number,
     armorClass: number
   ): Observable<Creature> {
-    return this.http.put<Creature>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`, {
+    return this.http.put<RawCreature>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`, {
       name,
       currentHp,
       maxHp,
       initiative,
       armorClass
-    });
+    }).pipe(map(c => ({ ...c, effects: c.statusEffects ?? [] })));
   }
 
   removeCreature(battleId: string, creatureId: string): Observable<void> {

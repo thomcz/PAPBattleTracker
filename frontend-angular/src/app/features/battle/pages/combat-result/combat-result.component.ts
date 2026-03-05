@@ -21,21 +21,26 @@ export class CombatResultComponent implements OnInit {
 
   isVictory = computed(() => this.outcome() === CombatOutcome.PLAYERS_VICTORIOUS);
 
+  outcomeLabel = computed(() => {
+    const o = this.outcome();
+    if (o === null) return 'COMBAT ENDED';
+    return o === CombatOutcome.PLAYERS_VICTORIOUS ? 'VICTORY' : 'DEFEAT';
+  });
+
+  outcomeIcon = computed(() => {
+    const o = this.outcome();
+    if (o === null) return '⚔️';
+    return o === CombatOutcome.PLAYERS_VICTORIOUS ? '🏆' : '💀';
+  });
+
   playerContributions = computed<CombatContribution[]>(() =>
     this.contributionService.getContributions()
       .filter(c => c.creatureType === CreatureType.PLAYER)
       .sort((a, b) => b.totalDamage - a.totalDamage)
   );
 
-  elapsedMs = computed(() => this.contributionService.getElapsedMs());
-
-  elapsedFormatted = computed(() => {
-    const ms = this.elapsedMs();
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}m ${seconds}s`;
-  });
+  // Not a computed — getElapsedMs() is not reactive; snapshot taken once at component init.
+  elapsedFormatted = signal<string>('0m 0s');
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -45,6 +50,12 @@ export class CombatResultComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const ms = this.contributionService.getElapsedMs();
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    this.elapsedFormatted.set(`${minutes}m ${seconds}s`);
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.battlePort.getBattle(id).subscribe({

@@ -1,9 +1,10 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { from } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BattleApiAdapter } from '../../../../adapters/api/battle-api.adapter';
+import { BattlePort } from '../../../../core/ports/battle.port';
 import { Battle, Creature, CreatureType } from '../../../../core/domain/models/battle.model';
 
 interface InitiativeRow {
@@ -29,20 +30,22 @@ export class CombatInitiativeComponent implements OnInit {
 
   readonly CreatureType = CreatureType;
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private battleApi: BattleApiAdapter
+    private battlePort: BattlePort
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.battleApi.getBattle(id).subscribe(battle => {
+      this.battlePort.getBattle(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(battle => {
         this.battle.set(battle);
         this.rows.set(battle.creatures.map(c => ({
           creature: c,
-          initiativeValue: c.initiative || null
+          initiativeValue: c.initiative ?? null
         })));
       });
     }
@@ -82,7 +85,7 @@ export class CombatInitiativeComponent implements OnInit {
 
     const updateCalls = this.rows()
       .filter(r => r.initiativeValue !== null)
-      .map(r => this.battleApi.updateCreature(
+      .map(r => this.battlePort.updateCreature(
         battle.id, r.creature.id,
         r.creature.name, r.creature.currentHp, r.creature.maxHp,
         r.initiativeValue!, r.creature.armorClass
@@ -94,7 +97,8 @@ export class CombatInitiativeComponent implements OnInit {
     }
 
     from(updateCalls).pipe(
-      concatMap(call => call)
+      concatMap(call => call),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       error: (err) => console.error('Failed to save initiative values', err),
       complete: () => this.doStartCombat(battle.id)
@@ -102,8 +106,9 @@ export class CombatInitiativeComponent implements OnInit {
   }
 
   private doStartCombat(battleId: string): void {
-    this.battleApi.startCombat(battleId).subscribe(() => {
-      this.router.navigate(['../combat'], { relativeTo: this.route });
+    this.battlePort.startCombat(battleId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => this.router.navigate(['../combat'], { relativeTo: this.route }),
+      error: (err) => console.error('Failed to start combat', err)
     });
   }
 

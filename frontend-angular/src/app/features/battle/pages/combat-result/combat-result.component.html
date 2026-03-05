@@ -1,7 +1,7 @@
 <div class="combat-result">
-  <div class="result-header" [class.victory]="isVictory()" [class.defeat]="!isVictory()">
-    <div class="result-icon">{{ isVictory() ? '🏆' : '💀' }}</div>
-    <h1 class="result-title">{{ isVictory() ? 'VICTORY' : 'DEFEAT' }}</h1>
+  <div class="result-header" [class.victory]="isVictory()" [class.defeat]="outcome() !== null && !isVictory()">
+    <div class="result-icon">{{ outcomeIcon() }}</div>
+    <h1 class="result-title">{{ outcomeLabel() }}</h1>
     @if (battle()) {
       <div class="battle-name">{{ battle()!.name }}</div>
     }
