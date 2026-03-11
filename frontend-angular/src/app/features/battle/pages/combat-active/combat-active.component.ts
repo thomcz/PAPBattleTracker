@@ -22,7 +22,7 @@ export class CombatActiveComponent implements OnInit {
   showEndDialog = signal<boolean>(false);
 
   sortedCreatures = computed(() =>
-    [...(this.battle()?.creatures ?? [])].sort((a, b) => b.initiative - a.initiative)
+    [...(this.battle()?.creatures ?? [])].sort((a, b) => (b.initiative ?? 0) - (a.initiative ?? 0))
   );
 
   currentActor = computed<Creature | null>(() => {

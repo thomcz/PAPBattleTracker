@@ -36,7 +36,7 @@ export interface Creature {
   type: CreatureType;
   currentHp: number;
   maxHp: number;
-  initiative: number;
+  initiative: number | null;
   armorClass: number;
   isDefeated: boolean;
   effects: string[];

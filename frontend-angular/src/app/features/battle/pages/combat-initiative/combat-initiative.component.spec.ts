@@ -11,12 +11,12 @@ import { BattlePort } from '../../../../core/ports/battle.port';
 describe('CombatInitiativeComponent', () => {
   const monster = {
     id: 'm1', name: 'Goblin', type: CreatureType.MONSTER,
-    currentHp: 7, maxHp: 7, initiative: 0, armorClass: 13,
+    currentHp: 7, maxHp: 7, initiative: null, armorClass: 13,
     isDefeated: false, effects: [], dexModifier: 1
   };
   const player = {
     id: 'p1', name: 'Aragorn', type: CreatureType.PLAYER,
-    currentHp: 40, maxHp: 60, initiative: 0, armorClass: 16,
+    currentHp: 40, maxHp: 60, initiative: null, armorClass: 16,
     isDefeated: false, effects: [], dexModifier: 3
   };
 
