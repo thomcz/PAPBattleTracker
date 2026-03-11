@@ -1,0 +1,32 @@
+<div class="combatant-card" role="button" [class.active]="isActive()" (click)="clicked.emit()">
+  <div class="card-left">
+    <div class="avatar" [class]="creature().type === 'PLAYER' ? 'avatar-player' : 'avatar-monster'">
+      {{ creature().name.charAt(0).toUpperCase() }}
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="card-header">
+      <span class="creature-name">{{ creature().name }}</span>
+      @if (isActive()) {
+        <span class="current-label">CURRENT</span>
+      }
+      @if (showInitiative()) {
+        <span class="initiative-badge">{{ creature().initiative }}</span>
+      }
+    </div>
+    <div class="hp-bar-track">
+      <div class="hp-bar-fill" [class]="hpBarClass()" [style.width.%]="hpPercent()"></div>
+    </div>
+    <div class="card-footer">
+      <span class="hp-text">{{ creature().currentHp }} / {{ creature().maxHp }}</span>
+      <span class="ac-text">{{ creature().armorClass }}</span>
+    </div>
+    @if (creature().effects && creature().effects.length > 0) {
+      <div class="effects-row">
+        @for (effect of creature().effects; track effect) {
+          <span class="effect-chip">{{ effect }}</span>
+        }
+      </div>
+    }
+  </div>
+</div>

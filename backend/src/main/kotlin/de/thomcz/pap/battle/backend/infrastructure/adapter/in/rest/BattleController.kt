@@ -2,10 +2,7 @@ package de.thomcz.pap.battle.backend.infrastructure.adapter.`in`.rest
 
 import de.thomcz.pap.battle.backend.application.dto.*
 import de.thomcz.pap.battle.backend.application.dto.UpdateCreatureRequest
-import de.thomcz.pap.battle.backend.application.service.AccessDeniedException
 import de.thomcz.pap.battle.backend.application.service.BattleService
-import de.thomcz.pap.battle.backend.application.service.EntityNotFoundException
-import de.thomcz.pap.battle.backend.application.service.StateConflictException
 import de.thomcz.pap.battle.backend.domain.model.CombatStatus
 import de.thomcz.pap.battle.backend.domain.port.`in`.*
 import jakarta.validation.Valid
@@ -13,7 +10,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
 import java.util.UUID
 
 /**
@@ -42,6 +38,8 @@ class BattleController(
     private val endCombat: EndCombatUseCase,
     private val advanceTurn: AdvanceTurnUseCase,
     private val applyDamage: ApplyDamageUseCase,
+    private val applyHealing: ApplyHealingUseCase,
+    private val applyStatusEffect: ApplyStatusEffectUseCase,
     private val getCombatLog: GetCombatLogUseCase,
     private val battleService: BattleService
 ) {
@@ -184,6 +182,37 @@ class BattleController(
     }
 
     /**
+     * POST /api/battles/{id}/heal - Apply healing to a creature
+     * User Story 3: Active Combat — Healing
+     */
+    @PostMapping("/{id}/heal")
+    fun applyHealing(
+        @PathVariable id: UUID,
+        @Valid @RequestBody command: ApplyHealingCommand,
+        authentication: Authentication
+    ): ResponseEntity<BattleDetailResponse> {
+        val userId = getUserId(authentication)
+        val battle = applyHealing.execute(id, command, userId)
+        return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
+     * POST /api/battles/{id}/creatures/{creatureId}/effects - Apply/remove status effect
+     * User Story 3: Active Combat — Status Effects
+     */
+    @PostMapping("/{id}/creatures/{creatureId}/effects")
+    fun applyStatusEffect(
+        @PathVariable id: UUID,
+        @PathVariable creatureId: UUID,
+        @Valid @RequestBody command: ApplyStatusEffectCommand,
+        authentication: Authentication
+    ): ResponseEntity<BattleDetailResponse> {
+        val userId = getUserId(authentication)
+        val battle = applyStatusEffect.execute(id, creatureId, command, userId)
+        return ResponseEntity.ok(BattleDetailResponse.from(battle))
+    }
+
+    /**
      * GET /api/battles/{id}/log - Get combat log (paginated)
      * User Story 4: Combat Log
      */
@@ -263,55 +292,4 @@ class BattleController(
         return authentication.name // JWT subject is userName
     }
 
-    /**
-     * Exception handler for REST controller.
-     * Converts domain/application exceptions to appropriate HTTP status codes.
-     */
-    @ExceptionHandler(EntityNotFoundException::class)
-    fun handleNotFound(e: EntityNotFoundException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(ErrorResponse(
-                timestamp = Instant.now(),
-                status = 404,
-                error = "Not Found",
-                message = e.message ?: "Resource not found"
-            ))
-    }
-
-    @ExceptionHandler(AccessDeniedException::class)
-    fun handleForbidden(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(ErrorResponse(
-                timestamp = Instant.now(),
-                status = 403,
-                error = "Forbidden",
-                message = e.message ?: "Access denied"
-            ))
-    }
-
-    @ExceptionHandler(StateConflictException::class)
-    fun handleConflict(e: StateConflictException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
-            .status(HttpStatus.CONFLICT)
-            .body(ErrorResponse(
-                timestamp = Instant.now(),
-                status = 409,
-                error = "Conflict",
-                message = e.message ?: "Invalid state transition"
-            ))
-    }
-
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun handleBadRequest(e: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(ErrorResponse(
-                timestamp = Instant.now(),
-                status = 400,
-                error = "Bad Request",
-                message = e.message ?: "Invalid request"
-            ))
-    }
 }

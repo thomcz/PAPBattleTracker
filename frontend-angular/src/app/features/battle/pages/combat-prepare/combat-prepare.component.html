@@ -1,0 +1,51 @@
+<div class="prepare-page">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()">&#8592;</button>
+      @if (battle()) {
+        <span class="battle-name">{{ battle()!.name }}</span>
+      }
+    </div>
+    <button
+      class="start-btn"
+      [disabled]="!canStart()"
+      (click)="startBattle()">
+      Start Battle
+    </button>
+  </header>
+
+  <!-- Stats bar -->
+  @if (battle()) {
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value">{{ enemies().length }}</span>
+        <span class="stat-label">Enemies</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ players().length }}</span>
+        <span class="stat-label">Players</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ avgCr() }}</span>
+        <span class="stat-label">Avg CR</span>
+      </div>
+    </div>
+  }
+
+  <!-- Creature list -->
+  <div class="creature-list">
+    @for (creature of battle()?.creatures ?? []; track creature.id) {
+      <app-combatant-card [creature]="creature" />
+    }
+    @if ((battle()?.creatures?.length ?? 0) === 0 && !loading()) {
+      <p class="empty-hint">No creatures yet. Add some to get started.</p>
+    }
+  </div>
+
+  <!-- Footer actions -->
+  <footer class="footer">
+    <button class="action-btn" (click)="openAddCreature()">+ Add Entity</button>
+    <button class="action-btn danger" (click)="removeAllCreatures()">Reset List</button>
+  </footer>
+</div>

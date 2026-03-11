@@ -37,6 +37,7 @@ class EventSourcingReplayTest : BaseIntegrationTest() {
         // Given: Battle with multiple state changes
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Replay Test")
+        addDefaultCreature(battleId, token)
 
         // Perform multiple actions
         startCombat(battleId, token)
@@ -53,9 +54,9 @@ class EventSourcingReplayTest : BaseIntegrationTest() {
 
         // And: All events are persisted
         val events = eventStore.getEvents(java.util.UUID.fromString(battleId))
-        assertThat(events).hasSize(4) // Created, Started, Paused, Resumed
+        assertThat(events).hasSize(5) // Created, CreatureAdded, Started, Paused, Resumed
         assertThat(events.map { it::class.simpleName })
-            .containsExactly("BattleCreated", "CombatStarted", "CombatPaused", "CombatResumed")
+            .containsExactly("BattleCreated", "CreatureAdded", "CombatStarted", "CombatPaused", "CombatResumed")
     }
 
     @Test
@@ -63,6 +64,7 @@ class EventSourcingReplayTest : BaseIntegrationTest() {
         // Given: Battle with multiple events
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Sequence Test")
+        addDefaultCreature(battleId, token)
 
         startCombat(battleId, token)
         pauseCombat(battleId, token)
@@ -71,7 +73,7 @@ class EventSourcingReplayTest : BaseIntegrationTest() {
         val events = eventStore.getEvents(java.util.UUID.fromString(battleId))
 
         // Then: Events have sequential sequence numbers
-        assertThat(events).hasSize(3)
+        assertThat(events).hasSize(4) // Created, CreatureAdded, Started, Paused
         // Note: EventEntity assigns sequence numbers starting from 1
         // We just verify they're in order and complete
     }
@@ -81,6 +83,7 @@ class EventSourcingReplayTest : BaseIntegrationTest() {
         // Given: Battle with complex state
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Idempotent Test")
+        addDefaultCreature(battleId, token)
 
         startCombat(battleId, token)
         pauseCombat(battleId, token)

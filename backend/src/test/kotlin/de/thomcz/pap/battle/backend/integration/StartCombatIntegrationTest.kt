@@ -24,9 +24,10 @@ class StartCombatIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun `should start combat and emit CombatStarted event`() {
-        // Given: Battle in NOT_STARTED status
+        // Given: Battle in NOT_STARTED status with at least one creature
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Combat Test")
+        addDefaultCreature(battleId, token)
 
         // When: POST /api/battles/{id}/start
         val response = authenticatedPost(
@@ -50,6 +51,7 @@ class StartCombatIntegrationTest : BaseIntegrationTest() {
         // Given: Battle with active combat
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Already Active")
+        addDefaultCreature(battleId, token)
 
         authenticatedPost(
             "/api/battles/$battleId/start",

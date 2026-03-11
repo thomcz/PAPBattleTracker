@@ -1,0 +1,55 @@
+<div class="initiative-page">
+  <!-- Header -->
+  <header class="header">
+    <button class="back-btn" aria-label="Back" (click)="goBack()">&#8592;</button>
+    <div class="header-center">
+      <h1 class="page-title">Initiative Setup</h1>
+      @if (battle()) {
+        <p class="battle-subtitle">{{ battle()!.name }}</p>
+      }
+    </div>
+    <div class="header-right"></div>
+  </header>
+
+  <!-- Roll all monsters shortcut -->
+  <div class="roll-all-row">
+    <button class="roll-all-btn" (click)="rollAllMonsters()">Roll all monsters</button>
+  </div>
+
+  <!-- Combatant rows -->
+  <div class="combatant-list">
+    @for (row of rows(); track row.creature.id) {
+      <div class="initiative-row">
+        <span class="type-badge" [class.badge-player]="row.creature.type === CreatureType.PLAYER">
+          {{ typeLabel(row.creature) }}
+        </span>
+        <div class="avatar">{{ row.creature.name.charAt(0).toUpperCase() }}</div>
+        <div class="creature-info">
+          <span class="creature-name">{{ row.creature.name }}</span>
+          @if (formatDexMod(row.creature)) {
+            <span class="dex-hint">DEX <span class="dex-value">{{ formatDexMod(row.creature) }}</span></span>
+          }
+        </div>
+        <button class="dice-btn" title="Roll d20" (click)="rollInitiative(row)">&#9861;</button>
+        <input
+          class="initiative-input"
+          type="number"
+          aria-label="Initiative for {{ row.creature.name }}"
+          [(ngModel)]="row.initiativeValue"
+          (ngModelChange)="onInitiativeChange()"
+          [placeholder]="'0'"
+        />
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <button
+      class="start-btn"
+      [disabled]="!allFilled()"
+      (click)="startBattle()">
+      START BATTLE
+    </button>
+  </footer>
+</div>

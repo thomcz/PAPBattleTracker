@@ -2,6 +2,7 @@ package de.thomcz.pap.battle.backend.infrastructure.adapter.`in`.rest
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thomcz.pap.battle.backend.application.dto.CreateCreatureRequest
+import de.thomcz.pap.battle.backend.application.dto.UpdateCreatureRequest
 import de.thomcz.pap.battle.backend.domain.model.CreatureType
 import de.thomcz.pap.battle.backend.infrastructure.adapter.out.security.JwtTokenProvider
 import org.junit.jupiter.api.Test
@@ -11,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -190,5 +192,102 @@ class BattleControllerCreatureTest {
                 .content(objectMapper.writeValueAsString(request))
         )
             .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `should persist dexModifier when creating creature`() {
+        // given
+        val token = jwtTokenProvider.generateToken("testuser")
+        val battleResponse = mockMvc.perform(
+            post("/api/battles")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"name": "DexMod Battle"}""")
+        ).andReturn().response.contentAsString
+        val battleId = objectMapper.readTree(battleResponse).get("id").asText()
+
+        val request = CreateCreatureRequest(
+            name = "Rogue", type = CreatureType.PLAYER,
+            currentHp = 30, maxHp = 30, initiative = 0, armorClass = 14,
+            dexModifier = 3
+        )
+
+        // when/then
+        mockMvc.perform(
+            post("/api/battles/$battleId/creatures")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.dexModifier").value(3))
+    }
+
+    @Test
+    fun `should return null dexModifier when not provided`() {
+        // given
+        val token = jwtTokenProvider.generateToken("testuser")
+        val battleResponse = mockMvc.perform(
+            post("/api/battles")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"name": "NoDexMod Battle"}""")
+        ).andReturn().response.contentAsString
+        val battleId = objectMapper.readTree(battleResponse).get("id").asText()
+
+        val request = CreateCreatureRequest(
+            name = "Goblin", type = CreatureType.MONSTER,
+            currentHp = 7, maxHp = 7, initiative = 0, armorClass = 13
+        )
+
+        // when/then
+        mockMvc.perform(
+            post("/api/battles/$battleId/creatures")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.dexModifier").doesNotExist())
+    }
+
+    @Test
+    fun `should update dexModifier via PUT`() {
+        // given - create battle and add creature
+        val token = jwtTokenProvider.generateToken("testuser")
+        val battleResponse = mockMvc.perform(
+            post("/api/battles")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"name": "Update DexMod Battle"}""")
+        ).andReturn().response.contentAsString
+        val battleId = objectMapper.readTree(battleResponse).get("id").asText()
+
+        val createRequest = CreateCreatureRequest(
+            name = "Fighter", type = CreatureType.PLAYER,
+            currentHp = 40, maxHp = 40, initiative = 0, armorClass = 18
+        )
+        val creatureResponse = mockMvc.perform(
+            post("/api/battles/$battleId/creatures")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest))
+        ).andReturn().response.contentAsString
+        val creatureId = objectMapper.readTree(creatureResponse).get("id").asText()
+
+        val updateRequest = UpdateCreatureRequest(
+            name = "Fighter", currentHp = 40, maxHp = 40,
+            initiative = 0, armorClass = 18, dexModifier = 2
+        )
+
+        // when/then
+        mockMvc.perform(
+            put("/api/battles/$battleId/creatures/$creatureId")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.dexModifier").value(2))
     }
 }

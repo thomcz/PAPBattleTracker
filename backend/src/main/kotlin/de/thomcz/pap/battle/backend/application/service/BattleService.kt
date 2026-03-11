@@ -37,6 +37,8 @@ class BattleService(
     EndCombatUseCase,
     AdvanceTurnUseCase,
     ApplyDamageUseCase,
+    ApplyHealingUseCase,
+    ApplyStatusEffectUseCase,
     GetCombatLogUseCase {
 
     override fun execute(command: CreateBattleCommand, userId: String): Battle {
@@ -211,6 +213,45 @@ class BattleService(
         return battle
     }
 
+    override fun execute(battleId: UUID, command: ApplyHealingCommand, userId: String): Battle {
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        try {
+            battle.applyHealing(userUUID, command.creatureId, command.healing, command.source)
+        } catch (e: IllegalArgumentException) {
+            throw StateConflictException("Cannot apply healing: ${e.message}", e)
+        }
+
+        battleRepository.save(battle)
+        return battle
+    }
+
+    override fun execute(battleId: UUID, creatureId: UUID, command: ApplyStatusEffectCommand, userId: String): Battle {
+        val battle = battleRepository.findById(battleId)
+            ?: throw EntityNotFoundException("Battle not found: $battleId")
+
+        val userUUID = userNameToUUID(userId)
+        if (battle.userId != userUUID) {
+            throw AccessDeniedException("User $userId does not own battle $battleId")
+        }
+
+        val add = command.action == EffectAction.ADD
+        try {
+            battle.applyStatusEffect(userUUID, creatureId, command.effect, add)
+        } catch (e: IllegalArgumentException) {
+            throw StateConflictException("Cannot apply status effect: ${e.message}", e)
+        }
+
+        battleRepository.save(battle)
+        return battle
+    }
+
     @Transactional(readOnly = true)
     override fun execute(battleId: UUID, userId: String, limit: Int, offset: Int): CombatLogResult {
         val battle = battleRepository.findById(battleId)
@@ -270,7 +311,8 @@ class BattleService(
             currentHp = request.currentHp,
             maxHp = request.maxHp,
             initiative = request.initiative,
-            armorClass = request.armorClass
+            armorClass = request.armorClass,
+            dexModifier = request.dexModifier
         )
 
         // Save battle (persists new event)
@@ -322,7 +364,8 @@ class BattleService(
             currentHp = request.currentHp,
             maxHp = request.maxHp,
             initiative = request.initiative,
-            armorClass = request.armorClass
+            armorClass = request.armorClass,
+            dexModifier = request.dexModifier
         )
 
         // Save battle (persists new event)

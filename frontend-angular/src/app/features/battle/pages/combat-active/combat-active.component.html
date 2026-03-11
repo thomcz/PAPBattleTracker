@@ -1,0 +1,56 @@
+<div class="combat-active">
+  <header class="combat-header">
+    @if (battle()) {
+      <div class="round-info">Round {{ battle()!.round }} &bull; Turn {{ (battle()!.currentTurn) + 1 }}</div>
+    }
+    <h1 class="page-title">COMBAT TRACKER</h1>
+    @if (battle()) {
+      <div class="battle-name">{{ battle()!.name }}</div>
+    }
+  </header>
+
+  <div class="creature-list">
+    @for (creature of sortedCreatures(); track creature.id) {
+      <app-combatant-card
+        [creature]="creature"
+        [isActive]="creature.id === currentActor()?.id"
+        [showInitiative]="true"
+        (clicked)="openActionManager(creature)"
+      />
+    }
+  </div>
+
+  <footer class="combat-footer">
+    <button class="footer-btn" aria-label="Next Turn" (click)="nextTurn()">Next Turn</button>
+    <button class="footer-btn danger-btn" aria-label="End Combat" (click)="openEndDialog()">End Combat</button>
+  </footer>
+
+  @if (actionTarget()) {
+    <app-action-manager
+      [battle]="battle()!"
+      [initialTarget]="actionTarget()"
+      (damageApplied)="onDamageApplied($event)"
+      (healingApplied)="onHealingApplied($event)"
+      (statusToggled)="onStatusToggled($event)"
+      (closed)="closeActionManager()"
+    />
+  }
+
+  @if (showEndDialog()) {
+    <div class="end-dialog-backdrop" (click)="showEndDialog.set(false)">
+      <div class="end-dialog" (click)="$event.stopPropagation()">
+        <h2 class="dialog-title">End Combat</h2>
+        <p class="dialog-subtitle">Choose the outcome:</p>
+        <div class="dialog-actions">
+          <button class="outcome-btn victory-btn" aria-label="Victory" (click)="endCombat(CombatOutcome.PLAYERS_VICTORIOUS)">
+            Victory
+          </button>
+          <button class="outcome-btn defeat-btn" aria-label="Defeat" (click)="endCombat(CombatOutcome.PLAYERS_DEFEATED)">
+            Defeat
+          </button>
+        </div>
+        <button class="cancel-btn" (click)="showEndDialog.set(false)">Cancel</button>
+      </div>
+    </div>
+  }
+</div>
