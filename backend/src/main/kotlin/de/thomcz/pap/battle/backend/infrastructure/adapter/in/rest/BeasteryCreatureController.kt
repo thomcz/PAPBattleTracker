@@ -5,14 +5,11 @@ import de.thomcz.pap.battle.backend.application.dto.BeasteryCreatureResponse
 import de.thomcz.pap.battle.backend.domain.port.`in`.command.CreateBeasteryCreatureCommand
 import de.thomcz.pap.battle.backend.domain.port.`in`.command.DeleteBeasteryCreatureCommand
 import de.thomcz.pap.battle.backend.domain.port.`in`.command.UpdateBeasteryCreatureCommand
-import de.thomcz.pap.battle.backend.application.service.AccessDeniedException
-import de.thomcz.pap.battle.backend.application.service.EntityNotFoundException
 import de.thomcz.pap.battle.backend.domain.port.`in`.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
 import java.util.UUID
 
 @RestController
@@ -98,31 +95,6 @@ class BeasteryCreatureController(
         return ResponseEntity.status(HttpStatus.CREATED).body(BeasteryCreatureResponse.fromCreature(creature))
     }
 
-    // === Exception Handlers ===
-
-    @ExceptionHandler(EntityNotFoundException::class)
-    fun handleNotFound(e: EntityNotFoundException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(ErrorResponse(timestamp = Instant.now(), status = 404, error = "Not Found", message = e.message ?: "Resource not found"))
-    }
-
-    @ExceptionHandler(AccessDeniedException::class)
-    fun handleForbidden(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(ErrorResponse(timestamp = Instant.now(), status = 403, error = "Forbidden", message = e.message ?: "Access denied"))
-    }
-
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun handleBadRequest(e: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(ErrorResponse(timestamp = Instant.now(), status = 400, error = "Bad Request", message = e.message ?: "Invalid request"))
-    }
-
-    @ExceptionHandler(IllegalStateException::class)
-    fun handleConflict(e: IllegalStateException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(ErrorResponse(timestamp = Instant.now(), status = 409, error = "Conflict", message = e.message ?: "State conflict"))
-    }
 }
 
 data class CreateBeasteryCreatureRequest(

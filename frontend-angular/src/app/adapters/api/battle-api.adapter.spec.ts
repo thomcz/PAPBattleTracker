@@ -235,4 +235,53 @@ describe('BattleApiAdapter', () => {
       });
     });
   });
+
+  describe('applyHealing', () => {
+    it('should send POST request with healing payload', () => {
+      const healedBattle = { ...mockBattle };
+      (httpClient.post as ReturnType<typeof vi.fn>).mockReturnValue(of(healedBattle));
+
+      adapter.applyHealing('battle-123', 'creature-1', 20).subscribe(() => {
+        expect(httpClient.post).toHaveBeenCalledWith(
+          'http://localhost:8080/api/battles/battle-123/heal',
+          { creatureId: 'creature-1', healing: 20, source: undefined }
+        );
+      });
+    });
+
+    it('should include optional source in payload', () => {
+      (httpClient.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockBattle));
+
+      adapter.applyHealing('battle-123', 'creature-1', 10, 'Potion').subscribe(() => {
+        expect(httpClient.post).toHaveBeenCalledWith(
+          'http://localhost:8080/api/battles/battle-123/heal',
+          { creatureId: 'creature-1', healing: 10, source: 'Potion' }
+        );
+      });
+    });
+  });
+
+  describe('applyStatusEffect', () => {
+    it('should send POST request to add status effect', () => {
+      (httpClient.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockBattle));
+
+      adapter.applyStatusEffect('battle-123', 'creature-1', 'Poisoned', 'ADD').subscribe(() => {
+        expect(httpClient.post).toHaveBeenCalledWith(
+          'http://localhost:8080/api/battles/battle-123/creatures/creature-1/effects',
+          { effect: 'Poisoned', action: 'ADD' }
+        );
+      });
+    });
+
+    it('should send POST request to remove status effect', () => {
+      (httpClient.post as ReturnType<typeof vi.fn>).mockReturnValue(of(mockBattle));
+
+      adapter.applyStatusEffect('battle-123', 'creature-1', 'Stunned', 'REMOVE').subscribe(() => {
+        expect(httpClient.post).toHaveBeenCalledWith(
+          'http://localhost:8080/api/battles/battle-123/creatures/creature-1/effects',
+          { effect: 'Stunned', action: 'REMOVE' }
+        );
+      });
+    });
+  });
 });

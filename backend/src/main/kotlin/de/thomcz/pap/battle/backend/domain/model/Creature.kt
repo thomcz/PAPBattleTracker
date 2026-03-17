@@ -25,7 +25,8 @@ data class Creature(
     val maxHp: Int,
     val initiative: Int,
     val armorClass: Int,
-    val statusEffects: List<String> = emptyList()
+    val statusEffects: List<String> = emptyList(),
+    val dexModifier: Int? = null
 ) {
     init {
         require(name.isNotBlank()) { "Creature name cannot be blank" }

@@ -6,6 +6,14 @@ import { BattlePort, CombatLogResponse, CombatOutcome } from '../../core/ports/b
 import { Battle, BattleSummary, CombatStatus, Creature, CreatureType } from '../../core/domain/models/battle.model';
 import { environment } from '../../../environments/environment';
 
+// Raw shape returned by the API (statusEffects instead of effects)
+interface RawCreature extends Omit<Creature, 'effects'> {
+  statusEffects?: string[];
+}
+interface RawBattle extends Omit<Battle, 'creatures'> {
+  creatures: RawCreature[];
+}
+
 /**
  * HTTP adapter implementing BattlePort.
  *
@@ -23,8 +31,18 @@ export class BattleApiAdapter implements BattlePort {
 
   constructor(private http: HttpClient) {}
 
+  private mapBattle(raw: RawBattle): Battle {
+    return {
+      ...raw,
+      creatures: raw.creatures.map(c => ({
+        ...c,
+        effects: c.statusEffects ?? []
+      }))
+    };
+  }
+
   createBattle(name: string): Observable<Battle> {
-    return this.http.post<Battle>(this.apiUrl, { name });
+    return this.http.post<RawBattle>(this.apiUrl, { name }).pipe(map(r => this.mapBattle(r)));
   }
 
   listBattles(status?: CombatStatus): Observable<BattleSummary[]> {
@@ -41,35 +59,35 @@ export class BattleApiAdapter implements BattlePort {
   }
 
   getBattle(battleId: string): Observable<Battle> {
-    return this.http.get<Battle>(`${this.apiUrl}/${battleId}`);
+    return this.http.get<RawBattle>(`${this.apiUrl}/${battleId}`).pipe(map(r => this.mapBattle(r)));
   }
 
   startCombat(battleId: string): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/start`, {});
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/start`, {}).pipe(map(r => this.mapBattle(r)));
   }
 
   pauseCombat(battleId: string): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/pause`, {});
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/pause`, {}).pipe(map(r => this.mapBattle(r)));
   }
 
   resumeCombat(battleId: string): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/resume`, {});
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/resume`, {}).pipe(map(r => this.mapBattle(r)));
   }
 
   endCombat(battleId: string, outcome: CombatOutcome): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/end`, { outcome });
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/end`, { outcome }).pipe(map(r => this.mapBattle(r)));
   }
 
   advanceTurn(battleId: string): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/turn`, {});
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/turn`, {}).pipe(map(r => this.mapBattle(r)));
   }
 
   applyDamage(battleId: string, creatureId: string, damage: number, source?: string): Observable<Battle> {
-    return this.http.post<Battle>(`${this.apiUrl}/${battleId}/damage`, {
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/damage`, {
       creatureId,
       damage,
       source
-    });
+    }).pipe(map(r => this.mapBattle(r)));
   }
 
   getCombatLog(battleId: string, limit: number = 100, offset: number = 0): Observable<CombatLogResponse> {
@@ -92,14 +110,14 @@ export class BattleApiAdapter implements BattlePort {
     initiative: number,
     armorClass: number
   ): Observable<Creature> {
-    return this.http.post<Creature>(`${this.apiUrl}/${battleId}/creatures`, {
+    return this.http.post<RawCreature>(`${this.apiUrl}/${battleId}/creatures`, {
       name,
       type,
       currentHp,
       maxHp,
       initiative,
       armorClass
-    });
+    }).pipe(map(c => ({ ...c, effects: c.statusEffects ?? [] })));
   }
 
   updateCreature(
@@ -111,16 +129,24 @@ export class BattleApiAdapter implements BattlePort {
     initiative: number,
     armorClass: number
   ): Observable<Creature> {
-    return this.http.put<Creature>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`, {
+    return this.http.put<RawCreature>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`, {
       name,
       currentHp,
       maxHp,
       initiative,
       armorClass
-    });
+    }).pipe(map(c => ({ ...c, effects: c.statusEffects ?? [] })));
   }
 
   removeCreature(battleId: string, creatureId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${battleId}/creatures/${creatureId}`);
+  }
+
+  applyHealing(battleId: string, creatureId: string, healing: number, source?: string): Observable<Battle> {
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/heal`, { creatureId, healing, source }).pipe(map(r => this.mapBattle(r)));
+  }
+
+  applyStatusEffect(battleId: string, creatureId: string, effect: string, action: 'ADD' | 'REMOVE'): Observable<Battle> {
+    return this.http.post<RawBattle>(`${this.apiUrl}/${battleId}/creatures/${creatureId}/effects`, { effect, action }).pipe(map(r => this.mapBattle(r)));
   }
 }

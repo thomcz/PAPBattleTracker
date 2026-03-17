@@ -94,6 +94,7 @@ class BattleListIntegrationTest : BaseIntegrationTest() {
         // Given: User with battles in different states
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Active Battle")
+        addDefaultCreature(battleId, token)
 
         // Start combat to change status to ACTIVE
         authenticatedPost(

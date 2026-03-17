@@ -28,6 +28,7 @@ class EndCombatIntegrationTest : BaseIntegrationTest() {
         // Given: Battle with active combat
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "End Test")
+        addDefaultCreature(battleId, token)
 
         authenticatedPost(
             "/api/battles/$battleId/start",
@@ -57,6 +58,7 @@ class EndCombatIntegrationTest : BaseIntegrationTest() {
         // Given: Battle with paused combat
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Paused End Test")
+        addDefaultCreature(battleId, token)
 
         authenticatedPost(
             "/api/battles/$battleId/start",
@@ -112,6 +114,7 @@ class EndCombatIntegrationTest : BaseIntegrationTest() {
         // Given: Battle with ended combat
         val token = createAuthenticatedUser()
         val battleId = createBattle(token, "Already Ended")
+        addDefaultCreature(battleId, token)
 
         authenticatedPost(
             "/api/battles/$battleId/start",

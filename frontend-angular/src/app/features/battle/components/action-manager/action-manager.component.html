@@ -1,0 +1,64 @@
+<div class="action-manager-backdrop" (click)="close()"></div>
+
+<div class="action-manager-panel">
+  <div class="panel-header">
+    <span class="panel-title">Action Manager</span>
+    <button class="close-btn" aria-label="Close" (click)="close()">✕</button>
+  </div>
+
+  <!-- Target selector -->
+  <div class="target-selector">
+    @for (creature of battle().creatures; track creature.id) {
+      <button
+        class="target-portrait"
+        [class.selected]="selectedTarget()?.id === creature.id"
+        [attr.data-creature-id]="creature.id"
+        [attr.aria-label]="creature.name"
+        (click)="selectTarget(creature)">
+        <span class="portrait-initial">{{ creature.name[0] }}</span>
+        <span class="portrait-name">{{ creature.name }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Amount stepper -->
+  <div class="amount-row">
+    <button class="stepper-btn" aria-label="Decrease amount" (click)="decrement()">−</button>
+    <span class="amount-display" data-testid="amount">{{ amount() }}</span>
+    <button class="stepper-btn" aria-label="Increase amount" (click)="increment()">+</button>
+  </div>
+
+  <!-- Dice roll row -->
+  <div class="dice-row">
+    <button class="dice-btn" aria-label="Roll d6" (click)="rollDice(6)">d6</button>
+    <button class="dice-btn" aria-label="Roll d8" (click)="rollDice(8)">d8</button>
+    <button class="dice-btn" aria-label="Roll d12" (click)="rollDice(12)">d12</button>
+    <button class="dice-btn" aria-label="Roll d20" (click)="rollDice(20)">d20</button>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-row">
+    <button class="action-btn damage-btn" aria-label="Apply Damage" (click)="applyDamage()">
+      Apply Damage
+    </button>
+    <button class="action-btn healing-btn" aria-label="Apply Healing" (click)="applyHealing()">
+      Apply Healing
+    </button>
+  </div>
+
+  <!-- Status effects -->
+  <div class="effects-section">
+    <span class="effects-label">Status Effects</span>
+    <div class="effects-grid">
+      @for (effect of statusEffects; track effect) {
+        <button
+          class="effect-btn"
+          [class.active]="activeEffects().includes(effect)"
+          [attr.aria-label]="effect"
+          (click)="toggleEffect(effect)">
+          {{ effect }}
+        </button>
+      }
+    </div>
+  </div>
+</div>

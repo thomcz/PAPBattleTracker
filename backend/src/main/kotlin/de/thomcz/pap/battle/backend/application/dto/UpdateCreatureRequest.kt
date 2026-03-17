@@ -1,5 +1,6 @@
 package de.thomcz.pap.battle.backend.application.dto
 
+import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -26,5 +27,9 @@ data class UpdateCreatureRequest(
 
     @field:NotNull(message = "Armor class is required")
     @field:PositiveOrZero(message = "Armor class must be non-negative")
-    val armorClass: Int
+    val armorClass: Int,
+
+    @field:Min(value = -5, message = "Dex modifier must be at least -5")
+    @field:Max(value = 10, message = "Dex modifier must be at most 10")
+    val dexModifier: Int? = null
 )

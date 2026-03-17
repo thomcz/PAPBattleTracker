@@ -62,6 +62,18 @@ export abstract class BattlePort {
   abstract applyDamage(battleId: string, creatureId: string, damage: number, source?: string): Observable<Battle>;
 
   /**
+   * Apply healing to a creature in an active battle.
+   * User Story 3: Active Combat — Healing
+   */
+  abstract applyHealing(battleId: string, creatureId: string, healing: number, source?: string): Observable<Battle>;
+
+  /**
+   * Apply or remove a status effect on a creature.
+   * User Story 3: Active Combat — Status Effects
+   */
+  abstract applyStatusEffect(battleId: string, creatureId: string, effect: string, action: 'ADD' | 'REMOVE'): Observable<Battle>;
+
+  /**
    * Get combat log entries for a battle (paginated).
    * User Story 4: Combat Log
    */

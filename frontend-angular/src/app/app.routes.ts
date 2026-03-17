@@ -36,8 +36,25 @@ export const routes: Routes = [
   },
   {
     path: 'battles/:id',
-    loadComponent: () => import('./features/battle/pages/battle-detail/battle-detail.component').then(m => m.BattleDetailComponent),
-    canActivate: [authGuard]  // Requires authentication
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/battle/pages/combat-prepare/combat-prepare.component').then(m => m.CombatPrepareComponent)
+      },
+      {
+        path: 'initiative',
+        loadComponent: () => import('./features/battle/pages/combat-initiative/combat-initiative.component').then(m => m.CombatInitiativeComponent)
+      },
+      {
+        path: 'combat',
+        loadComponent: () => import('./features/battle/pages/combat-active/combat-active.component').then(m => m.CombatActiveComponent)
+      },
+      {
+        path: 'result',
+        loadComponent: () => import('./features/battle/pages/combat-result/combat-result.component').then(m => m.CombatResultComponent)
+      }
+    ]
   },
   {
     path: 'players',

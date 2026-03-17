@@ -168,6 +168,22 @@ abstract class BaseIntegrationTest {
     }
 
     /**
+     * Add a default creature to a battle.
+     * Use this helper before starting combat, since combat requires at least one creature.
+     */
+    protected fun addDefaultCreature(battleId: String, token: String) {
+        val request = mapOf(
+            "name" to "Test Creature",
+            "type" to "MONSTER",
+            "currentHp" to 10,
+            "maxHp" to 10,
+            "initiative" to 15,
+            "armorClass" to 13
+        )
+        authenticatedPost("/api/battles/$battleId/creatures", token, request, Map::class.java)
+    }
+
+    /**
      * Make an authenticated DELETE request.
      */
     protected fun <T> authenticatedDelete(

@@ -1,0 +1,225 @@
+@use '../../../auth/shared/auth-theme' as *;
+
+:host {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.action-manager-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.action-manager-panel {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  background: $auth-bg;
+  border-top: 2px solid $auth-gold;
+  border-radius: 16px 16px 0 0;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  color: $auth-gold;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: $auth-text;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+    color: $auth-gold;
+  }
+}
+
+.target-selector {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+}
+
+.target-portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid $auth-input-border;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  min-width: 64px;
+  color: $auth-text;
+  font-size: 0.75rem;
+
+  &.selected {
+    border-color: $auth-gold;
+    background: rgba($auth-gold, 0.1);
+    color: $auth-gold;
+  }
+}
+
+.portrait-initial {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.portrait-name {
+  font-size: 0.65rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60px;
+}
+
+.amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.stepper-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid $auth-input-border;
+  background: rgba(255, 255, 255, 0.05);
+  color: $auth-text;
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $auth-gold;
+    color: $auth-gold;
+  }
+}
+
+.amount-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $auth-gold;
+  min-width: 60px;
+  text-align: center;
+}
+
+.dice-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.dice-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid $auth-input-border;
+  background: rgba(255, 255, 255, 0.05);
+  color: $auth-text;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $auth-purple;
+    color: $auth-purple;
+  }
+}
+
+.action-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.875rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+.damage-btn {
+  background: #c0392b;
+  color: #fff;
+
+  &:hover {
+    background: #e74c3c;
+  }
+}
+
+.healing-btn {
+  background: #27ae60;
+  color: #fff;
+
+  &:hover {
+    background: #2ecc71;
+  }
+}
+
+.effects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.effects-label {
+  color: $auth-text;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.effects-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.effect-btn {
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid $auth-input-border;
+  background: rgba(255, 255, 255, 0.05);
+  color: $auth-text;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &.active {
+    border-color: $auth-purple;
+    background: rgba($auth-purple, 0.2);
+    color: $auth-purple;
+  }
+
+  &:hover {
+    border-color: $auth-gold;
+  }
+}

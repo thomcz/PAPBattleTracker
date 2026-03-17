@@ -23,5 +23,6 @@ data class CreatureAdded(
     val currentHp: Int,
     val maxHp: Int,
     val initiative: Int,
-    val armorClass: Int
+    val armorClass: Int,
+    val dexModifier: Int? = null
 ) : BattleEvent

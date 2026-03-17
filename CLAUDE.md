@@ -285,6 +285,8 @@ Both backends implement identical APIs with the same hexagonal architecture:
 - Kotlin 1.9.25 (JVM 21) + TypeScript (Angular 21.0.2) + Spring Boot 3.5.7, Spring Data JPA, Jackson (backend); Angular 21, RxJS, Angular Signals (frontend) (008-game-sessions)
 - TypeScript ~5.9.2 + Angular 21.0.2 (standalone components, signals, `@if`/`@for` control flow), SCSS (`_auth-theme.scss` shared design system) (009-bestiary-player-redesign)
 - N/A — pure presentation-layer change; existing use cases and adapters unchanged (009-bestiary-player-redesign)
+- TypeScript ~5.9.2 + Angular 21.0.2 (frontend); Kotlin 1.9.25 JVM 21 (backend) + Angular standalone components, Angular Signals, RxJS, SCSS `_auth-theme.scss`, Spring Boot 3.5.7, Spring Data JPA, JWT (010-combat-redesign)
+- Backend H2 event sourcing (existing); frontend `CombatContributionService` accumulates session stats locally (010-combat-redesign)
 
 ## Recent Changes
 - 001-battle-tracker-features: Added H2 in-memory database (development), event sourcing with JSON event store

@@ -17,7 +17,8 @@ data class CreatureResponse(
     val initiative: Int,
     val armorClass: Int,
     val isDefeated: Boolean,
-    val statusEffects: List<String> = emptyList()
+    val statusEffects: List<String> = emptyList(),
+    val dexModifier: Int? = null
 ) {
     companion object {
         fun fromCreature(creature: Creature): CreatureResponse {
@@ -30,7 +31,8 @@ data class CreatureResponse(
                 initiative = creature.initiative,
                 armorClass = creature.armorClass,
                 isDefeated = creature.isDefeated(),
-                statusEffects = creature.statusEffects
+                statusEffects = creature.statusEffects,
+                dexModifier = creature.dexModifier
             )
         }
     }

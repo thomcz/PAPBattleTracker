@@ -1,0 +1,161 @@
+@use '../../../auth/shared/auth-theme' as *;
+
+.combat-result {
+  min-height: 100vh;
+  background: $auth-bg;
+  color: $auth-text;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
+}
+
+.result-header {
+  padding: 3rem 1.5rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid $auth-input-border;
+
+  &.victory {
+    .result-title {
+      color: $auth-gold;
+    }
+  }
+
+  &.defeat {
+    .result-title {
+      color: #c0392b;
+    }
+  }
+}
+
+.result-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.result-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+.battle-name {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  margin-top: 0.5rem;
+}
+
+.stats-row {
+  display: flex;
+  gap: 1px;
+  background: $auth-input-border;
+  border-bottom: 1px solid $auth-input-border;
+}
+
+.stat-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 0.5rem;
+  background: $auth-bg;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $auth-gold;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.contributions-section {
+  padding: 1.5rem 1rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: $auth-gold;
+  margin: 0 0 1rem;
+}
+
+.contribution-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.875rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid $auth-input-border;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.contrib-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: $auth-purple;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.contrib-info {
+  flex: 1;
+}
+
+.contrib-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.contrib-stats {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.contrib-stat {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  letter-spacing: 0.03em;
+}
+
+.result-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: $auth-bg;
+  border-top: 1px solid $auth-input-border;
+}
+
+.end-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  border: none;
+  background: $auth-gold;
+  color: $auth-bg;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
